@@ -61,12 +61,28 @@
   .radio-item-text { font-size: 13px; color: var(--gray-700); line-height: 1.4; font-weight: 600; }
   .radio-item-sub { font-size: 11.5px; color: var(--gray-500); font-weight: 400; }
   .radio-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .plan-item { display: flex; align-items: flex-start; gap: 10px; background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 12px 14px; cursor: pointer; transition: all 0.15s; user-select: none; }
-  .plan-item:hover { border-color: var(--green); }
-  .plan-item input[type="radio"] { width: 16px; height: 16px; accent-color: var(--green-dark); margin-top: 3px; flex-shrink: 0; cursor: pointer; }
-  .plan-name { font-size: 13px; font-weight: 700; color: var(--gray-800); }
-  .plan-price { font-size: 15px; font-weight: 800; color: var(--green-dark); }
-  .plan-desc { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+  /* Cards de plano elegantes */
+  .plan-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .plan-card { position: relative; cursor: pointer; border-radius: 14px; border: 2px solid var(--gray-200); background: #fff; padding: 20px; transition: border-color 0.18s, box-shadow 0.18s, background 0.18s; user-select: none; display: flex; flex-direction: column; gap: 14px; }
+  .plan-card input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+  .plan-card:hover { border-color: var(--cyan); box-shadow: 0 2px 12px rgba(6,182,212,0.12); }
+  .plan-card.selected { border-color: var(--cyan-dark); background: #F0FEFF; box-shadow: 0 0 0 3px rgba(6,182,212,0.15); }
+  .plan-card-tag { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cyan-dark); background: var(--cyan-light); padding: 3px 10px; border-radius: 99px; display: inline-block; margin-bottom: 8px; }
+  .plan-card.selected .plan-card-tag { background: var(--cyan-dark); color: #fff; }
+  .plan-card-name { font-size: 13px; font-weight: 700; color: var(--gray-800); line-height: 1.35; margin-bottom: 6px; }
+  .plan-card-price { font-size: 26px; font-weight: 900; color: var(--gray-900); line-height: 1; }
+  .plan-card.selected .plan-card-price { color: var(--cyan-dark); }
+  .plan-card-price span { font-size: 13px; font-weight: 500; color: var(--gray-400); }
+  .plan-card-features { list-style: none; display: flex; flex-direction: column; gap: 5px; padding-top: 12px; border-top: 1px solid var(--gray-100); }
+  .plan-card-features li { font-size: 11.5px; color: var(--gray-600); display: flex; align-items: flex-start; gap: 7px; line-height: 1.4; }
+  .plan-card-features li::before { content: "\2714"; color: var(--cyan-dark); font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .plan-card-addon { font-size: 11px; color: #7C3AED; background: #F5F3FF; border: 1px solid #DDD6FE; border-radius: 6px; padding: 4px 10px; display: inline-block; margin-top: 4px; }
+  /* Personalizado */
+  .plan-card.personalizado { border-style: dashed; }
+  .plan-card.selected.personalizado { border-color: var(--gray-600); background: var(--gray-50); box-shadow: 0 0 0 3px rgba(75,85,99,0.12); }
+  .plan-card.selected.personalizado .plan-card-price { color: var(--gray-800); }
+  .plan-card.selected.personalizado .plan-card-tag { background: var(--gray-700); color: #fff; }
+  @media (max-width: 600px) { .plan-cards-grid { grid-template-columns: 1fr; } }
   .proposta-toggle { display: none; }
   .proposta-section { display: none; background: #F0FDF4; border: 1.5px solid #A7F3D0; border-radius: 10px; padding: 20px; margin-top: 16px; }
   .proposta-section.visible { display: block; }
@@ -374,59 +390,86 @@
     </div>
 
     <div class="proposta-section" id="proposta_detalhes">
-      <div style="font-size:13px;font-weight:700;color:var(--green-dark);margin-bottom:14px;">&#128176; Qual plano deve aparecer na proposta?</div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="font-size:13px;font-weight:700;color:var(--green-dark);margin-bottom:16px;">&#128176; Qual plano deve aparecer na proposta?</div>
+      <div class="plan-cards-grid">
 
-        <label class="plan-item">
+        <label class="plan-card" id="plan_card_1">
           <input type="radio" name="plano" value="Plano 1 — Gestão de Social Media + Captação de Conteúdo — R$ 1.500/mês">
           <div>
-            <div class="plan-price">R$ 1.500/m&ecirc;s</div>
-            <div class="plan-name">Plano 1 &mdash; Social Media + Capta&ccedil;&atilde;o de Conte&uacute;do</div>
-            <div class="plan-desc">Planejamento, posts, capta&ccedil;&atilde;o de fotos e v&iacute;deos, edi&ccedil;&atilde;o e organiza&ccedil;&atilde;o do perfil</div>
+            <div class="plan-card-tag">Plano 1</div>
+            <div class="plan-card-name">Social Media + Capta&ccedil;&atilde;o de Conte&uacute;do</div>
+            <div class="plan-card-price">R$ 1.500<span>/m&ecirc;s</span></div>
           </div>
+          <ul class="plan-card-features">
+            <li>Planejamento estrat&eacute;gico mensal</li>
+            <li>At&eacute; 3 posts por semana</li>
+            <li>Capta&ccedil;&atilde;o de fotos e v&iacute;deos (mensal)</li>
+            <li>Edi&ccedil;&atilde;o de materiais</li>
+            <li>Organiza&ccedil;&atilde;o do perfil</li>
+            <li>Acompanhamento cont&iacute;nuo</li>
+          </ul>
         </label>
 
-        <label class="plan-item">
+        <label class="plan-card" id="plan_card_2">
           <input type="radio" name="plano" value="Plano 2 — Gestão de Social Media + Captação de Conteúdo + Tráfego Pago Meta — R$ 2.500/mês">
           <div>
-            <div class="plan-price">R$ 2.500/m&ecirc;s</div>
-            <div class="plan-name">Plano 2 &mdash; Social Media + Capta&ccedil;&atilde;o + Tr&aacute;fego Pago Meta</div>
-            <div class="plan-desc">Tudo do Plano 1 + at&eacute; 3 campanhas no Meta Ads por m&ecirc;s</div>
+            <div class="plan-card-tag">Plano 2</div>
+            <div class="plan-card-name">Social Media + Capta&ccedil;&atilde;o + Tr&aacute;fego Pago Meta</div>
+            <div class="plan-card-price">R$ 2.500<span>/m&ecirc;s</span></div>
           </div>
+          <ul class="plan-card-features">
+            <li>Tudo do Plano 1</li>
+            <li>At&eacute; 3 campanhas Meta Ads/m&ecirc;s</li>
+            <li>Estrat&eacute;gia e segmenta&ccedil;&atilde;o de p&uacute;blicos</li>
+            <li>Otimiza&ccedil;&atilde;o e escala de resultados</li>
+          </ul>
         </label>
 
-        <label class="plan-item">
+        <label class="plan-card" id="plan_card_3">
           <input type="radio" name="plano" value="Plano 3 — Gestão de Social Media + Captação de Conteúdo + Tráfego Pago Meta + Google Empresa — R$ 2.900/mês">
           <div>
-            <div class="plan-price">R$ 2.900/m&ecirc;s</div>
-            <div class="plan-name">Plano 3 &mdash; Social Media + Capta&ccedil;&atilde;o + Tr&aacute;fego Meta + Google Empresa</div>
-            <div class="plan-desc">Tudo do Plano 2 + gest&atilde;o completa do Google Empresa (GMB) &mdash; add-on TikTok +R$300</div>
+            <div class="plan-card-tag">Plano 3</div>
+            <div class="plan-card-name">Social Media + Capta&ccedil;&atilde;o + Tr&aacute;fego Meta + Google Empresa</div>
+            <div class="plan-card-price">R$ 2.900<span>/m&ecirc;s</span></div>
           </div>
+          <ul class="plan-card-features">
+            <li>Tudo do Plano 2</li>
+            <li>Gest&atilde;o completa do Google Empresa (GMB)</li>
+            <li>Posicionamento local e gera&ccedil;&atilde;o de avalia&ccedil;&otilde;es</li>
+          </ul>
+          <span class="plan-card-addon">&#43; add-on TikTok por R$ 300/m&ecirc;s</span>
         </label>
 
-        <label class="plan-item">
+        <label class="plan-card" id="plan_card_4">
           <input type="radio" name="plano" value="Plano 4 — Gestão de Social Media + Captação de Conteúdo + Tráfego Pago + Google Empresa + Suporte Comercial — R$ 3.800/mês">
           <div>
-            <div class="plan-price">R$ 3.800/m&ecirc;s</div>
-            <div class="plan-name">Plano 4 &mdash; Plano Completo + Suporte Comercial</div>
-            <div class="plan-desc">Tudo do Plano 3 + estrat&eacute;gia comercial, follow-up e marketing de relacionamento &mdash; add-on TikTok +R$300</div>
+            <div class="plan-card-tag">Plano 4</div>
+            <div class="plan-card-name">Plano Completo + Suporte Comercial</div>
+            <div class="plan-card-price">R$ 3.800<span>/m&ecirc;s</span></div>
           </div>
+          <ul class="plan-card-features">
+            <li>Tudo do Plano 3</li>
+            <li>Estrat&eacute;gia comercial e follow-up</li>
+            <li>Marketing de relacionamento e recorr&ecirc;ncia</li>
+          </ul>
+          <span class="plan-card-addon">&#43; add-on TikTok por R$ 300/m&ecirc;s</span>
         </label>
 
-        <label class="plan-item" id="plano_personalizado_label">
-          <input type="radio" name="plano" value="Personalizado" id="plano_personalizado">
-          <div>
-            <div class="plan-price" style="color:var(--gray-600);">Personalizado</div>
-            <div class="plan-name">Valor e escopo customizados</div>
-            <div class="plan-desc">Descreva o que foi combinado no campo abaixo</div>
-          </div>
-        </label>
+      </div>
 
-        <div class="custom-plan-obs" id="custom_plan_obs">
-          <label for="plano_obs_custom">Descreva o plano personalizado (valor, o que inclui, condições)</label>
-          <textarea id="plano_obs_custom" placeholder="Ex: R$ 2.100/mês — Social Media + Meta Ads com orçamento de R$ 600 de verba. Contrato trimestral." style="min-height:72px;"></textarea>
+      <label class="plan-card personalizado" id="plan_card_custom" style="margin-top:10px;">
+        <input type="radio" name="plano" value="Personalizado" id="plano_personalizado">
+        <div>
+          <div class="plan-card-tag">Personalizado</div>
+          <div class="plan-card-name">Valor e escopo customizados</div>
+          <div class="plan-card-price" style="font-size:18px;color:var(--gray-500);">A combinar</div>
         </div>
+        <div style="font-size:12px;color:var(--gray-500);">Selecione esta op&ccedil;&atilde;o e descreva abaixo o que foi combinado com o cliente.</div>
+      </label>
 
+      <div class="custom-plan-obs" id="custom_plan_obs">
+        <label for="plano_obs_custom">Descreva o plano personalizado (valor, o que inclui, condi&ccedil;&otilde;es)</label>
+        <textarea id="plano_obs_custom" placeholder="Ex: R$ 2.100/m&ecirc;s &mdash; Social Media + Meta Ads com verba de R$ 600. Contrato trimestral." style="min-height:80px;"></textarea>
       </div>
     </div>
   </div>
@@ -508,9 +551,17 @@
     });
   });
 
-  // Mostrar/ocultar campo de obs do plano personalizado
+  // Cards de plano: estado visual "selected" + caixa do personalizado
   document.querySelectorAll('input[name="plano"]').forEach(function(el) {
     el.addEventListener('change', function() {
+      // Remove selected de todos os cards
+      document.querySelectorAll('.plan-card').forEach(function(card) {
+        card.classList.remove('selected');
+      });
+      // Adiciona selected no card pai do radio selecionado
+      var parentCard = this.closest('.plan-card');
+      if (parentCard) parentCard.classList.add('selected');
+      // Mostra/oculta caixa de personalizado
       var obs = document.getElementById('custom_plan_obs');
       obs.classList.toggle('visible', this.value === 'Personalizado');
     });
