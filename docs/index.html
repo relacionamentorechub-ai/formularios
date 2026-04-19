@@ -924,9 +924,8 @@ async function chamarClaude(dados) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: buildPrompt(dados) }],
-      max_tokens: 16000
+      max_tokens: 8000
     })
   });
   if (!resp.ok) {
