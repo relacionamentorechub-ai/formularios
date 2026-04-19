@@ -179,6 +179,11 @@ textarea { resize:vertical; min-height:96px; line-height:1.6; }
 .copied-msg { font-size:12px; color:var(--green); margin-top:8px; display:none; }
 .btn-nova { margin-top:16px; display:inline-flex; align-items:center; gap:10px; background:rgba(6,182,212,0.1); color:var(--cyan); border:1.5px solid rgba(6,182,212,0.35); border-radius:12px; padding:13px 32px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .2s; }
 .btn-nova:hover { background:rgba(6,182,212,0.2); transform:translateY(-2px); box-shadow:0 0 20px rgba(6,182,212,0.2); }
+.ig-status { position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:12px; font-weight:700; pointer-events:none; transition:all .3s; }
+.ig-status.checking { color:var(--text-muted); animation:pulse-dot 1s infinite; }
+.ig-status.found    { color:#10B981; }
+.ig-status.notfound { color:#EF4444; }
+.ig-status.unknown  { color:#F97316; }
 
 /* ═══════════════════════════════════════════════
    LOADING OVERLAY
@@ -316,7 +321,13 @@ footer strong { color:var(--cyan); }
     </div>
     <div class="two-col">
       <div class="field-group"><label class="field-label" for="nome">Nome da empresa / Estabelecimento <span class="req">*</span></label><input type="text" id="nome" placeholder="Ex: Grazi Hair Boutique"></div>
-      <div class="field-group"><label class="field-label" for="instagram">@ do Instagram <span class="req">*</span></label><input type="text" id="instagram" placeholder="Ex: @gracihair_boutique"></div>
+      <div class="field-group">
+        <label class="field-label" for="instagram">@ do Instagram <span class="req">*</span></label>
+        <div style="position:relative;">
+          <input type="text" id="instagram" placeholder="Ex: @gracihair_boutique" onblur="verificarInstagram(this.value)">
+          <span class="ig-status" id="ig_status"></span>
+        </div>
+      </div>
     </div>
     <div class="two-col">
       <div class="field-group">
@@ -916,10 +927,8 @@ async function chamarClaude(dados) {
    GERAR PDF DIRETO (html2pdf)
 ═══════════════════════════════════════════ */
 async function abrirDiagnostico(htmlRaw, instagram) {
-  // Remove o script de auto-print que estava na versão anterior
   var html = htmlRaw.replace(/<script>window\.onload[\s\S]*?<\/script>/g, '');
 
-  // Injeta custo se disponível
   if (lastAnalysisCost) {
     var footerCusto = '<div style="position:fixed;bottom:12px;right:16px;font-size:10px;color:#666;background:#f0f0f0;padding:6px 12px;border-radius:6px;z-index:10;font-family:monospace;border-left:3px solid #0E7490;">'
       +'<strong style="color:#333;">Custo desta análise:</strong><br>'
@@ -929,33 +938,93 @@ async function abrirDiagnostico(htmlRaw, instagram) {
     html = html.replace('</body>', footerCusto + '</body>');
   }
 
-  // Cria container oculto para renderizar o HTML
+  // Extrai todos os <link> (Google Fonts etc.) e <style> do <head>
+  var links = '';
+  var linkRe = /<link[^>]+>/gi, lm;
+  while ((lm = linkRe.exec(html)) !== null) links += lm[0];
+
+  var styles = '';
+  var styleRe = /<style[^>]*>([\s\S]*?)<\/style>/gi, sm;
+  while ((sm = styleRe.exec(html)) !== null) styles += '<style>' + sm[1] + '</style>';
+
+  // Extrai apenas o conteúdo do <body>
+  var bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  var bodyContent = bodyMatch ? bodyMatch[1] : html;
+
+  // Container posicionado NA TELA mas atrás do loading overlay (z-index:9999)
+  // html2canvas não renderiza o que está fora do viewport — precisa estar em top:0
   var container = document.createElement('div');
-  container.style.cssText = 'position:fixed;top:-99999px;left:-99999px;width:794px;background:#D1D5DB;';
-  container.innerHTML = html.replace(/^[\s\S]*<body[^>]*>/i,'').replace(/<\/body>[\s\S]*$/i,'');
-
-  // Injeta o <style> do diagnóstico no container
-  var styleMatch = html.match(/<style>([\s\S]*?)<\/style>/i);
-  if (styleMatch) {
-    var styleEl = document.createElement('style');
-    styleEl.textContent = styleMatch[1];
-    container.insertBefore(styleEl, container.firstChild);
-  }
-
+  container.style.cssText = 'position:fixed;top:0;left:0;width:794px;z-index:100;background:#D1D5DB;overflow:hidden;';
+  container.innerHTML = links + styles + bodyContent;
   document.body.appendChild(container);
 
-  var nomeArquivo = 'diagnostico-' + (instagram || 'rec').replace('@','').replace(/\s/g,'-') + '.pdf';
+  // Aguarda fontes e imagens carregarem
+  await new Promise(function(r){ setTimeout(r, 2500); });
+
+  var nomeArquivo = 'diagnostico-' + (instagram || 'rec').replace('@','').replace(/[^a-zA-Z0-9_-]/g,'') + '.pdf';
 
   var opt = {
     margin:      0,
     filename:    nomeArquivo,
     image:       { type: 'jpeg', quality: 0.97 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#D1D5DB', windowWidth: 794 },
-    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    html2canvas: { scale: 1.5, useCORS: true, allowTaint: true, logging: false,
+                   backgroundColor: '#D1D5DB', windowWidth: 794 },
+    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak:   { mode: ['avoid-all'], before: ['.pdf-page'] }
   };
 
   await html2pdf().set(opt).from(container).save();
   document.body.removeChild(container);
+}
+
+/* ═══════════════════════════════════════════
+   VERIFICAÇÃO INSTAGRAM
+═══════════════════════════════════════════ */
+var lastIgCheck = null;
+
+async function verificarInstagram(val) {
+  var handle = val.replace('@','').trim();
+  var el = document.getElementById('ig_status');
+  if (!handle || handle.length < 2) { el.textContent = ''; el.className = 'ig-status'; lastIgCheck = null; return; }
+
+  // Validação de formato primeiro
+  if (!/^[a-zA-Z0-9._]{1,30}$/.test(handle)) {
+    el.textContent = '✕ formato inválido';
+    el.className = 'ig-status notfound';
+    lastIgCheck = 'invalid';
+    return;
+  }
+
+  el.textContent = '⟳ verificando...';
+  el.className = 'ig-status checking';
+  lastIgCheck = null;
+
+  try {
+    var res = await fetch('/api/check-instagram', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: handle })
+    });
+    var data = await res.json();
+
+    if (data.exists === true) {
+      el.textContent = '✓ perfil encontrado';
+      el.className = 'ig-status found';
+      lastIgCheck = 'found';
+    } else if (data.exists === false) {
+      el.textContent = '✕ perfil não encontrado';
+      el.className = 'ig-status notfound';
+      lastIgCheck = 'notfound';
+    } else {
+      el.textContent = '⚠ não foi possível verificar';
+      el.className = 'ig-status unknown';
+      lastIgCheck = 'unknown';
+    }
+  } catch(e) {
+    el.textContent = '⚠ não verificado';
+    el.className = 'ig-status unknown';
+    lastIgCheck = 'unknown';
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -968,6 +1037,11 @@ async function enviarSolicitacao() {
     document.getElementById('status_bar').innerHTML = '⚠️ Preencha ao menos o nome da empresa e o Instagram antes de enviar.';
     document.getElementById('status_bar').scrollIntoView({ behavior:'smooth', block:'center' });
     return;
+  }
+
+  if (lastIgCheck === 'notfound' || lastIgCheck === 'invalid') {
+    var ok = confirm('O perfil do Instagram informado não foi encontrado. Deseja continuar mesmo assim?');
+    if (!ok) return;
   }
 
   var temApi = !!getApiKey();
@@ -1060,7 +1134,7 @@ async function enviarSolicitacao() {
 }
 
 function novaAnalise() {
-  // Reseta todos os campos do formulário
+  // Reseta campos
   document.querySelectorAll('input[type="text"], input[type="url"], textarea, select').forEach(function(el) { el.value = ''; });
   document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(function(el) {
     el.checked = false;
@@ -1070,19 +1144,27 @@ function novaAnalise() {
   // Reseta seções condicionais
   document.getElementById('proposta_detalhes').classList.remove('visible');
   document.getElementById('custom_plan_obs').classList.remove('visible');
-  // Reseta área de resultado
+  // Reseta resultado
   document.getElementById('output_box').classList.remove('visible');
   document.getElementById('output_text').textContent = '';
   document.getElementById('status_bar').className = 'status-bar';
   document.getElementById('status_bar').innerHTML = '';
-  // Mostra botão de enviar, esconde botão nova análise
+  // Reseta todos os steps do loading para estado inicial
+  ['step_1','step_2','step_3','step_4','step_5'].forEach(function(id) { setStep(id, null); });
+  setProgress(0);
+  document.getElementById('loading_subtitle').textContent = 'A IA está analisando a presença digital do lead...';
+  hideLoading();
+  // Reseta indicador de Instagram
+  var igStatus = document.getElementById('ig_status');
+  if (igStatus) { igStatus.textContent = ''; igStatus.className = 'ig-status'; }
+  lastIgCheck = null;
+  // Botões
   var btn = document.getElementById('btn_enviar');
   btn.style.display = 'inline-flex';
   btn.disabled = false;
   document.getElementById('btn_nova').style.display = 'none';
-  // Reseta progress bar
+  // Reseta progress bar do formulário
   document.getElementById('progress_fill').style.width = '0%';
-  // Sobe ao topo suavemente
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
