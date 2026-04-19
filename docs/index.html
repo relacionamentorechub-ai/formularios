@@ -446,13 +446,13 @@ footer strong { color:var(--cyan); }
       </div>
     </div>
     <div class="proposta-section" id="proposta_detalhes">
-      <div class="proposta-title">💰 Qual plano deve aparecer na proposta?</div>
+      <div class="proposta-title">💰 Quais planos devem aparecer na proposta? <span style="font-size:11px;font-weight:500;color:#6EE7B7;opacity:.8">(selecione até 3)</span></div>
       <div class="plans-list">
-        <label class="plan-item"><input type="radio" name="plano" value="Plano 1 — Gestão de Social Media + Captação de Conteúdo — R$ 1.500/mês"><div><div class="plan-price">R$ 1.500<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div><div class="plan-name">Plano 1 — Social Media + Captação de Conteúdo</div><div class="plan-desc">Planejamento, posts, captação de fotos e vídeos, edição e organização do perfil</div></div></label>
-        <label class="plan-item"><input type="radio" name="plano" value="Plano 2 — Gestão de Social Media + Captação de Conteúdo + Tráfego Pago Meta — R$ 2.500/mês"><div><div class="plan-price">R$ 2.500<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div><div class="plan-name">Plano 2 — Social Media + Captação + Tráfego Pago Meta</div><div class="plan-desc">Tudo do Plano 1 + até 3 campanhas no Meta Ads por mês</div></div></label>
-        <label class="plan-item"><input type="radio" name="plano" value="Plano 3 — Gestão de Social Media + Captação de Conteúdo + Tráfego Pago Meta + Google Empresa — R$ 2.900/mês"><div><div class="plan-price">R$ 2.900<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div><div class="plan-name">Plano 3 — Social Media + Captação + Tráfego Meta + Google Empresa</div><div class="plan-desc">Tudo do Plano 2 + gestão completa do Google Empresa (GMB)</div></div></label>
-        <label class="plan-item"><input type="radio" name="plano" value="Plano 4 — Gestão de Social Media + Captação de Conteúdo + Tráfego Pago + Google Empresa + Suporte Comercial — R$ 3.800/mês"><div><div class="plan-price">R$ 3.800<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div><div class="plan-name">Plano 4 — Plano Completo + Suporte Comercial</div><div class="plan-desc">Tudo do Plano 3 + estratégia comercial, follow-up e marketing de relacionamento</div></div></label>
-        <label class="plan-item" id="plano_personalizado_label"><input type="radio" name="plano" value="Personalizado" id="plano_personalizado"><div><div class="plan-price" style="color:var(--text-secondary);font-size:15px">Personalizado</div><div class="plan-name">Valor e escopo customizados</div><div class="plan-desc">Descreva o que foi combinado no campo abaixo</div></div></label>
+        <label class="plan-item"><input type="checkbox" name="plano" value="Plano 1 — Gestão de Social Media + Captação de Conteúdo — R$ 1.500/mês"><div><div class="plan-price">R$ 1.500<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div><div class="plan-name">Plano 1 — Social Media + Captação de Conteúdo</div><div class="plan-desc">Planejamento, posts, captação de fotos e vídeos, edição e organização do perfil</div></div></label>
+        <label class="plan-item"><input type="checkbox" name="plano" value="Plano 2 — Gestão de Social Media + Captação de Conteúdo + Tráfego Pago Meta — R$ 2.500/mês"><div><div class="plan-price">R$ 2.500<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div><div class="plan-name">Plano 2 — Social Media + Captação + Tráfego Pago Meta</div><div class="plan-desc">Tudo do Plano 1 + até 3 campanhas no Meta Ads por mês</div></div></label>
+        <label class="plan-item"><input type="checkbox" name="plano" value="Plano 3 — Gestão de Social Media + Captação de Conteúdo + Tráfego Pago Meta + Google Empresa — R$ 2.900/mês"><div><div class="plan-price">R$ 2.900<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div><div class="plan-name">Plano 3 — Social Media + Captação + Tráfego Meta + Google Empresa</div><div class="plan-desc">Tudo do Plano 2 + gestão completa do Google Empresa (GMB)</div></div></label>
+        <label class="plan-item"><input type="checkbox" name="plano" value="Plano 4 — Gestão de Social Media + Captação de Conteúdo + Tráfego Pago + Google Empresa + Suporte Comercial — R$ 3.800/mês"><div><div class="plan-price">R$ 3.800<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div><div class="plan-name">Plano 4 — Plano Completo + Suporte Comercial</div><div class="plan-desc">Tudo do Plano 3 + estratégia comercial, follow-up e marketing de relacionamento</div></div></label>
+        <label class="plan-item" id="plano_personalizado_label"><input type="checkbox" name="plano" value="Personalizado" id="plano_personalizado"><div><div class="plan-price" style="color:var(--text-secondary);font-size:15px">Personalizado</div><div class="plan-name">Valor e escopo customizados</div><div class="plan-desc">Descreva o que foi combinado no campo abaixo</div></div></label>
         <div class="custom-plan-obs" id="custom_plan_obs"><label for="plano_obs_custom">Descreva o plano personalizado (valor, o que inclui, condições)</label><textarea id="plano_obs_custom" placeholder="Ex: R$ 2.100/mês — Social Media + Meta Ads com orçamento de R$ 600 de verba." style="min-height:72px;"></textarea></div>
       </div>
     </div>
@@ -674,15 +674,19 @@ document.querySelectorAll('.choice-item input[type="checkbox"]').forEach(functio
 });
 document.querySelectorAll('.plan-item input').forEach(function(inp) {
   inp.addEventListener('change', function() {
-    document.querySelectorAll('.plan-item').forEach(function(i) { i.classList.remove('selected'); });
-    this.closest('.plan-item').classList.add('selected');
+    var checked = document.querySelectorAll('input[name="plano"]:checked');
+    if (checked.length > 3) {
+      this.checked = false;
+      alert('Selecione no máximo 3 planos.');
+      return;
+    }
+    this.closest('.plan-item').classList.toggle('selected', this.checked);
+    var temPersonalizado = !!document.querySelector('input[name="plano"][value="Personalizado"]:checked');
+    document.getElementById('custom_plan_obs').classList.toggle('visible', temPersonalizado);
   });
 });
 document.querySelectorAll('input[name="com_proposta"]').forEach(function(el) {
   el.addEventListener('change', function() { document.getElementById('proposta_detalhes').classList.toggle('visible', this.value === 'Sim'); });
-});
-document.querySelectorAll('input[name="plano"]').forEach(function(el) {
-  el.addEventListener('change', function() { document.getElementById('custom_plan_obs').classList.toggle('visible', this.value === 'Personalizado'); });
 });
 
 /* ═══════════════════════════════════════════
@@ -712,7 +716,13 @@ function coletarDados() {
     canais: getChecked('canais').join(', '), trafego_atual: getRadio('trafego_atual')||'',
     tem_site: getRadio('tem_site')||'', objetivo: getChecked('objetivo').join(', '),
     observacoes: getVal('obs')||'', com_proposta: getRadio('com_proposta')||'Não',
-    plano: getRadio('plano')==='Personalizado' ? 'Personalizado — '+(getVal('plano_obs_custom')||'ver observações') : getRadio('plano')||'',
+    plano: (function() {
+      var sel = getChecked('plano');
+      if (!sel.length) return '';
+      return sel.map(function(v) {
+        return v === 'Personalizado' ? 'Personalizado — '+(getVal('plano_obs_custom')||'ver observações') : v;
+      }).join(' | ');
+    })(),
     urgencia: getRadio('urgencia')||'', data_reuniao: getVal('data_reuniao')||'', obs_extra: getVal('obs_extra')||''
   };
 }
@@ -848,18 +858,26 @@ header{background:#fff;border-bottom:1px solid var(--gray-200);padding:16px 32px
 .hub-why-tagline{font-size:14px;font-weight:600;font-style:italic;color:var(--cyan);}
 .hub-why-handle{font-size:12px;color:var(--gray-600);letter-spacing:.05em;}
 
-PLANO DE PÁGINAS PADRÃO:
+PLANO DE PÁGINAS — ATÉ 10 PÁGINAS:
 Página 1: dark — topbar + header + hero com KPIs (3 KPIs baseados nos dados informados)
 Página 2: white — "Parte 1 · Pontos identificados" + 4 problem cards (grid 2x2)
-Página 3: white — continuação dos pontos (mais 4 cards) se 8 pontos, OU ir direto para benchmark se 6 pontos
+Página 3: white — continuação dos pontos (mais 4 cards se 8+ pontos) OU benchmark se 6 pontos
 Página 4: gray — "Parte 2 · Análise de mercado" + 4 bench-cards (grid 2x2) + opportunity-strip
-Página 5: white — "Parte 3 · O que solucionamos" + plan-box (se com_proposta=Sim) + 4 del-cards
-Página 6: dark — hub-why + footer
+Página 5: white — "Parte 3 · O que solucionamos" + plan-box(es) (se com_proposta=Sim) + del-cards
+[Página 6+]: se houver muitos planos ou entregáveis, use páginas extras (até no máximo 10 no total)
+Última página: dark — hub-why + footer
 
 REGRA PARA QUANTIDADE DE PROBLEMAS:
-- Gere 8 pontos se houver 3+ canais a analisar (4 por página = 2 páginas)
-- Gere 6 pontos se houver 1-2 canais (todos na página 2, página 3 pode ser benchmark)
+- Gere 8 pontos se houver 3+ canais a analisar (4 por página = 2 páginas de problemas)
+- Gere 6 pontos se houver 1-2 canais (todos na página 2)
 - Todos os pontos devem ser baseados nos dados informados
+
+REGRA PARA MÚLTIPLOS PLANOS (se com_proposta = "Sim"):
+- 1 plano selecionado: 1 plan-box normal na página de entregáveis
+- 2 planos selecionados: 2 plan-box lado a lado (display:flex; gap:16px; margin-bottom:18px)
+- 3 planos selecionados: 3 plan-box empilhados verticalmente, tamanho menor (padding:16px 20px)
+- Cada plan-box deve mostrar nome, valor e lista de itens do plano correspondente
+- Os planos estão separados por " | " no campo PLANO INDICADO do prompt
 
 CANAIS — TAGS HTML para uso na section de channels da página 1:
 - Instagram: <span class="ch-tag ch-instagram">Instagram</span>
@@ -928,54 +946,26 @@ async function chamarClaude(dados) {
    GERAR PDF DIRETO (html2pdf)
 ═══════════════════════════════════════════ */
 async function abrirDiagnostico(htmlRaw, instagram) {
-  var html = htmlRaw.replace(/<script>window\.onload[\s\S]*?<\/script>/g, '');
+  var html = htmlRaw;
 
   if (lastAnalysisCost) {
-    var footerCusto = '<div style="position:fixed;bottom:12px;right:16px;font-size:10px;color:#666;background:#f0f0f0;padding:6px 12px;border-radius:6px;z-index:10;font-family:monospace;border-left:3px solid #0E7490;">'
-      +'<strong style="color:#333;">Custo desta análise:</strong><br>'
+    var footerCusto = '<div style="position:fixed;bottom:12px;right:16px;font-size:10px;color:#666;background:#f0f0f0;padding:6px 12px;border-radius:6px;z-index:9999;font-family:monospace;border-left:3px solid #0E7490;">'
+      +'<strong style="color:#333;">Custo desta an&aacute;lise:</strong><br>'
       +'Tokens entrada: '+lastAnalysisCost.input.toLocaleString('pt-BR')+'<br>'
-      +'Tokens saída: '+lastAnalysisCost.output.toLocaleString('pt-BR')+'<br>'
+      +'Tokens sa&iacute;da: '+lastAnalysisCost.output.toLocaleString('pt-BR')+'<br>'
       +'Total: $'+lastAnalysisCost.total_usd.toFixed(3)+' USD</div>';
     html = html.replace('</body>', footerCusto + '</body>');
   }
 
-  // Extrai todos os <link> (Google Fonts etc.) e <style> do <head>
-  var links = '';
-  var linkRe = /<link[^>]+>/gi, lm;
-  while ((lm = linkRe.exec(html)) !== null) links += lm[0];
-
-  var styles = '';
-  var styleRe = /<style[^>]*>([\s\S]*?)<\/style>/gi, sm;
-  while ((sm = styleRe.exec(html)) !== null) styles += '<style>' + sm[1] + '</style>';
-
-  // Extrai apenas o conteúdo do <body>
-  var bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-  var bodyContent = bodyMatch ? bodyMatch[1] : html;
-
-  // Container posicionado NA TELA mas atrás do loading overlay (z-index:9999)
-  // html2canvas não renderiza o que está fora do viewport — precisa estar em top:0
-  var container = document.createElement('div');
-  container.style.cssText = 'position:fixed;top:0;left:0;width:794px;z-index:100;background:#D1D5DB;overflow:hidden;';
-  container.innerHTML = links + styles + bodyContent;
-  document.body.appendChild(container);
-
-  // Aguarda fontes e imagens carregarem
-  await new Promise(function(r){ setTimeout(r, 2500); });
-
-  var nomeArquivo = 'diagnostico-' + (instagram || 'rec').replace('@','').replace(/[^a-zA-Z0-9_-]/g,'') + '.pdf';
-
-  var opt = {
-    margin:      0,
-    filename:    nomeArquivo,
-    image:       { type: 'jpeg', quality: 0.97 },
-    html2canvas: { scale: 1.5, useCORS: true, allowTaint: true, logging: false,
-                   backgroundColor: '#D1D5DB', windowWidth: 794 },
-    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak:   { mode: ['avoid-all'], before: ['.pdf-page'] }
-  };
-
-  await html2pdf().set(opt).from(container).save();
-  document.body.removeChild(container);
+  // Abre o HTML em nova aba via Blob URL — usa renderização nativa do browser
+  // O script window.onload no HTML dispara o diálogo de impressão automaticamente
+  var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var win = window.open(url, '_blank');
+  if (!win) {
+    alert('O navegador bloqueou a abertura da nova aba. Permita pop-ups para este site.');
+  }
+  setTimeout(function() { URL.revokeObjectURL(url); }, 60000);
 }
 
 /* ═══════════════════════════════════════════
