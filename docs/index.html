@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════════
    RESET & BASE
@@ -176,6 +177,8 @@ textarea { resize:vertical; min-height:96px; line-height:1.6; }
 .btn-copy { margin-top:18px; display:inline-flex; align-items:center; gap:8px; background:rgba(6,182,212,.1); color:var(--cyan); border:1px solid rgba(6,182,212,.25); border-radius:8px; padding:10px 22px; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; font-family:inherit; }
 .btn-copy:hover { background:rgba(6,182,212,.18); transform:translateY(-1px); }
 .copied-msg { font-size:12px; color:var(--green); margin-top:8px; display:none; }
+.btn-nova { margin-top:16px; display:inline-flex; align-items:center; gap:10px; background:rgba(6,182,212,0.1); color:var(--cyan); border:1.5px solid rgba(6,182,212,0.35); border-radius:12px; padding:13px 32px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .2s; }
+.btn-nova:hover { background:rgba(6,182,212,0.2); transform:translateY(-2px); box-shadow:0 0 20px rgba(6,182,212,0.2); }
 
 /* ═══════════════════════════════════════════════
    LOADING OVERLAY
@@ -468,8 +471,12 @@ footer strong { color:var(--cyan); }
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
       Gerar Diagnóstico e Enviar
     </button>
-    <div class="submit-hint">Salva no banco, envia e-mail <strong style="color:var(--cyan)">e gera o diagnóstico em PDF automaticamente</strong></div>
+    <div class="submit-hint">Salva no banco, envia e-mail <strong style="color:var(--cyan)">e baixa o diagnóstico em PDF automaticamente</strong></div>
     <div class="status-bar" id="status_bar"></div>
+    <button class="btn-nova" id="btn_nova" onclick="novaAnalise()" style="display:none;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      Nova Análise
+    </button>
   </div>
 
   <div class="output-box" id="output_box">
@@ -906,28 +913,49 @@ async function chamarClaude(dados) {
 }
 
 /* ═══════════════════════════════════════════
-   OPEN DIAGNOSTIC IN NEW TAB
+   GERAR PDF DIRETO (html2pdf)
 ═══════════════════════════════════════════ */
-function abrirDiagnostico(html) {
-  var htmlComCusto = html;
+async function abrirDiagnostico(htmlRaw, instagram) {
+  // Remove o script de auto-print que estava na versão anterior
+  var html = htmlRaw.replace(/<script>window\.onload[\s\S]*?<\/script>/g, '');
+
+  // Injeta custo se disponível
   if (lastAnalysisCost) {
     var footerCusto = '<div style="position:fixed;bottom:12px;right:16px;font-size:10px;color:#666;background:#f0f0f0;padding:6px 12px;border-radius:6px;z-index:10;font-family:monospace;border-left:3px solid #0E7490;">'
-      +'<strong style="color:#333;">Custo desta análise:</strong><br/>'
-      +'🔹 '+lastAnalysisCost.input.toLocaleString('pt-BR')+' tokens entrada<br/>'
-      +'🔹 '+lastAnalysisCost.output.toLocaleString('pt-BR')+' tokens saída<br/>'
-      +'💰 Total: $'+lastAnalysisCost.total_usd.toFixed(3)+' USD'
-      +'</div>'
-      +'<style>@media print { [data-cost] { display:none!important; } }</style>';
-    htmlComCusto = html.replace('</body>', footerCusto + '</body>');
+      +'<strong style="color:#333;">Custo desta análise:</strong><br>'
+      +'Tokens entrada: '+lastAnalysisCost.input.toLocaleString('pt-BR')+'<br>'
+      +'Tokens saída: '+lastAnalysisCost.output.toLocaleString('pt-BR')+'<br>'
+      +'Total: $'+lastAnalysisCost.total_usd.toFixed(3)+' USD</div>';
+    html = html.replace('</body>', footerCusto + '</body>');
   }
-  var blob = new Blob([htmlComCusto], { type: 'text/html;charset=utf-8' });
-  var url  = URL.createObjectURL(blob);
-  var win  = window.open(url, '_blank');
-  if (!win) {
-    var a = document.createElement('a');
-    a.href = url; a.download = 'diagnostico.html'; a.click();
+
+  // Cria container oculto para renderizar o HTML
+  var container = document.createElement('div');
+  container.style.cssText = 'position:fixed;top:-99999px;left:-99999px;width:794px;background:#D1D5DB;';
+  container.innerHTML = html.replace(/^[\s\S]*<body[^>]*>/i,'').replace(/<\/body>[\s\S]*$/i,'');
+
+  // Injeta o <style> do diagnóstico no container
+  var styleMatch = html.match(/<style>([\s\S]*?)<\/style>/i);
+  if (styleMatch) {
+    var styleEl = document.createElement('style');
+    styleEl.textContent = styleMatch[1];
+    container.insertBefore(styleEl, container.firstChild);
   }
-  setTimeout(function() { URL.revokeObjectURL(url); }, 60000);
+
+  document.body.appendChild(container);
+
+  var nomeArquivo = 'diagnostico-' + (instagram || 'rec').replace('@','').replace(/\s/g,'-') + '.pdf';
+
+  var opt = {
+    margin:      0,
+    filename:    nomeArquivo,
+    image:       { type: 'jpeg', quality: 0.97 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#D1D5DB', windowWidth: 794 },
+    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  await html2pdf().set(opt).from(container).save();
+  document.body.removeChild(container);
 }
 
 /* ═══════════════════════════════════════════
@@ -990,14 +1018,15 @@ async function enviarSolicitacao() {
       setStep('step_4', 'done'); setProgress(85);
       setStep('step_5', 'active'); setSubtitle('Abrindo documento para impressão em PDF...'); setProgress(95);
       await new Promise(function(r){ setTimeout(r, 500); });
-      abrirDiagnostico(html);
+      await abrirDiagnostico(html, d.instagram);
       setStep('step_5', 'done'); setProgress(100);
-      setSubtitle('Diagnóstico gerado! Imprima como PDF no documento que abriu.');
+      setSubtitle('PDF gerado e baixado com sucesso!');
       await new Promise(function(r){ setTimeout(r, 1800); });
       hideLoading();
       var costMsg = lastAnalysisCost ? ' · Custo: $'+lastAnalysisCost.total_usd.toFixed(3) : '';
       document.getElementById('status_bar').className = 'status-bar success';
-      document.getElementById('status_bar').innerHTML = '✅ Diagnóstico gerado e aberto! Use Ctrl+P (ou Cmd+P) para salvar como PDF.' + costMsg;
+      document.getElementById('status_bar').innerHTML = '✅ PDF baixado com sucesso!' + costMsg;
+      document.getElementById('btn_nova').style.display = 'inline-flex';
       atualizarCreditosHeader();
     } catch(err) {
       setStep('step_4', 'error-step'); setStep('step_5', 'error-step');
@@ -1028,6 +1057,33 @@ async function enviarSolicitacao() {
   btn.disabled = false;
   if (erros.length === 0 && temApi) btn.style.display = 'none';
   document.getElementById('status_bar').scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function novaAnalise() {
+  // Reseta todos os campos do formulário
+  document.querySelectorAll('input[type="text"], input[type="url"], textarea, select').forEach(function(el) { el.value = ''; });
+  document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(function(el) {
+    el.checked = false;
+    var item = el.closest('.choice-item, .plan-item');
+    if (item) { item.style.borderColor = ''; item.style.background = ''; item.classList.remove('selected'); }
+  });
+  // Reseta seções condicionais
+  document.getElementById('proposta_detalhes').classList.remove('visible');
+  document.getElementById('custom_plan_obs').classList.remove('visible');
+  // Reseta área de resultado
+  document.getElementById('output_box').classList.remove('visible');
+  document.getElementById('output_text').textContent = '';
+  document.getElementById('status_bar').className = 'status-bar';
+  document.getElementById('status_bar').innerHTML = '';
+  // Mostra botão de enviar, esconde botão nova análise
+  var btn = document.getElementById('btn_enviar');
+  btn.style.display = 'inline-flex';
+  btn.disabled = false;
+  document.getElementById('btn_nova').style.display = 'none';
+  // Reseta progress bar
+  document.getElementById('progress_fill').style.width = '0%';
+  // Sobe ao topo suavemente
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function copiarTexto() {
