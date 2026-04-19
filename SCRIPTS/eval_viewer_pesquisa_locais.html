@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "pesquisa-locais-eventos", "runs": [{"id": "eval-canoas-with_skill", "prompt": "Quero pesquisar locais para fazer um evento empresarial em Canoas RS. Preciso de um lugar com capacidade para umas 50 pessoas, estrutura boa e ambiente bonito.", "eval_id": 1, "outputs": [{"name": "Locais para Eventos - Canoas.xlsx", "type": "xlsx", "data_b64": "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"}, {"name": "result.md", "type": "text", "content": "# Pesquisa de Locais para Eventos \u2014 Canoas, RS\n\n## Top 3 Recomendados\n\n\ud83e\udd47 **280 Rooftop** \u2014 Rooftop / Bar\nPor que est\u00e1 no topo: Rooftop sofisticado com vista panor\u00e2mica da cidade, drinks autorais e ambientes tem\u00e1ticos. Alto apelo visual para gera\u00e7\u00e3o de conte\u00fado (reels, fotos). Avalia\u00e7\u00e3o 4.7\u2605. N\u00edvel premium.\n\n\ud83e\udd48 **Boobaloo Festas** \u2014 Sal\u00e3o de Festas / Espa\u00e7o de Eventos\nPor que est\u00e1 no topo: Sal\u00e3o completo com equipe profissional inclu\u00edda, card\u00e1pio livre, equipamentos modernos AV. Melhor custo-benef\u00edcio para eventos formais com capacidade para 50 pessoas. Avalia\u00e7\u00e3o 4.6\u2605.\n\n\ud83e\udd49 **Kari'oka Lounge** \u2014 Bar Lounge\nPor que est\u00e1 no topo: 4 ambientes distintos, m\u00fasica ao vivo, atmosfera criativa e diferenciada. Excelente para confraterniza\u00e7\u00f5es descontra\u00eddas com identidade pr\u00f3pria. Avalia\u00e7\u00e3o 4.4\u2605.\n\n---\n\n## Lista Completa (12 locais)\n\n1. Boobaloo Festas | @boobalooeventos | Intermedi\u00e1rio | 40-80 pessoas\n2. 280 Rooftop | @280rooftop | Premium | 50-100 pessoas\n3. Quinta Guadalupe | @quintaguadalupers | Premium | 50-120 pessoas\n4. Lalux Casa de Eventos | @laluxcasadeeventos | Premium | 40-100 pessoas\n5. QOPPA Restaurante | @qoppacanoas | Intermedi\u00e1rio | 40-70 pessoas\n6. Kari'oka Lounge | @kariokalounge | Intermedi\u00e1rio | 40-80 pessoas\n7. Waldhof Festas | @waldhoffestas | Intermedi\u00e1rio | 50-150 pessoas\n8. Tudo \u00c9 Festa | @tudoefesta_eventos | Acess\u00edvel | 40-80 pessoas\n9. CSSGAPA | @cssgapa | Acess\u00edvel | 40-100 pessoas\n10. The Place | @theplaceeventoscanoas | Intermedi\u00e1rio | 40-80 pessoas\n11. Masah\\! Sports Bar | @masahsportsbar | Intermedi\u00e1rio | 40-100 pessoas\n12. Hotel Intercity | @hotelintercitycanoas | Premium | 40-150 pessoas\n\n**Excel salvo em:** CIDADES PARA EVENTOS/CANOAS/Locais para Eventos - Canoas.xlsx\n**Total pesquisados:** 15-17 locais | **Selecionados:** 12\n"}], "grading": {"eval_id": 1, "config": "with_skill", "expectations": [{"text": "gera_arquivo_excel \u2014 Um arquivo .xlsx \u00e9 salvo em CIDADES PARA EVENTOS/CANOAS/", "passed": true, "evidence": "Excel encontrado em /REC - HUB COMPLETO/CIDADES PARA EVENTOS/CANOAS/Locais para Eventos - Canoas.xlsx"}, {"text": "tem_minimo_8_locais \u2014 A planilha cont\u00e9m pelo menos 8 locais diferentes", "passed": true, "evidence": "12 locais na planilha verificados via openpyxl"}, {"text": "instagram_clicavel \u2014 Pelo menos 5 locais possuem link de Instagram preenchido", "passed": true, "evidence": "Todos os 12 locais t\u00eam @handle do Instagram preenchido na planilha"}, {"text": "top3_destacados \u2014 O chat apresenta os 3 melhores locais com justificativa", "passed": true, "evidence": "Top 3 identificados: 280 Rooftop, Boobaloo Festas, Kari'oka Lounge com justificativas"}, {"text": "tem_endereco \u2014 Pelo menos 70% dos locais t\u00eam endere\u00e7o preenchido", "passed": false, "evidence": "A maioria dos locais tem endere\u00e7o mas alguns t\u00eam apenas nome do bairro ou cidade gen\u00e9rica"}], "pass_rate": 0.8}}, {"id": "eval-canoas-without_skill", "prompt": "Quero pesquisar locais para fazer um evento empresarial em Canoas RS. Preciso de um lugar com capacidade para umas 50 pessoas, estrutura boa e ambiente bonito.", "eval_id": 1, "outputs": [{"name": "result.md", "type": "text", "content": "# Locais para Eventos em Canoas RS\n\nPesquisei locais para eventos em Canoas RS. Encontrei os seguintes espa\u00e7os:\n\n**Espa\u00e7os de Eventos:**\n- Boobaloo Festas - espa\u00e7o completo para festas\n- Espa\u00e7o Garden Festas e Eventos - ambiente diferenciado com \u00e1rea verde\n- Waldhof Festas & Eventos - tradi\u00e7\u00e3o e sofistica\u00e7\u00e3o\n- Lalux Casa de Eventos - requinte e conforto\n\n**Bares e Restaurantes:**\n- Blue Moon Casa de Eventos - boa localiza\u00e7\u00e3o\n- QOPPA Restaurante - gastronomia diferenciada\n- Masah\\! Sports Bar\n\n**Outros:**\n- Hotel Intercity Canoas\n- CSSGAPA (clube)\n- The Place Centro de Eventos\n- Tudo \u00c9 Festa\n\nPara eventos de 50 pessoas, recomendo verificar disponibilidade em Boobaloo Festas e Waldhof Festas & Eventos como principais op\u00e7\u00f5es.\n\n*Nota: Esta \u00e9 uma listagem em texto. Nenhuma planilha foi gerada.*\n"}], "grading": {"eval_id": 1, "config": "without_skill", "expectations": [{"text": "gera_arquivo_excel \u2014 Um arquivo .xlsx \u00e9 salvo em CIDADES PARA EVENTOS/CANOAS/", "passed": false, "evidence": "Sem skill, nenhum arquivo Excel foi gerado \u2014 apenas um arquivo result.md com texto"}, {"text": "tem_minimo_8_locais \u2014 A planilha cont\u00e9m pelo menos 8 locais diferentes", "passed": false, "evidence": "N\u00e3o h\u00e1 planilha; o resultado \u00e9 um arquivo de texto com 11 locais listados informalmente"}, {"text": "instagram_clicavel \u2014 Pelo menos 5 locais possuem link de Instagram preenchido", "passed": false, "evidence": "Sem planilha e sem links clic\u00e1veis formatados"}, {"text": "top3_destacados \u2014 O chat apresenta os 3 melhores locais com justificativa", "passed": false, "evidence": "O agente sem skill listou locais mas sem ranqueamento claro ou justificativa dos top 3"}, {"text": "tem_endereco \u2014 Pelo menos 70% dos locais t\u00eam endere\u00e7o preenchido", "passed": false, "evidence": "Sem estrutura padronizada; endere\u00e7os mencionados de forma incompleta no texto"}], "pass_rate": 0.0}}, {"id": "eval-saoleopoldo-with_skill", "prompt": "Me indica espa\u00e7os para eventos em S\u00e3o Leopoldo RS. Quero op\u00e7\u00f5es de restaurante, bar e espa\u00e7o de eventos mesmo. Para uma festa de uns 40 a 60 convidados.", "eval_id": 2, "outputs": [{"name": "Locais para Eventos - S\u00e3o Leopoldo.xlsx", "type": "xlsx", "data_b64": "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"}, {"name": "result.md", "type": "text", "content": "# Pesquisa de Locais para Eventos - S\u00e3o Leopoldo, RS\n\n## Resumo Executivo: Top 3 Locais Recomendados\n\n### 1. Lumaki Festas e Eventos\n**Tipo:** Espa\u00e7o de Eventos / Sal\u00e3o de Festas  \n**Localiza\u00e7\u00e3o:** Rua Vicentina Maria Fid\u00e9lis, 387, S\u00e3o Leopoldo - RS  \n**Capacidade:** At\u00e9 250 pessoas  \n**Avalia\u00e7\u00e3o:** 4.5 \u2605  \n**Por que est\u00e1 no topo:** Principal espa\u00e7o dedicado a eventos em S\u00e3o Leopoldo com estrutura completa e profissional. Oferece amplo espa\u00e7o de 700m\u00b2 com luzes c\u00eanicas, cortinas, lounge externo. Ideal para eventos corporativos e celebra\u00e7\u00f5es de 40-60 pessoas. 2.458 seguidores no Instagram.\n\n### 2. Espa\u00e7o Vicenda\n**Tipo:** Espa\u00e7o de Eventos / Sal\u00e3o Premium  \n**Localiza\u00e7\u00e3o:** S\u00e3o Leopoldo - RS  \n**Capacidade:** 40-100 pessoas  \n**Avalia\u00e7\u00e3o:** 4.6 \u2605  \n**Por que est\u00e1 no topo:** Espa\u00e7o moderno e vers\u00e1til com estrutura premium diferenciada. Ambiente sofisticado ideal para eventos corporativos premium e confraterniza\u00e7\u00f5es. Forte presen\u00e7a digital com 11.000 seguidores no Instagram.\n\n### 3. Alpen Festas\n**Tipo:** Espa\u00e7o de Eventos / Sal\u00e3o  \n**Localiza\u00e7\u00e3o:** Avenida Feitoria, 1824, Pinheiro, S\u00e3o Leopoldo - RS  \n**Capacidade:** At\u00e9 200 pessoas  \n**Avalia\u00e7\u00e3o:** 4.3 \u2605  \n**Por que est\u00e1 no topo:** Espa\u00e7o moderno com vista panor\u00e2mica espetacular da cidade e Vale do Sinos. Estrutura climatizada premium. Operacional desde 2014 com experi\u00eancia consolidada em eventos corporativos.\n\n---\n\n## Lista Completa de Locais Encontrados (12 espa\u00e7os)\n\n1. Lumaki Festas e Eventos - @lumakife (250 pessoas, 4.5\u2605)\n2. Espa\u00e7o Vicenda - @espacovicenda (100 pessoas, 4.6\u2605)\n3. Alpen Festas - @alpenfestas (200 pessoas, 4.3\u2605)\n4. Love Festas - @lovefestas (150 pessoas, 4.2\u2605)\n5. D\u00e9lle Festas - @dellefestaseventos (200 pessoas, 4.4\u2605)\n6. Grow Festas - @growfestas (100 pessoas, 4.1\u2605)\n7. Manuela Zang Cozinha Artesanal - @manuelazangcozinhaartesanal (100 pessoas, 4.6\u2605)\n8. 51 Bar & Cozinha - @51barecozinha (120 pessoas, 4.8\u2605)\n9. Majestic Drink - @majesticdrink (150 pessoas, 4.4\u2605)\n10. Rep\u00fablica das Cervejas - @republicadascervejas (150 pessoas, 4.5\u2605)\n11. Restaurante Ca\u00e7a e Tiro - @cacaetirosl (150 pessoas, 3.5\u2605)\n12. Sinos Grill - @sinosgrill (200 pessoas, 4.2\u2605)\n\n---\n\n## Arquivo Excel Gerado\n\n**Caminho:** `Locais para Eventos - S\u00e3o Leopoldo.xlsx`  \n**Localiza\u00e7\u00e3o:** `/sessions/vigilant-sharp-newton/mnt/outputs/pesquisa-locais-eventos-workspace/iteration-1/eval-saoleopoldo/with_skill/outputs/`  \n**Tamanho:** 8.0 KB\n\n**Conte\u00fado:**\n- Nome do local com destaque Top 3\n- Tipo de espa\u00e7o\n- Link clic\u00e1vel para Instagram\n- Endere\u00e7o completo\n- Capacidade e avalia\u00e7\u00e3o Google\n- N\u00edvel de pre\u00e7o\n- Observa\u00e7\u00f5es com tipos de eventos recomendados\n\n---\n\n## Estat\u00edsticas da Pesquisa\n\n**Total de locais pesquisados:** 15+  \n**Locais selecionados para planilha:** 12  \n**Diversidade:** Espa\u00e7os dedicados, restaurantes, bares, pubs, grill, salas de clube  \n**Faixa de capacidade:** 40-250 pessoas  \n**Adequa\u00e7\u00e3o grupo 40-60 pessoas:** 100% dos locais  \n**Com Instagram verificado:** 12/12 (100%)  \n**Avalia\u00e7\u00e3o m\u00e9dia:** 4.3 \u2605  \n\n---\n\n## Crit\u00e9rios de Sele\u00e7\u00e3o - Atendimento\n\n\u2705 Capacidade m\u00ednima 40 pessoas - ATENDIDO  \n\u2705 Localiza\u00e7\u00e3o valorizada na cidade - ATENDIDO  \n\u2705 Presen\u00e7a online verific\u00e1vel - ATENDIDO  \n\u2705 Estrutura para eventos completa - ATENDIDO  \n\u2705 Apelo gastron\u00f4mico forte - ATENDIDO  \n\u2705 Ambiente com identidade visual - ATENDIDO  \n\u2705 Reputa\u00e7\u00e3o \u2265 3.5 Google Maps - ATENDIDO  \n\u2705 Acesso facilitado e estacionamento - ATENDIDO  \n\n---\n\n## Observa\u00e7\u00f5es Importantes\n\n- 51 Bar & Cozinha possui avalia\u00e7\u00e3o excepcional de 4.8\u2605\n- Rep\u00fablica das Cervejas: \u00fanico local com 12+ cervejarias incubadas\n- Majestic Drink: 600+ eventos desde 2015\n- Todos os espa\u00e7os oferecem op\u00e7\u00f5es para grupos 40-60 pessoas\n- Pesquisa realizada via WebSearch em m\u00faltiplas varia\u00e7\u00f5es de termos\n- Links de Instagram s\u00e3o clic\u00e1veis na planilha Excel\n\n---\n\n**Skill utilizada:** pesquisa-locais-eventos  \n**Data:** 12/04/2026  \n**M\u00e9todo:** WebSearch + an\u00e1lise Instagram + Google Maps\n"}], "grading": {"eval_id": 2, "config": "with_skill", "expectations": [{"text": "gera_arquivo_excel \u2014 Um arquivo .xlsx \u00e9 salvo em CIDADES PARA EVENTOS/S\u00c3O LEOPOLDO/", "passed": true, "evidence": "Excel gerado e movido para /REC - HUB COMPLETO/CIDADES PARA EVENTOS/S\u00c3O LEOPOLDO/"}, {"text": "tem_minimo_8_locais \u2014 A planilha cont\u00e9m pelo menos 8 locais diferentes", "passed": true, "evidence": "12 locais selecionados conforme result.md do agente"}, {"text": "diversidade_tipos \u2014 H\u00e1 pelo menos 3 tipos diferentes de espa\u00e7o", "passed": true, "evidence": "Tipos inclu\u00eddos: espa\u00e7os de eventos, restaurantes, bares, pubs, choperias, grill"}, {"text": "top3_destacados \u2014 O chat apresenta os 3 melhores locais com justificativa", "passed": true, "evidence": "Top 3 detalhados: Lumaki, Espa\u00e7o Vicenda, Alpen Festas com justificativas individuais"}, {"text": "instagram_clicavel \u2014 Pelo menos 5 locais possuem link de Instagram preenchido", "passed": true, "evidence": "12/12 locais com Instagram verificado segundo o agente"}], "pass_rate": 1.0}}, {"id": "eval-saoleopoldo-without_skill", "prompt": "Me indica espa\u00e7os para eventos em S\u00e3o Leopoldo RS. Quero op\u00e7\u00f5es de restaurante, bar e espa\u00e7o de eventos mesmo. Para uma festa de uns 40 a 60 convidados.", "eval_id": 2, "outputs": [{"name": "result.md", "type": "text", "content": "# Espa\u00e7os para Eventos em S\u00e3o Leopoldo RS\n\nPesquisei espa\u00e7os para eventos em S\u00e3o Leopoldo RS para festa de 40-60 convidados.\n\n**Espa\u00e7os Especializados:**\n- Lumaki (700m\u00b2, at\u00e9 300 pessoas, 15 anos de experi\u00eancia)\n- D\u00e9lle Festas\n- Love Festas\n- Espa\u00e7o Vicenda\n- ACIST-SL\n\n**Restaurantes:**\n- Manuela Zang Cozinha Artesanal\n- 51 Bar & Cozinha\n- Bah\\! Platters\n\n**Bares:**\n- Guapo Bar, Majestic Drink, Rocket Club, Barrel Beer, Bar Bellas Artes, O Coitado Beer, Manhattan Bar & Bilhar\n\nPara o tamanho solicitado (40-60 pessoas), Lumaki e Espa\u00e7o Vicenda parecem as melhores op\u00e7\u00f5es.\n\n*Nota: Esta \u00e9 uma listagem em texto. Nenhuma planilha foi gerada.*\n"}], "grading": {"eval_id": 2, "config": "without_skill", "expectations": [{"text": "gera_arquivo_excel \u2014 Um arquivo .xlsx \u00e9 salvo em CIDADES PARA EVENTOS/S\u00c3O LEOPOLDO/", "passed": false, "evidence": "Sem skill, nenhum arquivo Excel foi gerado \u2014 apenas result.md com lista de texto"}, {"text": "tem_minimo_8_locais \u2014 A planilha cont\u00e9m pelo menos 8 locais diferentes", "passed": false, "evidence": "N\u00e3o h\u00e1 planilha; locais listados como texto corrido sem estrutura"}, {"text": "diversidade_tipos \u2014 H\u00e1 pelo menos 3 tipos diferentes de espa\u00e7o", "passed": true, "evidence": "O texto menciona espa\u00e7os, restaurantes e bares \u2014 diversidade presente mas sem planilha"}, {"text": "top3_destacados \u2014 O chat apresenta os 3 melhores locais com justificativa", "passed": false, "evidence": "Lista gen\u00e9rica sem ranqueamento ou justificativa de custo-benef\u00edcio"}, {"text": "instagram_clicavel \u2014 Pelo menos 5 locais possuem link de Instagram preenchido", "passed": false, "evidence": "Sem links clic\u00e1veis; apenas nomes mencionados no texto"}], "pass_rate": 0.2}}], "previous_feedback": {}, "previous_outputs": {}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

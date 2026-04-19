@@ -560,35 +560,29 @@ var SUPABASE_URL  = 'https://dissknbpwxvhkjltuzya.supabase.co';
 var SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpc3NrbmJwd3h2aGtqbHR1enlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzOTM4OTYsImV4cCI6MjA5MTk2OTg5Nn0.VcAUjRZ9thxNCJZ2QZ6IUQkFyzZ99cDB5ADdvu00a7M';
 var EMAIL_DESTINO = 'relacionamento.rechub@gmail.com';
 var CLAUDE_MODEL  = 'claude-sonnet-4-6';
-var ANTHROPIC_API_KEY = 'sk-ant-api03-QGirYYk8rXM2ypaI1FGDHfAVJvUnOyz6elaPVscNcpI5z6g6xC9T7WSaI6QZ5xL35atqGmQQ--HSVdwAA';
 var PRICING = { input: 0.000003, output: 0.000015 };
 var lastAnalysisCost = null;
 
 /* ═══════════════════════════════════════════
-   API KEY MANAGEMENT
+   API KEY MANAGEMENT (Vercel Serverless)
 ═══════════════════════════════════════════ */
-function getApiKey() { return ANTHROPIC_API_KEY; }
+function getApiKey() { return 'vercel-serverless'; }
 function salvarApiKey() { }
 function abrirModalApi() { }
 function fecharModalApi() { }
 function atualizarStatusApi() {
-  var ok = !!getApiKey();
-  document.getElementById('api_dot').className = 'api-status-dot ' + (ok ? 'ok' : 'off');
+  document.getElementById('api_dot').className = 'api-status-dot ok';
   document.getElementById('api_btn_label').textContent = '✓ IA ativa';
 }
 atualizarStatusApi();
 
 /* ═══════════════════════════════════════════
-   FETCH ANTHROPIC CREDITS
+   FETCH ANTHROPIC CREDITS (via Vercel)
 ═══════════════════════════════════════════ */
 async function carregarCreditos() {
   try {
-    var resp = await fetch('https://api.anthropic.com/v1/usage', {
-      method: 'GET',
-      headers: {
-        'x-api-key': getApiKey(),
-        'anthropic-version': '2023-06-01'
-      }
+    var resp = await fetch('/api/usage', {
+      method: 'GET'
     });
     if (!resp.ok) throw new Error('Erro ao buscar créditos');
     var data = await resp.json();
@@ -888,21 +882,14 @@ function buildPrompt(d) {
    CLAUDE API CALL
 ═══════════════════════════════════════════ */
 async function chamarClaude(dados) {
-  var apiKey = getApiKey();
-  if (!apiKey) throw new Error('SEM_API_KEY');
-  var resp = await fetch('https://api.anthropic.com/v1/messages', {
+  var resp = await fetch('/api/claude', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: CLAUDE_MODEL,
-      max_tokens: 16000,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: buildPrompt(dados) }]
+      messages: [{ role: 'user', content: buildPrompt(dados) }],
+      max_tokens: 16000
     })
   });
   if (!resp.ok) {

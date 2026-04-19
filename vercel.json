@@ -1,0 +1,7 @@
+{
+  "buildCommand": "echo 'Static site with serverless functions'",
+  "outputDirectory": "docs",
+  "env": {
+    "ANTHROPIC_API_KEY": "@anthropic_api_key"
+  }
+}

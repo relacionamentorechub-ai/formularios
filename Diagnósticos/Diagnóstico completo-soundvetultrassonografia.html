@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>An&aacute;lise Digital &middot; @soundvetultrassonografia</title>
+<style>
+  :root {
+    --cyan: #06B6D4; --cyan-light: #CFFAFE; --cyan-dark: #0E7490;
+    --red: #EF4444; --red-light: #FEE2E2;
+    --orange: #F97316; --orange-light: #FFEDD5;
+    --green: #10B981; --green-light: #D1FAE5; --green-dark: #065F46;
+    --gray-50: #F9FAFB; --gray-100: #F3F4F6; --gray-200: #E5E7EB;
+    --gray-400: #9CA3AF; --gray-600: #4B5563; --gray-700: #374151;
+    --gray-800: #1F2937; --gray-900: #111827;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #D1D5DB; color: var(--gray-900); line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+
+  .pdf-page {
+    width: 794px; min-height: 1123px; margin: 20px auto;
+    background: #fff; box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+    overflow: hidden; position: relative; display: flex; flex-direction: column;
+  }
+  .pdf-page.dark { background: var(--gray-900); }
+  .pdf-page.gray { background: var(--gray-50); border-top: 1px solid var(--gray-200); border-bottom: 1px solid var(--gray-200); }
+  .pdf-page .inner { padding: 36px 40px; flex: 1; display: flex; flex-direction: column; }
+
+  @page { size: 210mm 297mm; margin: 0; }
+  @media print {
+    body { background: white; }
+    .pdf-page { width: 210mm; height: 297mm; min-height: unset; margin: 0; box-shadow: none; break-after: page; page-break-after: always; }
+    .pdf-page:last-child { break-after: auto; page-break-after: auto; }
+  }
+
+  .topbar { height: 5px; background: linear-gradient(90deg, var(--cyan-dark), var(--cyan), #67E8F9); }
+  header { background: var(--gray-900); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .logo { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cyan); }
+  .date-badge { font-size: 12px; color: var(--gray-400); background: rgba(255,255,255,0.08); padding: 4px 12px; border-radius: 20px; }
+
+  .hero { flex: 1; padding: 40px 32px 36px; text-align: center; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .alert-badge { display: inline-block; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4); color: #FCA5A5; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 5px 16px; border-radius: 20px; margin-bottom: 18px; }
+  .hero h1 { font-size: 28px; font-weight: 800; line-height: 1.2; margin-bottom: 10px; }
+  .hero h1 span { color: var(--cyan); }
+  .hero-sub { font-size: 13px; color: #94A3B8; margin-bottom: 12px; max-width: 540px; line-height: 1.65; }
+  .hero-meta { font-size: 12px; color: #64748B; margin-bottom: 28px; }
+  .hero-meta strong { color: #CBD5E1; }
+
+  .channels { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+  .ch-tag { font-size: 11px; font-weight: 700; padding: 5px 14px; border-radius: 20px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .ch-instagram { background: rgba(131,58,180,0.2); color: #D8B4FE; border: 1px solid rgba(131,58,180,0.3); }
+  .ch-facebook  { background: rgba(59,130,246,0.2);  color: #93C5FD;  border: 1px solid rgba(59,130,246,0.3); }
+  .ch-google    { background: rgba(234,179,8,0.2);   color: #FDE047;  border: 1px solid rgba(234,179,8,0.3); }
+  .ch-meta      { background: rgba(239,68,68,0.2);   color: #FCA5A5;  border: 1px solid rgba(239,68,68,0.3); }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; max-width: 700px; width: 100%; }
+  .kpi-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 18px 12px; text-align: center; }
+  .kpi-value { font-size: 22px; font-weight: 800; color: var(--cyan); display: block; margin-bottom: 4px; }
+  .kpi-label { font-size: 10px; color: #CBD5E1; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; display: block; }
+  .kpi-verdict { font-size: 10px; font-weight: 700; background: rgba(239,68,68,0.2); color: #FCA5A5; padding: 3px 8px; border-radius: 10px; display: inline-block; }
+  .kpi-verdict.ok { background: rgba(16,185,129,0.2); color: #6EE7B7; }
+
+  .section-header { display: flex; align-items: center; gap: 14px; }
+  .section-icon { width: 40px; height: 40px; background: var(--cyan-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .section-icon.orange { background: var(--orange-light); }
+  .section-icon.green  { background: var(--green-light); }
+  .section-label { font-size: 11px; font-weight: 700; color: var(--cyan-dark); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 3px; }
+  .section-label.orange { color: #C2410C; }
+  .section-label.green  { color: var(--green-dark); }
+  .section-title { font-size: 20px; font-weight: 800; color: var(--gray-900); line-height: 1.25; }
+  .page-cont { font-size: 11px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 20px; }
+
+  .problems { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex: 1; align-content: start; }
+  .card { background: #fff; border: 1px solid var(--gray-200); border-radius: 12px; padding: 20px; }
+  .card.instagram { border-left: 4px solid #A855F7; }
+  .card.facebook  { border-left: 4px solid #3B82F6; }
+  .card.google    { border-left: 4px solid #EAB308; }
+  .card.meta      { border-left: 4px solid var(--red); }
+  .card.tiktok    { border-left: 4px solid #000; }
+  .card-channel { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; display: inline-block; padding: 2px 8px; border-radius: 8px; }
+  .card-channel.instagram { background: rgba(168,85,247,0.1); color: #9333EA; }
+  .card-channel.facebook  { background: rgba(59,130,246,0.1);  color: #2563EB; }
+  .card-channel.google    { background: rgba(234,179,8,0.1);   color: #B45309; }
+  .card-channel.meta      { background: rgba(239,68,68,0.1);   color: #DC2626; }
+  .card-channel.tiktok    { background: rgba(0,0,0,0.07);      color: #111; }
+  .card-num   { font-size: 11px; font-weight: 800; color: var(--cyan); letter-spacing: 0.1em; margin-bottom: 6px; display: block; }
+  .card-title { font-size: 14px; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; line-height: 1.3; }
+  .card-body  { font-size: 12.5px; color: var(--gray-600); margin-bottom: 12px; line-height: 1.55; }
+  .card-tags  { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; display: inline-block; }
+  .tag.dado    { background: var(--orange-light); color: #C2410C; }
+  .tag.impacto { background: var(--red-light);    color: #B91C1C; }
+
+  .bench-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .bench-card { background: #fff; border: 1px solid var(--gray-200); border-radius: 12px; padding: 20px; }
+  .bench-label { font-size: 13px; font-weight: 700; color: var(--gray-900); margin-bottom: 14px; }
+  .bench-compare { display: flex; align-items: stretch; gap: 8px; margin-bottom: 12px; }
+  .bench-col { flex: 1; border-radius: 8px; padding: 10px; }
+  .bench-col.market { background: #F0FDF4; }
+  .bench-col.you    { background: var(--red-light); }
+  .bench-value { font-size: 15px; font-weight: 800; line-height: 1.2; margin-bottom: 4px; }
+  .bench-col.market .bench-value { color: var(--green-dark); }
+  .bench-col.you    .bench-value { color: var(--red); }
+  .bench-sub { font-size: 10px; line-height: 1.3; }
+  .bench-col.market .bench-sub { color: #166534; }
+  .bench-col.you    .bench-sub { color: #991B1B; }
+  .bench-vs { font-size: 11px; font-weight: 800; color: var(--gray-400); flex-shrink: 0; align-self: center; }
+  .bench-impact { font-size: 12px; color: var(--gray-600); line-height: 1.5; padding-top: 12px; border-top: 1px solid var(--gray-100); }
+  .opportunity-strip { background: linear-gradient(135deg, #FFF7ED, #FFEDD5); border: 1px solid #FED7AA; border-radius: 12px; padding: 20px 24px; }
+  .opportunity-strip h3 { font-size: 14px; font-weight: 800; color: #9A3412; margin-bottom: 8px; }
+  .opportunity-strip p  { font-size: 13px; color: #7C2D12; line-height: 1.6; }
+
+  /* Plan cards (vertical layout) */
+  .plan-card-v { background: linear-gradient(135deg, var(--gray-900) 0%, #1a3a50 100%); border: 2px solid rgba(6,182,212,0.3); border-radius: 14px; overflow: hidden; position: relative; margin-bottom: 12px; }
+  .plan-card-v.recommended { border-color: var(--cyan); }
+  .plan-cv-head { padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .plan-cv-info { flex: 1; }
+  .plan-cv-badge { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; display: inline-block; margin-bottom: 6px; background: rgba(6,182,212,0.15); color: var(--cyan); border: 1px solid rgba(6,182,212,0.3); }
+  .plan-cv-name { font-size: 12px; font-weight: 700; color: #94A3B8; line-height: 1.35; }
+  .plan-cv-period { font-size: 10.5px; color: #475569; margin-top: 2px; }
+  .plan-cv-price-block { text-align: right; flex-shrink: 0; }
+  .plan-cv-highlight { font-size: 10px; font-weight: 800; background: var(--cyan); color: #fff; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.08em; text-transform: uppercase; display: inline-block; margin-bottom: 4px; }
+  .plan-cv-price { font-size: 26px; font-weight: 900; color: var(--cyan); line-height: 1; }
+  .plan-cv-price span { font-size: 12px; font-weight: 400; color: var(--gray-400); }
+  .plan-cv-body { padding: 12px 20px 14px; }
+  .plan-cv-items { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 18px; }
+  .plan-cv-item { font-size: 11px; color: #CBD5E1; display: flex; align-items: flex-start; gap: 5px; line-height: 1.35; }
+  .plan-cv-item::before { content: '\2713'; color: var(--cyan); font-weight: 800; font-size: 10px; flex-shrink: 0; margin-top: 1px; }
+  .plan-cv-module { grid-column: 1 / -1; font-size: 10px; font-weight: 800; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px; margin: 6px 0 2px; }
+  .plan-cv-module::before, .plan-cv-module::after { content: ''; flex: 1; height: 1px; background: rgba(6,182,212,0.15); }
+  .plan-cv-addon { grid-column: 1 / -1; font-size: 10.5px; color: #64748B; padding: 7px 10px; margin-top: 6px; background: rgba(6,182,212,0.05); border-radius: 8px; border: 1px solid rgba(6,182,212,0.1); line-height: 1.5; }
+
+  .deliverable-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex: 1; align-content: start; }
+  .del-card { background: #fff; border: 1px solid var(--gray-200); border-radius: 12px; padding: 20px; border-top: 3px solid var(--cyan); }
+  .del-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+  .del-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .del-icon.ig   { background: rgba(168,85,247,0.1); }
+  .del-icon.ads  { background: var(--red-light); }
+  .del-icon.goog { background: var(--green-light); }
+  .del-icon.tik  { background: rgba(0,0,0,0.07); }
+  .del-icon.gen  { background: var(--gray-100); }
+  .del-title { font-size: 14px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+  .del-plan-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 8px; letter-spacing: 0.05em; text-transform: uppercase; background: var(--cyan-light); color: var(--cyan-dark); display: inline-block; }
+  .del-body  { font-size: 12.5px; color: var(--gray-600); margin-bottom: 12px; line-height: 1.55; }
+  .del-items { display: flex; flex-direction: column; gap: 5px; }
+  .del-item  { display: flex; align-items: flex-start; gap: 7px; font-size: 12px; color: var(--gray-700); }
+  .del-bullet { color: var(--cyan); font-weight: 700; font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+
+  .hub-why-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--cyan); background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3); border-radius: 99px; padding: 4px 16px; margin-bottom: 14px; }
+  .hub-why-title { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 10px; line-height: 1.25; }
+  .hub-why-sub   { font-size: 13.5px; color: var(--gray-400); line-height: 1.7; margin-bottom: 24px; }
+  .hub-benefits  { display: flex; flex-direction: column; gap: 0; margin-bottom: 24px; }
+  .hub-benefit   { display: flex; gap: 18px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .hub-benefit:first-child { padding-top: 0; }
+  .hub-benefit:last-child  { border-bottom: none; }
+  .hub-b-num   { font-size: 11px; font-weight: 800; color: var(--cyan); letter-spacing: 0.05em; padding-top: 2px; flex-shrink: 0; width: 22px; }
+  .hub-b-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .hub-b-desc  { font-size: 12.5px; color: var(--gray-400); line-height: 1.6; }
+  .hub-why-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap; gap: 8px; }
+  .hub-why-tagline { font-size: 14px; font-weight: 600; font-style: italic; color: var(--cyan); }
+  .hub-why-handle  { font-size: 12px; color: var(--gray-600); letter-spacing: 0.05em; }
+</style>
+</head>
+<body>
+
+<!-- P&Aacute;GINA 1 — HERO (dark) -->
+<div class="pdf-page dark">
+  <div class="topbar"></div>
+  <header>
+    <div class="logo">R.E.C. &middot; HUB de Neg&oacute;cios</div>
+    <div class="date-badge">An&aacute;lise Digital &middot; Abril 2026</div>
+  </header>
+  <section class="hero">
+    <div class="alert-badge">&#9888; SERVI&Ccedil;O B2B SEM ESTRAT&Eacute;GIA DIGITAL DIRECIONADA</div>
+    <h1>@soundvetultrassonografia<br><span>captando cl&iacute;nicas parceiras por indica&ccedil;&atilde;o enquanto concorrentes usam o digital</span></h1>
+    <p class="hero-sub">Ultrassonografia veterin&aacute;ria volante em Canoas e Grande Porto Alegre. An&aacute;lise completa de 5 canais digitais com foco em captac&atilde;o B2B de cl&iacute;nicas parceiras.</p>
+    <div class="hero-meta"><strong>Canoas &middot; Grande Porto Alegre, RS</strong> &middot; @soundvetultrassonografia</div>
+    <div class="channels">
+      <span class="ch-tag ch-instagram">Instagram</span>
+      <span class="ch-tag ch-facebook">Facebook</span>
+      <span class="ch-tag ch-google">Google</span>
+      <span class="ch-tag ch-meta">Meta Ads</span>
+      <span class="ch-tag" style="background:rgba(0,0,0,0.35);color:#fff;border:1px solid rgba(255,255,255,0.2);">TikTok</span>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-value">5.995</span>
+        <span class="kpi-label">seguidores Instagram</span>
+        <span class="kpi-verdict">sem estrat&eacute;gia B2B</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-value">1.190</span>
+        <span class="kpi-label">curtidas Facebook</span>
+        <span class="kpi-verdict">p&aacute;gina estagnada</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-value">Zero</span>
+        <span class="kpi-label">Meta Ads ativos</span>
+        <span class="kpi-verdict">sem capta&ccedil;&atilde;o paga</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-value">Zero</span>
+        <span class="kpi-label">presen&ccedil;a TikTok</span>
+        <span class="kpi-verdict">canal ignorado</span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- P&Aacute;GINA 2 — PONTOS #01 a #04 (white) -->
+<div class="pdf-page">
+  <div class="inner">
+    <div class="section-header" style="margin-bottom:24px;">
+      <div class="section-icon">&#128269;</div>
+      <div>
+        <div class="section-label">Parte 1 &middot; Pontos identificados</div>
+        <div class="section-title">8 pontos que limitam a capta&ccedil;&atilde;o de cl&iacute;nicas parceiras pela SoundVet</div>
+      </div>
+    </div>
+    <div class="problems">
+
+      <div class="card instagram">
+        <span class="card-channel instagram">Instagram</span>
+        <span class="card-num">#01</span>
+        <div class="card-title">Conte&uacute;do voltado ao consumidor final, mas o cliente real &eacute; a cl&iacute;nica veterin&aacute;ria</div>
+        <div class="card-body">A SoundVet vende para cl&iacute;nicas e hospitais veterin&aacute;rios, n&atilde;o diretamente ao tutor. O Instagram ainda n&atilde;o comunica com clareza para esse p&uacute;blico B2B. Uma cl&iacute;nica que busca um parceiro de ultrassonografia n&atilde;o encontra conte&uacute;do que mostre precis&atilde;o t&eacute;cnica, agilidade e confiabilidade profissional.</div>
+        <div class="card-tags">
+          <span class="tag dado">p&uacute;blico B2B sem comunica&ccedil;&atilde;o direcionada</span>
+          <span class="tag impacto">parcerias que deveriam fechar n&atilde;o fecham</span>
+        </div>
+      </div>
+
+      <div class="card instagram">
+        <span class="card-channel instagram">Instagram</span>
+        <span class="card-num">#02</span>
+        <div class="card-title">Reels sem demonstra&ccedil;&atilde;o de exames em tempo real</div>
+        <div class="card-body">No mercado de imagem veterin&aacute;ria, ver o equipamento funcionando e a leitura t&eacute;cnica em tempo real &eacute; o que convence um veterin&aacute;rio a indicar um parceiro. Sem Reels mostrando o ultrassom em a&ccedil;&atilde;o, a SoundVet n&atilde;o produz o conte&uacute;do que mais converte no segmento.</div>
+        <div class="card-tags">
+          <span class="tag dado">sem v&iacute;deos de exames em execu&ccedil;&atilde;o</span>
+          <span class="tag impacto">principal gatilho B2B desperdi&ccedil;ado</span>
+        </div>
+      </div>
+
+      <div class="card facebook">
+        <span class="card-channel facebook">Facebook</span>
+        <span class="card-num">#03</span>
+        <div class="card-title">P&aacute;gina com 1.190 curtidas sem presen&ccedil;a ativa para veterin&aacute;rios da regi&atilde;o</div>
+        <div class="card-body">O Facebook concentra m&eacute;dicos veterin&aacute;rios, donos de cl&iacute;nicas e grupos profissionais do RS. Uma p&aacute;gina com engajamento m&iacute;nimo n&atilde;o transmite autoridade para esse p&uacute;blico. Cl&iacute;nicas que buscam parceiros de diagn&oacute;stico por imagem precisam encontrar uma presen&ccedil;a ativa, com casos cl&iacute;nicos e frequ&ecirc;ncia de publica&ccedil;&atilde;o consistente.</div>
+        <div class="card-tags">
+          <span class="tag dado">1.190 curtidas, sem posts recentes</span>
+          <span class="tag impacto">invis&iacute;vel para veterin&aacute;rios da regi&atilde;o</span>
+        </div>
+      </div>
+
+      <div class="card meta">
+        <span class="card-channel meta">Meta Ads</span>
+        <span class="card-num">#04</span>
+        <div class="card-title">Nenhum an&uacute;ncio ativo identificado na Biblioteca de An&uacute;ncios da Meta</div>
+        <div class="card-body">Um servi&ccedil;o B2B de ultrassonografia volante depende de capta&ccedil;&atilde;o constante de novas cl&iacute;nicas parceiras para crescer. Sem tr&aacute;fego pago, a capta&ccedil;&atilde;o fica 100% dependente de indica&ccedil;&atilde;o boca a boca, modelo que limita o crescimento e impede previsibilidade de receita.</div>
+        <div class="card-tags">
+          <span class="tag dado">zero an&uacute;ncios Meta identificados</span>
+          <span class="tag impacto">crescimento sem previsibilidade</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- P&Aacute;GINA 3 — PONTOS #05 a #08 (white) -->
+<div class="pdf-page">
+  <div class="inner">
+    <div class="page-cont">Parte 1 &middot; continua&ccedil;&atilde;o</div>
+    <div class="problems">
+
+      <div class="card meta">
+        <span class="card-channel meta">Meta Ads</span>
+        <span class="card-num">#05</span>
+        <div class="card-title">Sem Pixel instalado nem remarketing para cl&iacute;nicas que visitam o site</div>
+        <div class="card-body">Quando uma cl&iacute;nica veterin&aacute;ria visita soundvet.vet.br, pesquisa os servi&ccedil;os e sai sem contato, ela desaparece sem segunda chance. Sem o Pixel do Facebook instalado e sem campanha de remarketing, esse tr&aacute;fego qualificado &eacute; desperdi&ccedil;ado por completo.</div>
+        <div class="card-tags">
+          <span class="tag dado">sem Pixel ativo no site</span>
+          <span class="tag impacto">leads quentes descartados sem remarketing</span>
+        </div>
+      </div>
+
+      <div class="card google">
+        <span class="card-channel google">Google</span>
+        <span class="card-num">#06</span>
+        <div class="card-title">Google Meu Neg&oacute;cio sem gest&atilde;o ativa de fotos e palavras-chave</div>
+        <div class="card-body">Uma cl&iacute;nica que busca "ultrassonografia veterin&aacute;ria volante Canoas" no Google precisa encontrar um perfil com fotos do equipamento, equipe, casos e postagens recentes. Sem gest&atilde;o ativa do GMB, a SoundVet perde visibilidade exatamente no momento em que a decis&atilde;o de parceria acontece.</div>
+        <div class="card-tags">
+          <span class="tag dado">GMB sem gest&atilde;o ativa</span>
+          <span class="tag impacto">invis&iacute;vel na busca local de parceiros</span>
+        </div>
+      </div>
+
+      <div class="card google">
+        <span class="card-channel google">Google</span>
+        <span class="card-num">#07</span>
+        <div class="card-title">Site sem conte&uacute;do de autoridade para ranqueamento org&acirc;nico</div>
+        <div class="card-body">O site soundvet.vet.br oferece informa&ccedil;&atilde;o sobre os servi&ccedil;os, mas n&atilde;o possui conte&uacute;do que ranqueie organicamente. Artigos como "quando indicar ecocardiograma em c&atilde;es" ou "como escolher um parceiro de ultrassom veterin&aacute;rio" atraem veterin&aacute;rios em fase de pesquisa, exatamente o p&uacute;blico que pode se tornar cliente.</div>
+        <div class="card-tags">
+          <span class="tag dado">site sem conte&uacute;do SEO</span>
+          <span class="tag impacto">tr&aacute;fego org&acirc;nico de veterin&aacute;rios desperdi&ccedil;ado</span>
+        </div>
+      </div>
+
+      <div class="card tiktok">
+        <span class="card-channel tiktok">TikTok</span>
+        <span class="card-num">#08</span>
+        <div class="card-title">Zero presen&ccedil;a no TikTok, canal onde diagn&oacute;stico por imagem veterin&aacute;rio viraliza</div>
+        <div class="card-body">O TikTok veterin&aacute;rio &eacute; um dos nichos com maior taxa de viraliza&ccedil;&atilde;o org&acirc;nica no Brasil. V&iacute;deos mostrando achados surpreendentes de ultrassom e bastidores do servi&ccedil;o volante alcan&ccedil;am dezenas de milhares de visualiza&ccedil;&otilde;es sem investimento, construindo autoridade com veterin&aacute;rios jovens.</div>
+        <div class="card-tags">
+          <span class="tag dado">zero presen&ccedil;a no TikTok</span>
+          <span class="tag impacto">autoridade com veterin&aacute;rios jovens zerada</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- P&Aacute;GINA 4 — AN&Aacute;LISE DE MERCADO (gray) -->
+<div class="pdf-page gray">
+  <div class="inner">
+    <div class="section-header" style="margin-bottom:24px;">
+      <div class="section-icon orange">&#128202;</div>
+      <div>
+        <div class="section-label orange">Parte 2 &middot; An&aacute;lise de mercado</div>
+        <div class="section-title">O que servi&ccedil;os de imagem veterin&aacute;ria bem posicionados j&aacute; fazem no digital</div>
+      </div>
+    </div>
+
+    <div class="bench-grid">
+
+      <div class="bench-card">
+        <div class="bench-label">Crescimento no Instagram</div>
+        <div class="bench-compare">
+          <div class="bench-col market">
+            <div class="bench-value">10.000 a 30.000 seguidores</div>
+            <div class="bench-sub">servi&ccedil;os de diagn&oacute;stico veterin&aacute;rio com estrat&eacute;gia B2B ativa</div>
+          </div>
+          <div class="bench-vs">VS</div>
+          <div class="bench-col you">
+            <div class="bench-value">5.995 seguidores</div>
+            <div class="bench-sub">@soundvetultrassonografia, sem estrat&eacute;gia B2B direcionada</div>
+          </div>
+        </div>
+        <div class="bench-impact">A SoundVet lidera entre concorrentes locais da Grande POA, mas permanece abaixo do potencial do nicho. Com estrat&eacute;gia voltada a cl&iacute;nicas parceiras, o alcance pode dobrar em 6 meses.</div>
+      </div>
+
+      <div class="bench-card">
+        <div class="bench-label">Campanhas Meta Ads ativas</div>
+        <div class="bench-compare">
+          <div class="bench-col market">
+            <div class="bench-value">campanhas ativas</div>
+            <div class="bench-sub">servi&ccedil;os de imagem veterin&aacute;ria com tr&aacute;fego pago rodando para cl&iacute;nicas da regi&atilde;o</div>
+          </div>
+          <div class="bench-vs">VS</div>
+          <div class="bench-col you">
+            <div class="bench-value">zero</div>
+            <div class="bench-sub">nenhum an&uacute;ncio identificado na Biblioteca Meta da SoundVet</div>
+          </div>
+        </div>
+        <div class="bench-impact">Servi&ccedil;os volantes que investem em Meta Ads segmentados por cargo e raio geogr&aacute;fico est&atilde;o aparecendo para cl&iacute;nicas da Grande POA que ainda n&atilde;o conhecem a SoundVet.</div>
+      </div>
+
+      <div class="bench-card">
+        <div class="bench-label">Presen&ccedil;a no Google Local</div>
+        <div class="bench-compare">
+          <div class="bench-col market">
+            <div class="bench-value">GMB ativo</div>
+            <div class="bench-sub">concorrentes com perfil gerenciado, fotos profissionais e postagens mensais no Google Maps</div>
+          </div>
+          <div class="bench-vs">VS</div>
+          <div class="bench-col you">
+            <div class="bench-value">GMB b&aacute;sico</div>
+            <div class="bench-sub">sem postagens regulares, sem fotos do equipamento e sem palavras-chave otimizadas</div>
+          </div>
+        </div>
+        <div class="bench-impact">Quando uma cl&iacute;nica de Canoas pesquisa "ultrassonografia veterin&aacute;ria volante" no Google Maps, encontra o perfil mais ativo. Sem gest&atilde;o do GMB, a SoundVet perde essa decis&atilde;o.</div>
+      </div>
+
+      <div class="bench-card">
+        <div class="bench-label">Presen&ccedil;a no TikTok</div>
+        <div class="bench-compare">
+          <div class="bench-col market">
+            <div class="bench-value">viral org&acirc;nico</div>
+            <div class="bench-sub">servi&ccedil;os veterin&aacute;rios com TikTok ativo alcan&ccedil;ando 10k a 100k views por v&iacute;deo de diagn&oacute;stico por imagem</div>
+          </div>
+          <div class="bench-vs">VS</div>
+          <div class="bench-col you">
+            <div class="bench-value">zero</div>
+            <div class="bench-sub">sem presen&ccedil;a nenhuma no TikTok</div>
+          </div>
+        </div>
+        <div class="bench-impact">O nicho veterin&aacute;rio &eacute; um dos que mais viraliza no TikTok sem investimento. V&iacute;deos de achados em ultrassom e bastidores do servi&ccedil;o volante geram autoridade e atraem cl&iacute;nicas naturalmente.</div>
+      </div>
+
+    </div>
+
+    <div class="opportunity-strip" style="margin-top:24px;">
+      <h3>O que a SoundVet est&aacute; deixando de captar todo m&ecirc;s</h3>
+      <p>A Grande Porto Alegre concentra centenas de cl&iacute;nicas e hospitais veterin&aacute;rios que realizam exames de imagem regularmente. Cada cl&iacute;nica que ainda n&atilde;o conhece a SoundVet e escolhe um concorrente &eacute; receita recorrente, n&atilde;o pontual. Um &uacute;nico parceiro novo representa exames semanais por meses ou anos. Sem presen&ccedil;a ativa no Google, Meta Ads e TikTok, novos parceiros continuam indo para quem est&aacute; vis&iacute;vel nesses canais.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- P&Aacute;GINA 5 — O QUE SOLUCIONAMOS (white) -->
+<div class="pdf-page">
+  <div class="inner">
+    <div class="section-header" style="margin-bottom:22px;">
+      <div class="section-icon green">&#127919;</div>
+      <div>
+        <div class="section-label green">Parte 3 &middot; O que solucionamos</div>
+        <div class="section-title">O que ser&aacute; constru&iacute;do para a SoundVet</div>
+      </div>
+    </div>
+
+    <div class="plan-card-v recommended" style="margin-bottom:18px;">
+      <div class="plan-cv-head">
+        <div class="plan-cv-info">
+          <div class="plan-cv-badge">Plano Social + Tr&aacute;fego</div>
+          <div class="plan-cv-name">Gest&atilde;o de Social Media + Capta&ccedil;&atilde;o + Tr&aacute;fego Pago Meta</div>
+          <div class="plan-cv-period">Contrato m&iacute;nimo 12 meses &middot; Verba em an&uacute;ncios sugerida R$ 600/m&ecirc;s, separada</div>
+        </div>
+        <div class="plan-cv-price-block">
+          <div class="plan-cv-highlight">PLANO INDICADO</div>
+          <div class="plan-cv-price">R$ 2.500<span>/m&ecirc;s</span></div>
+        </div>
+      </div>
+      <div class="plan-cv-body">
+        <div class="plan-cv-items">
+          <div class="plan-cv-module">SOCIAL MEDIA &middot; INSTAGRAM + FACEBOOK</div>
+          <div class="plan-cv-item">Planejamento estrat&eacute;gico B2B</div>
+          <div class="plan-cv-item">Calend&aacute;rio editorial mensal</div>
+          <div class="plan-cv-item">Capta&ccedil;&atilde;o de conte&uacute;do (fotos e v&iacute;deos)</div>
+          <div class="plan-cv-item">Reels de exames e equipamentos</div>
+          <div class="plan-cv-item">Publica&ccedil;&otilde;es Facebook integradas</div>
+          <div class="plan-cv-item">Acompanhamento estrat&eacute;gico cont&iacute;nuo</div>
+          <div class="plan-cv-module">TR&Aacute;FEGO PAGO &middot; META ADS</div>
+          <div class="plan-cv-item">Tr&aacute;fego Meta Ads (at&eacute; 3 campanhas/m&ecirc;s)</div>
+          <div class="plan-cv-item">Segmenta&ccedil;&atilde;o por cargo e localiza&ccedil;&atilde;o</div>
+          <div class="plan-cv-item">Otimiza&ccedil;&atilde;o e escala das campanhas</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="deliverable-grid">
+
+      <div class="del-card">
+        <div class="del-header">
+          <div class="del-icon ig">&#128248;</div>
+          <div>
+            <div class="del-title">Instagram + Facebook &middot; Estrat&eacute;gia B2B</div>
+            <span class="del-plan-tag">Social Media</span>
+          </div>
+        </div>
+        <div class="del-body">Conte&uacute;do orientado ao p&uacute;blico que decide pela SoundVet, m&eacute;dicos veterin&aacute;rios e donos de cl&iacute;nicas, mostrando precis&atilde;o t&eacute;cnica, agilidade e confiabilidade a cada publica&ccedil;&atilde;o.</div>
+        <div class="del-items">
+          <div class="del-item"><span class="del-bullet">&#8250;</span> Calend&aacute;rio editorial mensal B2B</div>
+          <div class="del-item"><span class="del-bullet">&#8250;</span> Reels de exames e equipamentos</div>
+          <div class="del-item"><span class="del-bullet">&#8250;</span> Stories de bastidores e servi&ccedil;o volante</div>
+          <div class="del-item"><span class="del-bullet">&#8250;</span> Publica&ccedil;&otilde;es Facebook integradas</div>
+        </div>
+      </div>
+
+      <div class="del-card">
+        <div class="del-header">
+          <div class="del-icon ads">&#128227;</div>
+          <div>
+            <div class="del-title">Meta Ads &middot; Campanhas para a Grande POA</div>
+            <span class="del-plan-tag">Tr&aacute;fego Pago</span>
+          </div>
+        </div>
+        <div class="del-body">Campanhas pagas segmentadas por cargo profissional e raio geogr&aacute;fico da Grande Porto Alegre, levando a SoundVet at&eacute; cl&iacute;nicas que ainda n&atilde;o conhecem o servi&ccedil;o.</div>
+        <div class="del-items">
+          <div class="del-item"><span class="del-bullet">&#8250;</span> Pixel instalado e configurado</div>
+          <div class="del-item"><span class="del-bullet">&#8250;</span> Campanha de prospec&ccedil;&atilde;o para cl&iacute;nicas</div>
+          <div class="del-item"><span class="del-bullet">&#8250;</span> Remarketing para visitantes do site</div>
+          <div class="del-item"><span class="del-bullet">&#8250;</span> Criativos de v&iacute;deo e imagem</div>
+        </div>
+      </div>
+
+      <div class="del-card">
+        <div class="del-header">
+          <div class="del-icon goog">&#127758;</div>
+          <div>
+            <div class="del-title">Google Empresa &middot; Visibilidade local</div>
+            <span class="del-plan-tag">Presen&ccedil;a Local</span>
+          </div>
+        </div>
+        <div class="del-body">Gest&atilde;o ativa do Google Meu Neg&oacute;cio para que a SoundVet apare&ccedil;a com destaque quando uma cl&iacute;nica da Grande POA pesquisa ultrassonografia volante no Google.</div>
+        <div class="del-items">
+          <div class="del-item"><span class="del-bullet">&#8250;</span> Fotos do equipamento e equipe</div>
+          <div class="del-item"><span class="del-bullet">&#8250;</span> Posts mensais no GMB</div>
+          <div class="del-item"><span class="del-bullet">&#8250;</span> Palavras-chave locais otimizadas</div>
+          <div class="del-item"><span class="del-bullet">&#8250;</span> M&eacute;tricas mensais de visibilidade</div>
+        </div>
+      </div>
+
+      <div class="del-card">
+        <div class="del-header">
+          <div class="del-icon tik">&#127909;</div>
+          <div>
+            <div class="del-title">TikTok &middot; Autoridade org&acirc;nica no nicho vet</div>
+            <span class="del-plan-tag">TikTok + Landing Page</span>
+          </div>
+        </div>
+        <div class="del-body">Presen&ccedil;a no TikTok com conte&uacute;do de diagn&oacute;stico por imagem que aproveita o alto potencial de viraliza&ccedil;&atilde;o do nicho veterin&aacute;rio, mais landing page dedicada para capta&ccedil;&atilde;o de cl&iacute;nicas.</div>
+        <div class="del-items">
+          <div class="del-item"><span class="del-bullet">&#8250;</span> V&iacute;deos de exames e casos t&eacute;cnicos</div>
+          <div class="del-item"><span class="del-bullet">&#8250;</span> Bastidores do servi&ccedil;o volante</div>
+          <div class="del-item"><span class="del-bullet">&#8250;</span> Landing page com formul&aacute;rio e WhatsApp</div>
+          <div class="del-item"><span class="del-bullet">&#8250;</span> Integra&ccedil;&atilde;o Pixel para remarketing</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- P&Aacute;GINA 6 — HUB WHY + FOOTER (dark) -->
+<div class="pdf-page dark">
+  <div class="inner" style="justify-content:center;">
+    <section style="padding:0;background:none;">
+      <div style="max-width:100%;padding:0;">
+        <div class="hub-why-tag">REC HUB DE NEG&Oacute;CIOS</div>
+        <h2 class="hub-why-title">Por que fechar com o REC HUB?</h2>
+        <p class="hub-why-sub">N&atilde;o somos uma ag&ecirc;ncia tradicional. Somos um ecossistema estrat&eacute;gico que ajuda empres&aacute;rios a pensar, estruturar e escalar seus neg&oacute;cios, com conex&otilde;es reais, estrutura completa e resultados concretos.</p>
+        <div class="hub-benefits">
+          <div class="hub-benefit">
+            <div class="hub-b-num">01</div>
+            <div>
+              <div class="hub-b-title">Conte&uacute;do com estrat&eacute;gia</div>
+              <div class="hub-b-desc">Planejamento, roteiro e produ&ccedil;&atilde;o orientados a autoridade e vendas. N&atilde;o postamos por postar, cada pe&ccedil;a tem um objetivo claro.</div>
+            </div>
+          </div>
+          <div class="hub-benefit">
+            <div class="hub-b-num">02</div>
+            <div>
+              <div class="hub-b-title">Tr&aacute;fego pago integrado</div>
+              <div class="hub-b-desc">Campanhas no Meta Ads e Google constru&iacute;das em cima do posicionamento da marca, para gerar leads qualificados e alcan&ccedil;ar cl&iacute;nicas parceiras no momento certo.</div>
+            </div>
+          </div>
+          <div class="hub-benefit">
+            <div class="hub-b-num">03</div>
+            <div>
+              <div class="hub-b-title">Estrutura comercial</div>
+              <div class="hub-b-desc">Marketing e vendas trabalhando juntos. Do primeiro contato &agrave; convers&atilde;o, com processos que se repetem e escalam o faturamento.</div>
+            </div>
+          </div>
+          <div class="hub-benefit">
+            <div class="hub-b-num">04</div>
+            <div>
+              <div class="hub-b-title">Ecossistema de conex&otilde;es</div>
+              <div class="hub-b-desc">Acesso a uma comunidade ativa de empreendedores no RS com mais de 38 mil seguidores, grupos segmentados e eventos presenciais.</div>
+            </div>
+          </div>
+          <div class="hub-benefit">
+            <div class="hub-b-num">05</div>
+            <div>
+              <div class="hub-b-title">Acompanhamento estrat&eacute;gico cont&iacute;nuo</div>
+              <div class="hub-b-desc">Reuni&atilde;o mensal de alinhamento, relat&oacute;rios de resultado e ajuste de estrat&eacute;gia conforme o desempenho. O trabalho evolui junto com o neg&oacute;cio, sem contratos engessados.</div>
+            </div>
+          </div>
+        </div>
+        <div class="hub-why-bottom">
+          <span class="hub-why-tagline">"Movimento gera movimento."</span>
+          <span class="hub-why-handle">recolaborativo.com.br &middot; @somosrecoficial</span>
+        </div>
+      </div>
+    </section>
+    <footer style="background:none;border-top:1px solid rgba(255,255,255,0.08);margin-top:24px;padding-top:20px;text-align:center;font-size:12px;color:var(--gray-400);">
+      An&aacute;lise elaborada por <strong style="color:var(--cyan);">R.E.C. &middot; Ecossistema de Conex&otilde;es e Solu&ccedil;&otilde;es Empresariais</strong><br>
+      <span style="margin-top:4px;display:block;">recolaborativo.com.br &middot; @somosrecoficial</span>
+    </footer>
+  </div>
+</div>
+
+</body>
+</html>

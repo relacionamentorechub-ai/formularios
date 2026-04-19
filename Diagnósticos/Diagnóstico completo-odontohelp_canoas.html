@@ -1,0 +1,700 @@
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico Digital · @odontohelp_canoas</title>
+<style>
+  :root {
+    --cyan: #06B6D4; --cyan-light: #CFFAFE; --cyan-dark: #0E7490;
+    --red: #EF4444; --red-light: #FEE2E2;
+    --orange: #F97316; --orange-light: #FFEDD5;
+    --green: #10B981; --green-light: #D1FAE5; --green-dark: #065F46;
+    --gray-50: #F9FAFB; --gray-100: #F3F4F6; --gray-200: #E5E7EB;
+    --gray-400: #9CA3AF; --gray-600: #4B5563; --gray-700: #374151; --gray-800: #1F2937; --gray-900: #111827;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fff; color: var(--gray-900); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  .topbar { height: 5px; background: linear-gradient(90deg, var(--cyan-dark), var(--cyan), #67E8F9); }
+  header { background: #fff; border-bottom: 1px solid var(--gray-200); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .logo { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cyan-dark); }
+  .date-badge { font-size: 12px; color: var(--gray-400); background: var(--gray-100); padding: 4px 12px; border-radius: 20px; }
+  .hero { background: linear-gradient(135deg, var(--gray-900) 0%, #1e3a4a 100%); padding: 56px 32px 48px; text-align: center; color: #fff; }
+  .alert-badge { display: inline-block; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4); color: #FCA5A5; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 5px 16px; border-radius: 20px; margin-bottom: 20px; }
+  .hero h1 { font-size: clamp(22px, 5vw, 36px); font-weight: 800; line-height: 1.2; margin-bottom: 10px; }
+  .hero h1 span { color: var(--cyan); }
+  .hero-sub { font-size: 14px; color: #94A3B8; margin-bottom: 16px; max-width: 520px; margin-left: auto; margin-right: auto; }
+  .hero-meta { font-size: 12px; color: #64748B; margin-bottom: 36px; }
+  .hero-meta strong { color: #CBD5E1; }
+  .channels { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 40px; }
+  .ch-tag { font-size: 11px; font-weight: 700; padding: 5px 14px; border-radius: 20px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .ch-instagram { background: rgba(131,58,180,0.2); color: #D8B4FE; border: 1px solid rgba(131,58,180,0.3); }
+  .ch-facebook { background: rgba(59,130,246,0.2); color: #93C5FD; border: 1px solid rgba(59,130,246,0.3); }
+  .ch-google { background: rgba(234,179,8,0.2); color: #FDE047; border: 1px solid rgba(234,179,8,0.3); }
+  .ch-meta { background: rgba(239,68,68,0.2); color: #FCA5A5; border: 1px solid rgba(239,68,68,0.3); }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; max-width: 820px; margin: 0 auto; }
+  .kpi-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px 16px; text-align: center; transition: transform 0.2s; }
+  .kpi-card:hover { transform: translateY(-3px); }
+  .kpi-value { font-size: clamp(22px, 4vw, 30px); font-weight: 800; color: var(--cyan); display: block; margin-bottom: 4px; }
+  .kpi-label { font-size: 11px; color: #CBD5E1; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; display: block; }
+  .kpi-verdict { font-size: 10px; font-weight: 700; background: rgba(239,68,68,0.2); color: #FCA5A5; padding: 3px 8px; border-radius: 10px; display: inline-block; letter-spacing: 0.05em; }
+  .kpi-verdict.ok { background: rgba(16,185,129,0.2); color: #6EE7B7; }
+  .section { max-width: 960px; margin: 0 auto; padding: 56px 24px; }
+  .section-header { margin-bottom: 36px; display: flex; align-items: center; gap: 14px; }
+  .section-icon { width: 44px; height: 44px; background: var(--cyan-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .section-icon.green { background: var(--green-light); }
+  .section-icon.orange { background: var(--orange-light); }
+  .section-label { font-size: 11px; font-weight: 700; color: var(--cyan-dark); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 3px; }
+  .section-label.green { color: var(--green-dark); }
+  .section-label.orange { color: #C2410C; }
+  .section-title { font-size: clamp(18px, 3vw, 24px); font-weight: 800; color: var(--gray-900); }
+  .problems { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .card { background: #fff; border: 1px solid var(--gray-200); border-radius: 12px; padding: 24px; transition: box-shadow 0.2s, transform 0.2s; }
+  .card.instagram { border-left: 4px solid #A855F7; }
+  .card.facebook { border-left: 4px solid #3B82F6; }
+  .card.google { border-left: 4px solid #EAB308; }
+  .card.meta { border-left: 4px solid var(--red); }
+  .card:hover { box-shadow: 0 8px 30px rgba(6,182,212,0.1); transform: translateY(-2px); }
+  .card-channel { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; display: inline-block; padding: 2px 8px; border-radius: 8px; }
+  .card-channel.instagram { background: rgba(168,85,247,0.1); color: #9333EA; }
+  .card-channel.facebook { background: rgba(59,130,246,0.1); color: #2563EB; }
+  .card-channel.google { background: rgba(234,179,8,0.1); color: #B45309; }
+  .card-channel.meta { background: rgba(239,68,68,0.1); color: #DC2626; }
+  .card-num { font-size: 11px; font-weight: 800; color: var(--cyan); letter-spacing: 0.1em; margin-bottom: 8px; display: block; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--gray-900); margin-bottom: 10px; line-height: 1.3; }
+  .card-body { font-size: 13.5px; color: var(--gray-600); margin-bottom: 16px; line-height: 1.6; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; display: inline-block; }
+  .tag.dado { background: var(--orange-light); color: #C2410C; }
+  .tag.impacto { background: var(--red-light); color: #B91C1C; }
+  .compare-bg { background: var(--gray-50); border-top: 1px solid var(--gray-200); border-bottom: 1px solid var(--gray-200); }
+  .bench-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .bench-card { background: #fff; border: 1px solid var(--gray-200); border-radius: 12px; padding: 24px; }
+  .bench-label { font-size: 13px; font-weight: 700; color: var(--gray-900); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .bench-compare { display: flex; align-items: stretch; gap: 10px; margin-bottom: 14px; }
+  .bench-col { flex: 1; border-radius: 8px; padding: 12px; }
+  .bench-col.market { background: #F0FDF4; }
+  .bench-col.you { background: var(--red-light); }
+  .bench-value { font-size: 17px; font-weight: 800; line-height: 1.2; margin-bottom: 4px; }
+  .bench-col.market .bench-value { color: var(--green-dark); }
+  .bench-col.you .bench-value { color: var(--red); }
+  .bench-sub { font-size: 10px; line-height: 1.3; }
+  .bench-col.market .bench-sub { color: #166534; }
+  .bench-col.you .bench-sub { color: #991B1B; }
+  .bench-vs { font-size: 11px; font-weight: 800; color: var(--gray-400); flex-shrink: 0; align-self: center; }
+  .bench-impact { font-size: 12.5px; color: var(--gray-600); line-height: 1.5; padding-top: 14px; border-top: 1px solid var(--gray-100); }
+  .opportunity-strip { background: linear-gradient(135deg, #FFF7ED, #FFEDD5); border: 1px solid #FED7AA; border-radius: 12px; padding: 24px 28px; margin-top: 32px; }
+  .opportunity-strip h3 { font-size: 15px; font-weight: 800; color: #9A3412; margin-bottom: 8px; }
+  .opportunity-strip p { font-size: 13.5px; color: #7C2D12; line-height: 1.6; }
+  .deliverables-bg { background: var(--gray-50); border-top: 1px solid var(--gray-200); border-bottom: 1px solid var(--gray-200); }
+  .plans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 56px; }
+  .plan-card { border-radius: 16px; padding: 32px; position: relative; overflow: hidden; }
+  .plan-card.partial { background: #fff; border: 2px solid var(--gray-200); }
+  .plan-card.full { background: linear-gradient(135deg, var(--gray-900), #1a3040); color: #fff; border: 2px solid var(--cyan); }
+  .plan-badge { font-size: 10px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 20px; }
+  .plan-card.partial .plan-badge { background: var(--gray-100); color: var(--gray-600); }
+  .plan-card.full .plan-badge { background: rgba(6,182,212,0.2); color: var(--cyan); border: 1px solid rgba(6,182,212,0.3); }
+  .plan-name { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+  .plan-card.partial .plan-name { color: var(--gray-900); }
+  .plan-card.full .plan-name { color: #fff; }
+  .plan-price { font-size: 34px; font-weight: 900; margin-bottom: 4px; }
+  .plan-card.partial .plan-price { color: var(--cyan-dark); }
+  .plan-card.full .plan-price { color: var(--cyan); }
+  .plan-period { font-size: 12px; color: var(--gray-400); margin-bottom: 24px; }
+  .plan-card.full .plan-period { color: #64748B; }
+  .plan-items { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .plan-items li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; }
+  .plan-card.partial .plan-items li { color: var(--gray-700); }
+  .plan-card.full .plan-items li { color: #CBD5E1; }
+  .plan-check { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; margin-top: 2px; }
+  .plan-card.partial .plan-check { background: var(--cyan-light); color: var(--cyan-dark); }
+  .plan-card.full .plan-check { background: rgba(6,182,212,0.2); color: var(--cyan); }
+  .plan-highlight { position: absolute; top: 16px; right: 16px; background: var(--cyan); color: #fff; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .plan-note { font-size: 12px; margin-top: 12px; padding: 10px 14px; border-radius: 8px; }
+  .plan-card.partial .plan-note { background: #FFF7ED; color: #9A3412; border: 1px solid #FED7AA; }
+  .plan-card.full .plan-note { background: rgba(6,182,212,0.1); color: var(--cyan); border: 1px solid rgba(6,182,212,0.2); }
+  .plan-conditions { font-size: 11px; margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(0,0,0,0.06); color: var(--gray-400); }
+  .plan-card.full .plan-conditions { border-top-color: rgba(255,255,255,0.1); color: #64748B; }
+  .deliverable-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .del-card { background: #fff; border: 1px solid var(--gray-200); border-radius: 12px; padding: 28px; transition: box-shadow 0.2s; }
+  .del-card:hover { box-shadow: 0 6px 24px rgba(6,182,212,0.08); }
+  .del-card.both { border-top: 3px solid var(--green); }
+  .del-card.full-only { border-top: 3px solid var(--cyan); }
+  .del-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .del-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .del-icon.ig { background: rgba(168,85,247,0.1); }
+  .del-icon.cap { background: rgba(251,191,36,0.15); }
+  .del-icon.meta { background: rgba(239,68,68,0.1); }
+  .del-icon.goog { background: var(--green-light); }
+  .del-title { font-size: 15px; font-weight: 700; color: var(--gray-900); line-height: 1.3; }
+  .del-plan-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-top: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .del-plan-tag.both { background: var(--green-light); color: var(--green-dark); }
+  .del-plan-tag.full { background: var(--cyan-light); color: var(--cyan-dark); }
+  .del-body { font-size: 13px; color: var(--gray-600); line-height: 1.6; margin-bottom: 14px; }
+  .del-items { display: flex; flex-direction: column; gap: 6px; }
+  .del-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--gray-700); }
+  .del-bullet { color: var(--cyan); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .summary { background: var(--gray-50); border-top: 1px solid var(--gray-200); padding: 40px 24px; text-align: center; }
+  .summary-inner { max-width: 700px; margin: 0 auto; }
+  .summary h2 { font-size: 20px; font-weight: 800; color: var(--gray-900); margin-bottom: 10px; }
+  .summary p { font-size: 14px; color: var(--gray-600); margin-bottom: 20px; }
+  .score-box { display: inline-flex; align-items: center; gap: 10px; background: var(--red-light); border: 1px solid #FECACA; border-radius: 12px; padding: 14px 28px; }
+  .score-num { font-size: 36px; font-weight: 900; color: var(--red); }
+  .score-label { text-align: left; font-size: 12px; color: #991B1B; font-weight: 600; line-height: 1.4; }
+  footer { background: var(--gray-900); color: var(--gray-400); text-align: center; padding: 24px; font-size: 12px; }
+  footer strong { color: var(--cyan); }
+  @media (max-width: 700px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .problems { grid-template-columns: 1fr; }
+    .bench-grid { grid-template-columns: 1fr; }
+    .plans-grid { grid-template-columns: 1fr; }
+    .deliverable-grid { grid-template-columns: 1fr; }
+    header { padding: 14px 20px; }
+    .hero { padding: 40px 20px 36px; }
+    .section { padding: 40px 16px; }
+  }
+
+/* ─────────────────────────────────────────────────────
+   SEÇÃO — POR QUE FECHAR COM O REC HUB
+───────────────────────────────────────────────────── */
+.hub-why-section {
+  background: var(--gray-900);
+  padding: 52px 0 48px;
+}
+.hub-why-inner {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.hub-why-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  background: rgba(6,182,212,0.1);
+  border: 1px solid rgba(6,182,212,0.3);
+  border-radius: 99px;
+  padding: 4px 16px;
+  margin-bottom: 16px;
+}
+.hub-why-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 12px;
+  line-height: 1.25;
+}
+.hub-why-sub {
+  font-size: 14px;
+  color: var(--gray-400);
+  line-height: 1.7;
+  margin-bottom: 36px;
+  max-width: 580px;
+}
+.hub-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 36px;
+}
+.hub-benefit {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.hub-benefit:first-child {
+  padding-top: 0;
+}
+.hub-benefit:last-child {
+  border-bottom: none;
+}
+.hub-b-num {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--cyan);
+  letter-spacing: 0.05em;
+  padding-top: 3px;
+  flex-shrink: 0;
+  width: 22px;
+}
+.hub-b-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 5px;
+}
+.hub-b-desc {
+  font-size: 13px;
+  color: var(--gray-400);
+  line-height: 1.6;
+}
+.hub-why-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.hub-why-tagline {
+  font-size: 14px;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--cyan);
+}
+.hub-why-handle {
+  font-size: 12px;
+  color: var(--gray-600);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+</style>
+</head>
+<body>
+
+<div class="topbar"></div>
+<header>
+  <div class="logo">R.E.C. · HUB de Negócios</div>
+  <div class="date-badge">Diagnóstico Digital · Abril 2026</div>
+</header>
+
+<section class="hero">
+  <div class="alert-badge">⚠ Alerta de Receita Perdida</div>
+  <h1>@odontohelp_canoas<br><span>17 anos de clínica, digital com desempenho muito abaixo do potencial</span></h1>
+  <p class="hero-sub">Clínica Odontológica em Canoas, RS. Mais de 50.000 pacientes atendidos desde 2009, e um digital que não reflete essa história nem capta novos pacientes de forma constante.</p>
+  <div class="hero-meta"><strong>Canoas · RS</strong> · odontohelpcanoas.com.br</div>
+  <div class="channels">
+    <span class="ch-tag ch-instagram">Instagram</span>
+    <span class="ch-tag ch-facebook">Facebook</span>
+    <span class="ch-tag ch-google">Google</span>
+    <span class="ch-tag ch-meta">Meta Ads</span>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <span class="kpi-value">2.892</span>
+      <span class="kpi-label">Seguidores IG</span>
+      <span class="kpi-verdict">Muito abaixo do histórico</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-value">6.405</span>
+      <span class="kpi-label">Curtidas Facebook</span>
+      <span class="kpi-verdict">Sem conteúdo ativo</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-value">5★ · 200+</span>
+      <span class="kpi-label">Google Reviews</span>
+      <span class="kpi-verdict ok">Ativo mas sem gestão</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-value">Zero</span>
+      <span class="kpi-label">Meta Ads ativos</span>
+      <span class="kpi-verdict">Sem captação paga</span>
+    </div>
+  </div>
+</section>
+
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon">🔍</div>
+    <div>
+      <div class="section-label">Parte 1 · Diagnóstico Digital</div>
+      <div class="section-title">10 problemas que estão impedindo a OdontoHelp de crescer no digital</div>
+    </div>
+  </div>
+  <div class="problems">
+
+    <div class="card instagram">
+      <span class="card-channel instagram">Instagram</span>
+      <span class="card-num">#01</span>
+      <div class="card-title">2.892 seguidores para uma clínica com 17 anos e mais de 50 mil pacientes atendidos</div>
+      <div class="card-body">A OdontoHelp acumula um histórico de décadas e uma base enorme de pacientes satisfeitos. O Instagram, porém, não reflete isso: 2.892 seguidores é um número que não corresponde ao tamanho real da clínica, à sua reputação no Google nem ao potencial de Canoas. Clínicas com menos tempo de mercado e menos tradição já ultrapassaram os 10 mil seguidores usando estratégia de conteúdo.</div>
+      <div class="card-tags"><span class="tag dado">2.892 seguidores / 17 anos de clínica</span><span class="tag impacto">Potencial de crescimento completamente represado</span></div>
+    </div>
+
+    <div class="card instagram">
+      <span class="card-channel instagram">Instagram</span>
+      <span class="card-num">#02</span>
+      <div class="card-title">215 posts em anos de atividade, frequência sem calendário editorial estratégico</div>
+      <div class="card-body">Uma clínica odontológica com o volume de atendimentos da OdontoHelp gera casos, resultados e histórias diariamente. Publicar com frequência irregular, sem calendário, sem pilares de conteúdo definidos e sem foco em transformações e depoimentos é desperdiçar o maior ativo de marketing que a clínica tem: a prova real dos seus resultados.</div>
+      <div class="card-tags"><span class="tag dado">215 posts totais</span><span class="tag impacto">Crescimento orgânico bloqueado</span></div>
+    </div>
+
+    <div class="card instagram">
+      <span class="card-channel instagram">Instagram</span>
+      <span class="card-num">#03</span>
+      <div class="card-title">Sem casos de transformação (antes/depois) de implante e estética dental, o conteúdo que mais converte</div>
+      <div class="card-body">No Instagram odontológico, nada converte mais do que mostrar um sorriso transformado. Casos de implante, clareamento, facetas e reabilitação oral são conteúdos de altíssimo engajamento e gatilho direto para novos pacientes. Sem uma estratégia sistemática de produção e publicação desses resultados, a OdontoHelp deixa de gerar o tipo de conteúdo que faz pacientes mandarem mensagem pedindo orçamento.</div>
+      <div class="card-tags"><span class="tag dado">Sem cases visuais de resultado</span><span class="tag impacto">Gatilho de conversão desperdiçado</span></div>
+    </div>
+
+    <div class="card facebook">
+      <span class="card-channel facebook">Facebook</span>
+      <span class="card-num">#04</span>
+      <div class="card-title">6.405 curtidas mas sem estratégia de conteúdo ativa para converter essa audiência</div>
+      <div class="card-body">A página do Facebook da OdontoHelp tem uma base de mais de 6 mil seguidores, maior do que a maioria das clínicas de Canoas. É um ativo valioso que está sendo subutilizado. Sem publicações regulares, conteúdo educativo e campanhas direcionadas para esse público, 6.405 pessoas que já demonstraram interesse na clínica nunca recebem uma razão para marcar uma consulta.</div>
+      <div class="card-tags"><span class="tag dado">6.405 curtidas sem aproveitamento estratégico</span><span class="tag impacto">Audiência existente sendo desperdiçada</span></div>
+    </div>
+
+    <div class="card facebook">
+      <span class="card-channel facebook">Facebook</span>
+      <span class="card-num">#05</span>
+      <div class="card-title">Público 35-60 anos do Facebook nunca é ativado para procedimentos de maior ticket</div>
+      <div class="card-body">Implantes, próteses e reabilitação oral são procedimentos de decisão mais longa, pesquisados e decididos com mais frequência pelo público de 35 a 60 anos, exatamente o público concentrado no Facebook. Sem conteúdo e anúncios voltados para esse público na plataforma certa, a OdontoHelp perde o canal mais eficiente para captação dos procedimentos de maior valor.</div>
+      <div class="card-tags"><span class="tag dado">Público de alto ticket ignorado no Facebook</span><span class="tag impacto">Perda dos procedimentos mais rentáveis</span></div>
+    </div>
+
+    <div class="card meta">
+      <span class="card-channel meta">Meta Ads</span>
+      <span class="card-num">#06</span>
+      <div class="card-title">Nenhum anúncio ativo identificado na Biblioteca de Anúncios da Meta</div>
+      <div class="card-body">A Biblioteca de Anúncios da Meta não registra campanhas ativas para a OdontoHelp. Uma clínica em Canoas que não investe em Meta Ads está disputando pacientes no digital sem aparecer onde eles estão decidindo. Concorrentes com orçamentos menores mas anúncios estruturados captam pacientes diariamente que poderiam estar marcando consulta na OdontoHelp.</div>
+      <div class="card-tags"><span class="tag dado">Zero anúncios Meta identificados</span><span class="tag impacto">Captação 100% dependente de indicação</span></div>
+    </div>
+
+    <div class="card meta">
+      <span class="card-channel meta">Meta Ads</span>
+      <span class="card-num">#07</span>
+      <div class="card-title">Sem Pixel instalado nem remarketing para quem visita o site e não agenda</div>
+      <div class="card-body">Todo dia, pessoas pesquisam por dentista em Canoas, chegam ao site da OdontoHelp e saem sem agendar. Sem o Pixel do Facebook instalado e sem campanha de remarketing, esses visitantes, que já demonstraram interesse, desaparecem para sempre. Uma campanha de retargeting bem estruturada traria boa parte desse público de volta para fechar a consulta.</div>
+      <div class="card-tags"><span class="tag dado">Sem Pixel ativo</span><span class="tag impacto">Leads quentes descartados sem segunda chance</span></div>
+    </div>
+
+    <div class="card google">
+      <span class="card-channel google">Google</span>
+      <span class="card-num">#08</span>
+      <div class="card-title">200+ avaliações com 5 estrelas mas sem estratégia para potencializar esse ativo no Google</div>
+      <div class="card-body">A OdontoHelp tem um dos perfis mais bem avaliados de Canoas, mais de 200 avaliações e nota máxima. É um ativo raro e valioso. O problema é que sem gestão ativa do Google Meu Negócio (postagens regulares, fotos profissionais do espaço e da equipe, e palavras-chave otimizadas), essa reputação não está sendo usada para gerar ainda mais visibilidade e consultas.</div>
+      <div class="card-tags"><span class="tag dado">GMB sem postagens e fotos atualizadas</span><span class="tag impacto">Reputação de 5★ não totalmente aproveitada</span></div>
+    </div>
+
+    <div class="card google">
+      <span class="card-channel google">Google</span>
+      <span class="card-num">#09</span>
+      <div class="card-title">Perfil no Google sem conteúdo de serviços específicos para atrair buscas de procedimento</div>
+      <div class="card-body">Alguém que pesquisa "implante dentário Canoas" ou "clareamento dental Canoas" no Google quer encontrar uma clínica que claramente oferece e se especializa no procedimento. Sem seções bem preenchidas de serviços, fotos específicas de cada procedimento e postagens temáticas no GMB, a OdontoHelp perde posição justamente nas buscas de maior intenção de compra.</div>
+      <div class="card-tags"><span class="tag dado">Serviços não mapeados no GMB</span><span class="tag impacto">Invisível nas buscas por procedimento</span></div>
+    </div>
+
+    <div class="card instagram">
+      <span class="card-channel instagram">Instagram</span>
+      <span class="card-num">#10</span>
+      <div class="card-title">Sem Reels estratégicos mostrando a experiência da clínica, o formato que mais cresce no digital odontológico</div>
+      <div class="card-body">O algoritmo do Instagram prioriza Reels para distribuição para novos públicos. Vídeos curtos mostrando o ambiente da clínica, procedimentos sem dor, depoimentos de pacientes e a equipe em ação são os formatos que mais crescem no segmento odontológico. Sem uma estratégia de Reels frequente, a OdontoHelp não aparece para quem ainda não a conhece e está buscando um dentista em Canoas agora.</div>
+      <div class="card-tags"><span class="tag dado">Sem estratégia de Reels</span><span class="tag impacto">Alcance para novos pacientes bloqueado</span></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="summary" style="padding:32px 24px;">
+  <div class="summary-inner">
+    <div class="score-box">
+      <div class="score-num">10/10</div>
+      <div class="score-label">problemas críticos<br>identificados no diagnóstico</div>
+    </div>
+  </div>
+</div>
+
+<div class="compare-bg">
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon orange">📊</div>
+    <div>
+      <div class="section-label orange">Parte 2 · Análise de Mercado</div>
+      <div class="section-title">O que clínicas odontológicas bem posicionadas em Canoas e região já fazem</div>
+    </div>
+  </div>
+
+  <div class="bench-grid">
+    <div class="bench-card">
+      <div class="bench-label">📱 Presença no Instagram</div>
+      <div class="bench-compare">
+        <div class="bench-col market">
+          <div class="bench-value">8.000 a 20.000</div>
+          <div class="bench-sub">clínicas odontológicas com estratégia de conteúdo ativa no RS</div>
+        </div>
+        <div class="bench-vs">vs</div>
+        <div class="bench-col you">
+          <div class="bench-value">2.892</div>
+          <div class="bench-sub">@odontohelp_canoas hoje, com 17 anos de história</div>
+        </div>
+      </div>
+      <div class="bench-impact">A OdontoHelp tem histórico, reputação e base de pacientes que a maioria dos concorrentes no Instagram não tem. Com estratégia de conteúdo, esse número pode triplicar em 12 meses, e cada seguidor novo é um potencial paciente que passa a receber a mensagem da clínica toda semana.</div>
+    </div>
+
+    <div class="bench-card">
+      <div class="bench-label">📣 Campanhas Meta Ads ativas</div>
+      <div class="bench-compare">
+        <div class="bench-col market">
+          <div class="bench-value">5 a 15</div>
+          <div class="bench-sub">clínicas odontológicas com anúncios simultâneos rodando no Facebook e Instagram em Canoas</div>
+        </div>
+        <div class="bench-vs">vs</div>
+        <div class="bench-col you">
+          <div class="bench-value">Zero</div>
+          <div class="bench-sub">nenhum anúncio ativo identificado para a OdontoHelp</div>
+        </div>
+      </div>
+      <div class="bench-impact">Enquanto a OdontoHelp não anuncia, concorrentes aparecem para pacientes de Canoas que buscam implante, clareamento e estética dental todos os dias. Cada mês sem anúncios é um mês de novos pacientes indo para quem já está posicionado com tráfego pago.</div>
+    </div>
+
+    <div class="bench-card">
+      <div class="bench-label">⭐ Aproveitamento do Google</div>
+      <div class="bench-compare">
+        <div class="bench-col market">
+          <div class="bench-value">GMB ativo</div>
+          <div class="bench-sub">perfis com postagens mensais, galeria atualizada, serviços mapeados e palavras-chave otimizadas</div>
+        </div>
+        <div class="bench-vs">vs</div>
+        <div class="bench-col you">
+          <div class="bench-value">5★ parado</div>
+          <div class="bench-sub">200+ avaliações excelentes mas sem gestão ativa do perfil no Google</div>
+        </div>
+      </div>
+      <div class="bench-impact">A OdontoHelp tem o ativo mais raro no Google, mais de 200 avaliações positivas. Mas sem postagens e conteúdo regular, perde visibilidade para clínicas com menos avaliações que gerenciam o perfil ativamente e aparecem primeiro nas buscas por procedimento.</div>
+    </div>
+
+    <div class="bench-card">
+      <div class="bench-label">🎬 Conteúdo em Vídeo (Reels)</div>
+      <div class="bench-compare">
+        <div class="bench-col market">
+          <div class="bench-value">Reels semanais</div>
+          <div class="bench-sub">clínicas que publicam vídeos de resultado, procedimentos e depoimentos toda semana e crescem 3x mais rápido</div>
+        </div>
+        <div class="bench-vs">vs</div>
+        <div class="bench-col you">
+          <div class="bench-value">Sem estratégia</div>
+          <div class="bench-sub">produção de vídeo irregular, sem foco em cases e transformações</div>
+        </div>
+      </div>
+      <div class="bench-impact">O algoritmo do Instagram favorece Reels e os distribui para novos públicos gratuitamente. Clínicas que publicam vídeos de transformação dental semanalmente ganham novos seguidores e novos pacientes todos os meses sem precisar de tráfego pago para isso.</div>
+    </div>
+  </div>
+
+  <div class="opportunity-strip">
+    <h3>O que a OdontoHelp está deixando de captar todo mês</h3>
+    <p>Canoas tem mais de 350 mil habitantes e uma demanda constante por serviços odontológicos, especialmente para implantes e estética dental, procedimentos de alto ticket que pacientes pesquisam antes de decidir. Sem presença ativa no Instagram, sem anúncios e sem um Google Meu Negócio otimizado, novos pacientes que pesquisam dentista em Canoas encontram os concorrentes antes. A OdontoHelp tem 17 anos de história e 200+ avaliações 5 estrelas, falta o digital que traduza isso em novos agendamentos toda semana.</p>
+  </div>
+</div>
+</div>
+
+<div class="deliverables-bg">
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon green">🚀</div>
+    <div>
+      <div class="section-label green">Parte 3 · Proposta Comercial</div>
+      <div class="section-title">O que o REC HUB vai construir para a OdontoHelp</div>
+    </div>
+  </div>
+
+  <div class="plans-grid">
+    <div class="plan-card partial">
+      <span class="plan-badge">Plano Presença Estratégica</span>
+      <div class="plan-name">Social Media + Captação + Meta Ads</div>
+      <div class="plan-price">R$ 2.200</div>
+      <div class="plan-period">por mês · contrato mínimo de 6 meses</div>
+      <ul class="plan-items">
+        <li><span class="plan-check">✓</span><span>Planejamento estratégico mensal de comunicação</span></li>
+        <li><span class="plan-check">✓</span><span>Até 3 publicações semanais no Instagram e Facebook</span></li>
+        <li><span class="plan-check">✓</span><span>Sessão mensal de captação com fotos e vídeos</span></li>
+        <li><span class="plan-check">✓</span><span>Edição de vídeos e imagens com identidade da clínica</span></li>
+        <li><span class="plan-check">✓</span><span>Organização e padronização do perfil digital</span></li>
+        <li><span class="plan-check">✓</span><span>Gestão de Meta Ads, até 3 campanhas por mês</span></li>
+        <li><span class="plan-check">✓</span><span>Acompanhamento estratégico com análise de desempenho mensal</span></li>
+      </ul>
+      <div class="plan-note">Investimento em anúncios Meta Ads: a partir de R$ 600/mês (separado do valor do plano).</div>
+      <div class="plan-conditions">Ideal para construir presença sólida, gerar conteúdo de qualidade e começar a captar pacientes via Meta Ads.</div>
+    </div>
+
+    <div class="plan-card full">
+      <span class="plan-highlight">Recomendado</span>
+      <span class="plan-badge">Plano Presença Completa</span>
+      <div class="plan-name">Social Media + Captação + Meta Ads + Google Empresa</div>
+      <div class="plan-price">R$ 2.500</div>
+      <div class="plan-period">por mês · contrato mínimo de 6 meses</div>
+      <ul class="plan-items">
+        <li><span class="plan-check">✓</span><span>Tudo do Plano Presença Estratégica incluído</span></li>
+        <li><span class="plan-check">✓</span><span>Gestão completa do Google Meu Negócio</span></li>
+        <li><span class="plan-check">✓</span><span>Otimização de perfil, serviços, fotos e palavras-chave no Google</span></li>
+        <li><span class="plan-check">✓</span><span>Postagens periódicas no GMB para aumentar visibilidade nas buscas</span></li>
+        <li><span class="plan-check">✓</span><span>Estratégia de posicionamento local para buscas de procedimento</span></li>
+        <li><span class="plan-check">✓</span><span>Estratégia para geração de novas avaliações positivas</span></li>
+        <li><span class="plan-check">✓</span><span>Monitoramento e ajustes mensais de desempenho no Google</span></li>
+      </ul>
+      <div class="plan-note" style="background:rgba(6,182,212,0.1);color:#67E8F9;border-color:rgba(6,182,212,0.2);">Investimento em anúncios Meta Ads: a partir de R$ 600/mês (separado do valor do plano).</div>
+      <div class="plan-conditions" style="color:#94A3B8;">Domina todos os canais de captação, redes sociais, tráfego pago e Google, para que a OdontoHelp apareça em todo lugar onde o paciente pesquisa.</div>
+    </div>
+  </div>
+
+  <div class="section-header" style="margin-bottom:28px;">
+    <div>
+      <div class="section-label green">Em detalhe</div>
+      <div class="section-title" style="font-size:20px;">O que será executado em cada frente</div>
+    </div>
+  </div>
+
+  <div class="deliverable-grid">
+
+    <div class="del-card both">
+      <div class="del-header">
+        <div class="del-icon ig">📱</div>
+        <div>
+          <div class="del-title">Gestão de Redes Sociais · Instagram e Facebook</div>
+          <span class="del-plan-tag both">Ambos os planos</span>
+        </div>
+      </div>
+      <div class="del-body">Estruturação completa da comunicação da OdontoHelp nas redes sociais, com definição de posicionamento, linha editorial e conteúdo estratégico voltado para atrair e converter novos pacientes.</div>
+      <div class="del-items">
+        <div class="del-item"><span class="del-bullet">›</span><span>Planejamento estratégico mensal alinhado ao posicionamento, público ideal e objetivos da clínica</span></div>
+        <div class="del-item"><span class="del-bullet">›</span><span>Até 3 publicações por semana com foco em autoridade, conexão com o público e conversão</span></div>
+        <div class="del-item"><span class="del-bullet">›</span><span>Organização e padronização do perfil para fortalecer posicionamento e percepção de valor</span></div>
+        <div class="del-item"><span class="del-bullet">›</span><span>Análise de desempenho dos conteúdos e ajustes mensais para evolução contínua de resultados</span></div>
+      </div>
+    </div>
+
+    <div class="del-card both">
+      <div class="del-header">
+        <div class="del-icon cap">📸</div>
+        <div>
+          <div class="del-title">Captação e Edição de Conteúdo Profissional</div>
+          <span class="del-plan-tag both">Ambos os planos</span>
+        </div>
+      </div>
+      <div class="del-body">Sessão mensal de produção de fotos e vídeos na clínica, gerando material suficiente para aproximadamente 1 mês de conteúdos com identidade visual consistente e foco estratégico.</div>
+      <div class="del-items">
+        <div class="del-item"><span class="del-bullet">›</span><span>Captação de bastidores, rotina e ambiente da clínica</span></div>
+        <div class="del-item"><span class="del-bullet">›</span><span>Apresentação de procedimentos, serviços e diferenciais em vídeo</span></div>
+        <div class="del-item"><span class="del-bullet">›</span><span>Conteúdos humanizados com equipe e pacientes (com autorização)</span></div>
+        <div class="del-item"><span class="del-bullet">›</span><span>Edição de todos os vídeos e imagens adaptados para feed e Reels, com consistência visual</span></div>
+      </div>
+    </div>
+
+    <div class="del-card both">
+      <div class="del-header">
+        <div class="del-icon meta">📣</div>
+        <div>
+          <div class="del-title">Meta Ads · Campanhas no Facebook e Instagram</div>
+          <span class="del-plan-tag both">Ambos os planos</span>
+        </div>
+      </div>
+      <div class="del-body">Gestão de tráfego pago no Meta Ads com campanhas estruturadas para gerar leads, conversas no WhatsApp e agendamentos para a OdontoHelp, com otimização contínua para reduzir custo por resultado.</div>
+      <div class="del-items">
+        <div class="del-item"><span class="del-bullet">›</span><span>Criação e gestão de até 3 campanhas por mês com foco em leads e conversas no WhatsApp</span></div>
+        <div class="del-item"><span class="del-bullet">›</span><span>Segmentação estratégica de público por localização, idade e interesse para maximizar qualidade dos leads</span></div>
+        <div class="del-item"><span class="del-bullet">›</span><span>Instalação do Pixel e campanha de remarketing para visitantes do site que não agendaram</span></div>
+        <div class="del-item"><span class="del-bullet">›</span><span>Testes e otimizações contínuas para reduzir custo por resultado e aumentar conversões</span></div>
+        <div class="del-item"><span class="del-bullet">›</span><span>Análise de métricas e relatório mensal de desempenho com direcionamentos estratégicos</span></div>
+      </div>
+    </div>
+
+    <div class="del-card full-only">
+      <div class="del-header">
+        <div class="del-icon goog">🌐</div>
+        <div>
+          <div class="del-title">Google Empresa · Presença e Posicionamento Local</div>
+          <span class="del-plan-tag full">Plano Presença Completa</span>
+        </div>
+      </div>
+      <div class="del-body">Gestão completa do Google Meu Negócio para que a OdontoHelp apareça com destaque quando alguém pesquisa dentista, implante ou procedimento odontológico em Canoas, aproveitando as 200+ avaliações 5 estrelas que a clínica já acumulou.</div>
+      <div class="del-items">
+        <div class="del-item"><span class="del-bullet">›</span><span>Otimização completa do perfil: descrição com palavras-chave, serviços, horários e categorias</span></div>
+        <div class="del-item"><span class="del-bullet">›</span><span>Inserção e atualização de fotos estratégicas da clínica, equipe e procedimentos</span></div>
+        <div class="del-item"><span class="del-bullet">›</span><span>Publicações periódicas no GMB para manter o perfil ativo e aumentar visibilidade nas buscas</span></div>
+        <div class="del-item"><span class="del-bullet">›</span><span>Estratégia de posicionamento local para buscas de alto valor como "implante Canoas" e "dentista Canoas"</span></div>
+        <div class="del-item"><span class="del-bullet">›</span><span>Orientação estratégica para geração de novas avaliações positivas no Google</span></div>
+        <div class="del-item"><span class="del-bullet">›</span><span>Monitoramento mensal do desempenho do perfil e ajustes estratégicos contínuos</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<div class="summary">
+  <div class="summary-inner">
+    <h2>Um ecossistema estratégico, não uma agência</h2>
+    <p>O REC HUB entra como parceiro de crescimento da OdontoHelp, conectando conteúdo de qualidade, captação profissional, tráfego pago e presença no Google para que a clínica com 17 anos de tradição em Canoas passe a gerar novos pacientes de forma constante e previsível.</p>
+    <div style="display:inline-flex;gap:16px;flex-wrap:wrap;justify-content:center;">
+      <div class="score-box" style="background:var(--gray-100);border-color:var(--gray-200);">
+        <div class="score-num" style="color:var(--cyan-dark);font-size:28px;">6 meses</div>
+        <div class="score-label" style="color:var(--gray-600);">duração mínima<br>do contrato</div>
+      </div>
+      <div class="score-box" style="background:#F0FDF4;border-color:#BBF7D0;">
+        <div class="score-num" style="color:#065F46;font-size:28px;">R$ 2.200</div>
+        <div class="score-label" style="color:#065F46;">sem Google<br>presença estratégica</div>
+      </div>
+      <div class="score-box">
+        <div class="score-num" style="font-size:28px;">R$ 2.500</div>
+        <div class="score-label">com Google<br>presença completa</div>
+      </div>
+    </div>
+    <p style="margin-top:16px;font-size:12px;color:var(--gray-400);">Investimento em anúncios Meta Ads: a partir de R$ 600/mês (valor separado, gerenciado pelo HUB).</p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     SEÇÃO — POR QUE FECHAR COM O REC HUB
+════════════════════════════════════════════════════════ -->
+<section class="hub-why-section">
+  <div class="hub-why-inner">
+    <div class="hub-why-tag">REC HUB DE NEGÓCIOS</div>
+    <h2 class="hub-why-title">Por que fechar com o REC HUB?</h2>
+    <p class="hub-why-sub">Não somos uma agência tradicional. Somos um ecossistema estratégico que ajuda empresários a pensar, estruturar e escalar seus negócios — com conexões reais, estrutura completa e resultados concretos.</p>
+
+    <div class="hub-benefits">
+
+      <div class="hub-benefit">
+        <div class="hub-b-num">01</div>
+        <div>
+          <div class="hub-b-title">Conteúdo com estratégia</div>
+          <div class="hub-b-desc">Planejamento, roteiro e produção orientados a autoridade e vendas. Não postamos por postar — cada peça tem um objetivo claro dentro da sua estratégia de posicionamento.</div>
+        </div>
+      </div>
+
+      <div class="hub-benefit">
+        <div class="hub-b-num">02</div>
+        <div>
+          <div class="hub-b-title">Tráfego pago integrado</div>
+          <div class="hub-b-desc">Campanhas no Meta Ads e Google construídas em cima do posicionamento da marca — para gerar leads qualificados, não apenas cliques.</div>
+        </div>
+      </div>
+
+      <div class="hub-benefit">
+        <div class="hub-b-num">03</div>
+        <div>
+          <div class="hub-b-title">Estrutura comercial</div>
+          <div class="hub-b-desc">Marketing e vendas trabalhando juntos. Do primeiro contato à conversão, com processos que se repetem e escalam o faturamento.</div>
+        </div>
+      </div>
+
+      <div class="hub-benefit">
+        <div class="hub-b-num">04</div>
+        <div>
+          <div class="hub-b-title">Ecossistema de conexões</div>
+          <div class="hub-b-desc">Acesso a uma comunidade ativa de empreendedores no RS com mais de 38 mil seguidores, grupos segmentados e eventos presenciais — parcerias e oportunidades reais de negócio.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="hub-why-bottom">
+      <span class="hub-why-tagline">"Movimento gera movimento."</span>
+      <span class="hub-why-handle">recolaborativo.com.br &middot; @somosrecoficial</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Diagnóstico e proposta elaborados por <strong>R.E.C. · Ecossistema de conexões e Soluções Empresariais</strong><br>
+  <span style="margin-top:4px;display:block;">recolaborativo.com.br · @somosrecoficial</span>
+</footer>
+
+</body>
+</html>
