@@ -1,670 +1,1057 @@
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solicita&ccedil;&atilde;o de Diagn&oacute;stico &middot; R.E.C. HUB</title>
+<title>Solicitação de Diagnóstico · R.E.C. HUB de Negócios</title>
+<meta name="description" content="Formulário interno de solicitação de diagnóstico digital — R.E.C. HUB de Negócios">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --cyan: #06B6D4; --cyan-light: #CFFAFE; --cyan-dark: #0E7490;
-    --red: #EF4444; --red-light: #FEE2E2;
-    --orange: #F97316; --orange-light: #FFEDD5;
-    --green: #10B981; --green-light: #D1FAE5; --green-dark: #065F46;
-    --gray-50: #F9FAFB; --gray-100: #F3F4F6; --gray-200: #E5E7EB;
-    --gray-400: #9CA3AF; --gray-500: #6B7280; --gray-600: #4B5563;
-    --gray-700: #374151; --gray-800: #1F2937; --gray-900: #111827;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--gray-50); color: var(--gray-900); line-height: 1.6; -webkit-font-smoothing: antialiased; min-height: 100vh; }
-  .topbar { height: 5px; background: linear-gradient(90deg, var(--cyan-dark), var(--cyan), #67E8F9); }
-  header { background: #fff; border-bottom: 1px solid var(--gray-200); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-  .logo { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cyan-dark); }
-  .header-sub { font-size: 12px; color: var(--gray-400); background: var(--gray-100); padding: 4px 12px; border-radius: 20px; }
-  .hero { background: linear-gradient(135deg, var(--gray-900) 0%, #1e3a4a 100%); padding: 40px 32px 36px; text-align: center; color: #fff; }
-  .hero-badge { display: inline-block; background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.4); color: #67E8F9; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 5px 16px; border-radius: 20px; margin-bottom: 16px; }
-  .hero h1 { font-size: clamp(18px, 4vw, 28px); font-weight: 800; line-height: 1.3; margin-bottom: 8px; color: #fff; }
-  .hero h1 span { color: var(--cyan); }
-  .hero-sub { font-size: 13.5px; color: #94A3B8; max-width: 520px; margin: 0 auto; }
-  .container { max-width: 760px; margin: 0 auto; padding: 40px 24px 60px; }
-  .form-section { background: #fff; border: 1px solid var(--gray-200); border-radius: 14px; padding: 28px; margin-bottom: 20px; }
-  .form-section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid var(--gray-100); }
-  .section-num { width: 28px; height: 28px; background: var(--cyan-dark); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
-  .section-num.orange { background: var(--orange); }
-  .section-num.green { background: var(--green-dark); }
-  .section-num.red { background: var(--red); }
-  .section-num.purple { background: #7C3AED; }
-  .section-title { font-size: 15px; font-weight: 700; color: var(--gray-900); }
-  .section-desc { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
-  .field-group { margin-bottom: 18px; }
-  .field-group:last-child { margin-bottom: 0; }
-  label.field-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 7px; }
-  label.field-label .req { color: var(--red); margin-left: 3px; }
-  input[type="text"], input[type="url"], textarea, select {
-    width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-200); border-radius: 8px;
-    font-size: 14px; color: var(--gray-900); background: #fff; outline: none;
-    font-family: inherit; transition: border-color 0.2s;
-  }
-  input[type="text"]:focus, input[type="url"]:focus, textarea:focus, select:focus {
-    border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(6,182,212,0.1);
-  }
-  textarea { resize: vertical; min-height: 90px; }
-  .field-hint { font-size: 11.5px; color: var(--gray-400); margin-top: 5px; }
-  .check-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .check-item { display: flex; align-items: flex-start; gap: 10px; background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 11px 14px; cursor: pointer; transition: all 0.15s; user-select: none; }
-  .check-item:hover { border-color: var(--cyan); background: var(--cyan-light); }
-  .check-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--cyan-dark); margin-top: 2px; flex-shrink: 0; cursor: pointer; }
-  .check-item-text { font-size: 13px; color: var(--gray-700); line-height: 1.4; }
-  .check-item-sub { font-size: 11px; color: var(--gray-400); }
-  .radio-group { display: flex; flex-direction: column; gap: 10px; }
-  .radio-item { display: flex; align-items: flex-start; gap: 10px; background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 11px 14px; cursor: pointer; transition: all 0.15s; user-select: none; }
-  .radio-item:hover { border-color: var(--cyan); }
-  .radio-item input[type="radio"] { width: 16px; height: 16px; accent-color: var(--cyan-dark); margin-top: 3px; flex-shrink: 0; cursor: pointer; }
-  .radio-item-text { font-size: 13px; color: var(--gray-700); line-height: 1.4; font-weight: 600; }
-  .radio-item-sub { font-size: 11.5px; color: var(--gray-500); font-weight: 400; }
-  .radio-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .plan-item { display: flex; align-items: flex-start; gap: 10px; background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 12px 14px; cursor: pointer; transition: all 0.15s; user-select: none; }
-  .plan-item:hover { border-color: var(--green); }
-  .plan-item input[type="radio"] { width: 16px; height: 16px; accent-color: var(--green-dark); margin-top: 3px; flex-shrink: 0; cursor: pointer; }
-  .plan-name { font-size: 13px; font-weight: 700; color: var(--gray-800); }
-  .plan-price { font-size: 15px; font-weight: 800; color: var(--green-dark); }
-  .plan-desc { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
-  .proposta-toggle { display: none; }
-  .proposta-section { display: none; background: #F0FDF4; border: 1.5px solid #A7F3D0; border-radius: 10px; padding: 20px; margin-top: 16px; }
-  .proposta-section.visible { display: block; }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .submit-area { text-align: center; margin-top: 12px; }
-  .btn-generate {
-    display: inline-flex; align-items: center; gap: 10px;
-    background: linear-gradient(135deg, #0E7490 0%, #06B6D4 60%, #22D3EE 100%);
-    color: #fff; border: none; border-radius: 12px;
-    padding: 16px 44px; font-size: 16px; font-weight: 800;
-    cursor: pointer; letter-spacing: 0.03em;
-    box-shadow: 0 4px 24px rgba(6,182,212,0.35), 0 1px 3px rgba(0,0,0,0.12);
-    transition: box-shadow 0.2s, transform 0.15s, opacity 0.2s;
-    position: relative; overflow: hidden;
-  }
-  .btn-generate::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 60%);
-    pointer-events: none;
-  }
-  .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(6,182,212,0.45), 0 2px 6px rgba(0,0,0,0.15); }
-  .btn-generate:active { transform: translateY(0); box-shadow: 0 2px 12px rgba(6,182,212,0.3); }
-  .btn-generate:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
-  .btn-send { display: none; }
-  .btn-send.visible { display: inline-block; }
-  .btn-copy { background: var(--gray-800); color: #fff; border: none; border-radius: 8px; padding: 10px 22px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; margin-top: 12px; }
-  .btn-copy:hover { opacity: 0.85; }
-  .output-box { display: none; background: var(--gray-900); border-radius: 12px; padding: 24px; margin-top: 24px; }
-  .output-box.visible { display: block; }
-  .output-title { font-size: 12px; font-weight: 700; color: var(--cyan); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
-  .output-text { font-family: 'Courier New', monospace; font-size: 13px; color: #E2E8F0; white-space: pre-wrap; line-height: 1.7; }
-  .copied-msg { font-size: 12px; color: var(--cyan); margin-top: 8px; display: none; }
-  .status-bar { display: none; border-radius: 10px; padding: 16px 20px; margin-top: 16px; font-size: 13.5px; font-weight: 600; text-align: center; }
-  .status-bar.loading { display: block; background: #EFF6FF; border: 1px solid #BFDBFE; color: #1D4ED8; }
-  .status-bar.success { display: block; background: #F0FDF4; border: 1px solid #A7F3D0; color: var(--green-dark); }
-  .status-bar.error { display: block; background: var(--red-light); border: 1px solid #FECACA; color: #991B1B; }
-  .ideas-box { background: linear-gradient(135deg, #FFF7ED, #FFEDD5); border: 1px solid #FED7AA; border-radius: 12px; padding: 22px 24px; margin-bottom: 20px; }
-  .ideas-title { font-size: 13px; font-weight: 800; color: #9A3412; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-  .idea-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 13px; color: #7C2D12; line-height: 1.5; }
-  .idea-num { font-weight: 800; color: #C2410C; flex-shrink: 0; }
-  .custom-plan-obs { display: none; background: #F0FDF4; border: 1.5px solid #A7F3D0; border-radius: 8px; padding: 14px 16px; margin-top: 10px; }
-  .custom-plan-obs.visible { display: block; }
-  .custom-plan-obs label { font-size: 12.5px; font-weight: 600; color: var(--green-dark); display: block; margin-bottom: 7px; }
-  .plan-item.selected { border-color: var(--green-dark); background: #F0FDF4; }
-  .submit-area { text-align: center; padding: 8px 0 4px; }
-  .submit-hint { font-size: 12px; color: var(--gray-400); margin-top: 10px; }
-  @media (max-width: 600px) {
-    .check-grid { grid-template-columns: 1fr; }
-    .radio-grid { grid-template-columns: 1fr; }
-    .two-col { grid-template-columns: 1fr; }
-    header { padding: 14px 20px; }
-    .container { padding: 24px 16px 48px; }
-    .form-section { padding: 20px; }
-  }
+/* ═══════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cyan:#06B6D4; --cyan-light:#22D3EE; --cyan-dark:#0E7490; --cyan-glow:rgba(6,182,212,0.35);
+  --blue-deep:#0284C7; --purple:#7C3AED; --purple-soft:#8B5CF6;
+  --green:#10B981; --green-dark:#065F46; --orange:#F97316; --red:#EF4444;
+  --bg-base:#050B18; --bg-card:rgba(8,18,38,0.75); --bg-input:rgba(6,15,35,0.8);
+  --border:rgba(6,182,212,0.15); --border-hover:rgba(6,182,212,0.4);
+  --text-primary:#F0F6FF; --text-secondary:#94A3B8; --text-muted:#4A5A72;
+  --shadow-glow:0 0 40px rgba(6,182,212,0.12); --radius:16px; --radius-sm:10px;
+}
+html { scroll-behavior:smooth; }
+body { font-family:'Inter',-apple-system,sans-serif; background:var(--bg-base); color:var(--text-primary);
+  line-height:1.6; -webkit-font-smoothing:antialiased; min-height:100vh; overflow-x:hidden; }
+
+/* ═══════════════════════════════════════════════
+   AURORA BACKGROUND
+═══════════════════════════════════════════════ */
+.aurora-bg { position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+.aurora-bg::before,.aurora-bg::after { content:''; position:absolute; border-radius:50%; filter:blur(80px); opacity:.18; animation:aurora-drift 18s ease-in-out infinite alternate; }
+.aurora-bg::before { width:700px; height:500px; background:radial-gradient(ellipse,#0E7490,#06B6D4,transparent); top:-150px; left:-200px; }
+.aurora-bg::after  { width:600px; height:450px; background:radial-gradient(ellipse,#7C3AED,#0284C7,transparent); bottom:-100px; right:-150px; animation-delay:-9s; animation-direction:alternate-reverse; }
+.aurora-mid { position:fixed; width:500px; height:400px; background:radial-gradient(ellipse,rgba(6,182,212,.1),transparent 70%); border-radius:50%; top:40%; left:50%; transform:translate(-50%,-50%); filter:blur(60px); animation:aurora-pulse 12s ease-in-out infinite; pointer-events:none; z-index:0; }
+.grid-overlay { position:fixed; inset:0; z-index:0; pointer-events:none; background-image:linear-gradient(rgba(6,182,212,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(6,182,212,.03) 1px,transparent 1px); background-size:60px 60px; }
+@keyframes aurora-drift { 0%{transform:translate(0,0) scale(1)} 50%{transform:translate(80px,40px) scale(1.1)} 100%{transform:translate(-40px,80px) scale(.95)} }
+@keyframes aurora-pulse { 0%,100%{opacity:.06;transform:translate(-50%,-50%) scale(1)} 50%{opacity:.14;transform:translate(-50%,-50%) scale(1.15)} }
+
+/* ═══════════════════════════════════════════════
+   PROGRESS BAR
+═══════════════════════════════════════════════ */
+.progress-bar-track { position:fixed; top:0; left:0; right:0; height:3px; background:rgba(255,255,255,.05); z-index:1000; }
+.progress-bar-fill  { height:100%; width:0%; background:linear-gradient(90deg,#0E7490,#06B6D4,#22D3EE,#8B5CF6); background-size:200% 100%; transition:width .4s cubic-bezier(.4,0,.2,1); animation:shimmer-bg 3s linear infinite; box-shadow:0 0 10px rgba(6,182,212,.6); }
+@keyframes shimmer-bg { 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
+
+/* ═══════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════ */
+.header { position:relative; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:18px 32px;
+  background:rgba(5,11,24,.85); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(6,182,212,.1); gap:12px; flex-wrap:wrap; }
+.logo-wrap { display:flex; align-items:center; gap:10px; }
+.logo-dot  { width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 10px var(--cyan),0 0 20px rgba(6,182,212,.5); animation:pulse-dot 2s ease-in-out infinite; }
+.logo-text { font-size:13px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; background:linear-gradient(135deg,#22D3EE,#06B6D4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+@keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.4);opacity:.7} }
+.header-right { display:flex; align-items:center; gap:10px; }
+.header-badge { font-size:11px; font-weight:600; color:var(--text-muted); background:rgba(6,182,212,.06); border:1px solid rgba(6,182,212,.12); padding:5px 14px; border-radius:20px; letter-spacing:.04em; }
+.btn-settings { background:rgba(6,182,212,.08); border:1px solid rgba(6,182,212,.15); color:var(--text-secondary); border-radius:8px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:6px; font-family:inherit; }
+.btn-settings:hover { background:rgba(6,182,212,.15); color:var(--cyan); border-color:rgba(6,182,212,.3); }
+.api-status-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.api-status-dot.ok  { background:#10B981; box-shadow:0 0 6px rgba(16,185,129,.6); }
+.api-status-dot.off { background:#6B7280; }
+
+/* ═══════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════ */
+.hero { position:relative; z-index:10; padding:70px 32px 60px; text-align:center; overflow:hidden; }
+.hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(6,182,212,.08),transparent); pointer-events:none; }
+.hero-eyebrow { display:inline-flex; align-items:center; gap:8px; background:rgba(6,182,212,.08); border:1px solid rgba(6,182,212,.25); color:var(--cyan-light); font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; padding:7px 18px; border-radius:50px; margin-bottom:28px; animation:fade-up .6s ease-out both; }
+.hero-eyebrow .dot-pulse { width:6px; height:6px; border-radius:50%; background:var(--cyan); animation:pulse-dot 1.5s ease-in-out infinite; }
+.hero-title { font-size:clamp(28px,5vw,52px); font-weight:900; line-height:1.15; letter-spacing:-.02em; margin-bottom:18px; animation:fade-up .6s ease-out .1s both; }
+.hero-title .white    { color:var(--text-primary); }
+.hero-title .gradient { background:linear-gradient(135deg,#06B6D4 0%,#22D3EE 40%,#8B5CF6 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.hero-sub   { font-size:clamp(14px,2vw,16px); color:var(--text-secondary); max-width:540px; margin:0 auto 32px; line-height:1.7; animation:fade-up .6s ease-out .2s both; }
+.hero-stats { display:inline-flex; align-items:center; gap:24px; padding:14px 28px; background:rgba(6,182,212,.05); border:1px solid rgba(6,182,212,.12); border-radius:50px; animation:fade-up .6s ease-out .3s both; flex-wrap:wrap; justify-content:center; }
+.hero-stat  { display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-secondary); font-weight:500; }
+.hero-stat .stat-icon { width:20px; height:20px; border-radius:50%; background:rgba(6,182,212,.15); display:flex; align-items:center; justify-content:center; font-size:10px; }
+.hero-divider { width:1px; height:16px; background:rgba(6,182,212,.2); }
+@keyframes fade-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+/* ═══════════════════════════════════════════════
+   CONTAINER & SECTIONS
+═══════════════════════════════════════════════ */
+.container { position:relative; z-index:10; max-width:800px; margin:0 auto; padding:0 20px 80px; }
+.form-section { background:var(--bg-card); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+  border:1px solid var(--border); border-radius:var(--radius); padding:32px; margin-bottom:20px;
+  transition:border-color .3s,box-shadow .3s,transform .3s; opacity:0; transform:translateY(24px); position:relative; overflow:hidden; }
+.form-section::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(6,182,212,.4),transparent); opacity:0; transition:opacity .3s; }
+.form-section:hover::before { opacity:1; }
+.form-section:hover { border-color:rgba(6,182,212,.25); box-shadow:var(--shadow-glow),0 20px 60px rgba(0,0,0,.3); }
+.form-section.visible { opacity:1; transform:translateY(0); transition:opacity .5s,transform .5s cubic-bezier(.23,1,.32,1); }
+.section-header { display:flex; align-items:center; gap:14px; margin-bottom:28px; padding-bottom:20px; border-bottom:1px solid rgba(6,182,212,.08); }
+.section-num { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; }
+.section-num.cyan   { background:linear-gradient(135deg,#0E7490,#06B6D4); color:#fff; box-shadow:0 4px 16px rgba(6,182,212,.4); }
+.section-num.orange { background:linear-gradient(135deg,#C2410C,#F97316); color:#fff; box-shadow:0 4px 16px rgba(249,115,22,.4); }
+.section-num.purple { background:linear-gradient(135deg,#5B21B6,#7C3AED); color:#fff; box-shadow:0 4px 16px rgba(124,58,237,.4); }
+.section-num.green  { background:linear-gradient(135deg,#065F46,#10B981); color:#fff; box-shadow:0 4px 16px rgba(16,185,129,.4); }
+.section-num.red    { background:linear-gradient(135deg,#991B1B,#EF4444); color:#fff; box-shadow:0 4px 16px rgba(239,68,68,.4); }
+.section-title { font-size:16px; font-weight:700; color:var(--text-primary); }
+.section-desc  { font-size:12px; color:var(--text-muted); margin-top:3px; }
+
+/* ═══════════════════════════════════════════════
+   FIELDS
+═══════════════════════════════════════════════ */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.field-group { margin-bottom:20px; }
+.field-group:last-child { margin-bottom:0; }
+.field-label { display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:8px; letter-spacing:.03em; text-transform:uppercase; }
+.field-label .req { color:var(--cyan); margin-left:3px; }
+input[type="text"],input[type="url"],textarea,select { width:100%; padding:12px 16px; background:var(--bg-input); border:1.5px solid rgba(6,182,212,.12); border-radius:var(--radius-sm); font-size:14px; color:var(--text-primary); font-family:inherit; outline:none; transition:border-color .25s,box-shadow .25s,background .25s; -webkit-appearance:none; }
+input[type="text"]::placeholder,input[type="url"]::placeholder,textarea::placeholder { color:var(--text-muted); }
+input[type="text"]:focus,input[type="url"]:focus,textarea:focus,select:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(6,182,212,.1),0 0 20px rgba(6,182,212,.08); background:rgba(6,182,212,.04); }
+select { cursor:pointer; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2306B6D4' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:40px; }
+select option { background:#0A1628; color:var(--text-primary); }
+textarea { resize:vertical; min-height:96px; line-height:1.6; }
+.field-hint { font-size:11.5px; color:var(--text-muted); margin-top:6px; line-height:1.5; }
+
+/* ═══════════════════════════════════════════════
+   CHOICE ITEMS
+═══════════════════════════════════════════════ */
+.choice-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.choice-group  { display:flex; flex-direction:column; gap:10px; }
+.choice-item   { display:flex; align-items:flex-start; gap:12px; background:rgba(6,15,35,.6); border:1.5px solid rgba(6,182,212,.1); border-radius:var(--radius-sm); padding:13px 16px; cursor:pointer; transition:all .2s; user-select:none; position:relative; overflow:hidden; }
+.choice-item::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(6,182,212,.06),transparent); opacity:0; transition:opacity .2s; }
+.choice-item:hover { border-color:rgba(6,182,212,.35); transform:translateY(-1px); }
+.choice-item:hover::before { opacity:1; }
+.choice-item input { width:auto; padding:0; border:none; background:transparent; flex-shrink:0; margin-top:1px; cursor:pointer; accent-color:var(--cyan); }
+.choice-label { font-size:13.5px; font-weight:600; color:var(--text-primary); line-height:1.3; }
+.choice-sub   { font-size:11.5px; color:var(--text-muted); margin-top:2px; font-weight:400; }
+.choice-item.urgent    { border-color:rgba(239,68,68,.25);  background:rgba(239,68,68,.05); }
+.choice-item.warning   { border-color:rgba(249,115,22,.25); background:rgba(249,115,22,.05); }
+.choice-item.proposta-yes { border-color:rgba(16,185,129,.25); background:rgba(16,185,129,.05); }
+.choice-item.urgent .choice-label  { color:#FCA5A5; }
+.choice-item.warning .choice-label { color:#FDBA74; }
+.choice-item.proposta-yes .choice-label { color:#6EE7B7; }
+
+/* Plan items */
+.plan-item { display:flex; align-items:flex-start; gap:14px; background:rgba(6,15,35,.6); border:1.5px solid rgba(6,182,212,.1); border-radius:var(--radius-sm); padding:16px 18px; cursor:pointer; transition:all .2s; user-select:none; }
+.plan-item:hover { border-color:rgba(16,185,129,.35); transform:translateY(-1px); }
+.plan-item.selected { border-color:rgba(16,185,129,.5); background:rgba(16,185,129,.06); }
+.plan-item input { width:auto; padding:0; border:none; background:transparent; flex-shrink:0; margin-top:3px; accent-color:#10B981; }
+.plan-price { font-size:18px; font-weight:900; color:#34D399; letter-spacing:-.01em; }
+.plan-name  { font-size:13px; font-weight:700; color:var(--text-primary); margin-top:3px; }
+.plan-desc  { font-size:11.5px; color:var(--text-muted); margin-top:4px; line-height:1.5; }
+.proposta-section { display:none; background:rgba(16,185,129,.04); border:1px solid rgba(16,185,129,.15); border-radius:12px; padding:22px; margin-top:18px; }
+.proposta-section.visible { display:block; animation:fade-up .3s ease; }
+.proposta-title { font-size:13px; font-weight:700; color:#34D399; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.plans-list { display:flex; flex-direction:column; gap:10px; }
+.custom-plan-obs { display:none; background:rgba(16,185,129,.04); border:1px solid rgba(16,185,129,.15); border-radius:8px; padding:16px; margin-top:12px; }
+.custom-plan-obs.visible { display:block; animation:fade-up .3s ease; }
+.custom-plan-obs label { font-size:12px; font-weight:600; color:#34D399; display:block; margin-bottom:8px; }
+
+/* ═══════════════════════════════════════════════
+   SUBMIT AREA
+═══════════════════════════════════════════════ */
+.submit-area { text-align:center; padding:12px 0 6px; }
+.btn-generate { position:relative; display:inline-flex; align-items:center; gap:12px; background:linear-gradient(135deg,#0E7490 0%,#06B6D4 50%,#22D3EE 100%); color:#fff; border:none; border-radius:14px; padding:18px 52px; font-size:16px; font-weight:800; cursor:pointer; letter-spacing:.02em; overflow:hidden; transition:transform .2s,box-shadow .2s; box-shadow:0 0 40px rgba(6,182,212,.4),0 4px 20px rgba(0,0,0,.3); }
+.btn-generate::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent); transition:left .5s; }
+.btn-generate:hover::before { left:100%; }
+.btn-generate:hover { transform:translateY(-3px); box-shadow:0 0 60px rgba(6,182,212,.55),0 8px 32px rgba(0,0,0,.35); }
+.btn-generate:active { transform:translateY(0); }
+.btn-generate:disabled { opacity:.5; cursor:not-allowed; transform:none; box-shadow:none; }
+.submit-hint { font-size:12px; color:var(--text-muted); margin-top:12px; }
+.status-bar { display:none; border-radius:12px; padding:16px 20px; margin-top:18px; font-size:14px; font-weight:600; text-align:center; animation:fade-up .3s ease; }
+.status-bar.loading { display:block; background:rgba(6,182,212,.08); border:1px solid rgba(6,182,212,.2); color:var(--cyan-light); }
+.status-bar.success { display:block; background:rgba(16,185,129,.08); border:1px solid rgba(16,185,129,.25); color:#34D399; }
+.status-bar.error   { display:block; background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.25); color:#FCA5A5; }
+.output-box { display:none; background:rgba(2,8,20,.9); border:1px solid rgba(6,182,212,.2); border-radius:var(--radius); padding:28px; margin-top:24px; animation:fade-up .4s ease; }
+.output-box.visible { display:block; }
+.output-title { font-size:11px; font-weight:700; color:var(--cyan); letter-spacing:.14em; text-transform:uppercase; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.output-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,rgba(6,182,212,.3),transparent); }
+.output-text { font-family:'Courier New',monospace; font-size:13px; color:#94A3B8; white-space:pre-wrap; line-height:1.8; }
+.btn-copy { margin-top:18px; display:inline-flex; align-items:center; gap:8px; background:rgba(6,182,212,.1); color:var(--cyan); border:1px solid rgba(6,182,212,.25); border-radius:8px; padding:10px 22px; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; font-family:inherit; }
+.btn-copy:hover { background:rgba(6,182,212,.18); transform:translateY(-1px); }
+.copied-msg { font-size:12px; color:var(--green); margin-top:8px; display:none; }
+
+/* ═══════════════════════════════════════════════
+   LOADING OVERLAY
+═══════════════════════════════════════════════ */
+.loading-overlay { position:fixed; inset:0; z-index:9999; background:rgba(5,11,24,.97); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); display:none; align-items:center; justify-content:center; }
+.loading-overlay.active { display:flex; animation:fade-in .3s ease; }
+@keyframes fade-in { from{opacity:0} to{opacity:1} }
+
+.loading-card { max-width:460px; width:92%; background:rgba(8,18,38,.95); border:1px solid rgba(6,182,212,.2); border-radius:28px; padding:48px 40px; text-align:center; box-shadow:0 0 100px rgba(6,182,212,.18),0 40px 80px rgba(0,0,0,.6); position:relative; overflow:hidden; }
+.loading-card::before { content:''; position:absolute; top:-1px; left:15%; right:15%; height:2px; background:linear-gradient(90deg,transparent,#06B6D4,#8B5CF6,transparent); animation:border-glow 2s ease-in-out infinite; }
+@keyframes border-glow { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+.loading-orbit { position:relative; width:80px; height:80px; margin:0 auto 32px; }
+.loading-orbit-ring { position:absolute; inset:0; border-radius:50%; border:2px solid transparent; border-top-color:var(--cyan); animation:spin 1.2s linear infinite; }
+.loading-orbit-ring:nth-child(2) { inset:8px; border-top-color:#8B5CF6; animation-duration:1.8s; animation-direction:reverse; }
+.loading-orbit-ring:nth-child(3) { inset:16px; border-top-color:#22D3EE; animation-duration:2.4s; }
+.loading-orbit-center { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+.loading-orbit-dot { width:16px; height:16px; border-radius:50%; background:radial-gradient(circle,#22D3EE,#0E7490); box-shadow:0 0 16px rgba(6,182,212,.8); animation:pulse-dot 1.5s ease-in-out infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+.loading-title { font-size:18px; font-weight:800; color:var(--text-primary); margin-bottom:8px; }
+.loading-subtitle { font-size:14px; color:var(--text-secondary); margin-bottom:36px; line-height:1.5; }
+
+.loading-steps { display:flex; flex-direction:column; gap:14px; text-align:left; margin-bottom:36px; }
+.loading-step  { display:flex; align-items:center; gap:14px; padding:12px 16px; border-radius:12px; background:rgba(6,182,212,.04); border:1px solid rgba(6,182,212,.08); transition:all .4s ease; }
+.loading-step.active  { background:rgba(6,182,212,.1); border-color:rgba(6,182,212,.3); }
+.loading-step.done    { background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.25); }
+.loading-step.error-step { background:rgba(239,68,68,.08); border-color:rgba(239,68,68,.25); }
+
+.step-icon { width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; background:rgba(6,182,212,.1); transition:all .3s; }
+.loading-step.active .step-icon  { background:rgba(6,182,212,.2); animation:pulse-step .8s ease-in-out infinite; }
+.loading-step.done   .step-icon  { background:rgba(16,185,129,.2); }
+@keyframes pulse-step { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+
+.step-text  { font-size:13.5px; font-weight:600; color:var(--text-secondary); transition:color .3s; flex:1; }
+.loading-step.active .step-text  { color:var(--cyan-light); }
+.loading-step.done   .step-text  { color:#6EE7B7; }
+.step-check { font-size:14px; opacity:0; transform:scale(.5); transition:all .3s; }
+.loading-step.done .step-check { opacity:1; transform:scale(1); }
+
+.loading-progress-wrap { background:rgba(255,255,255,.05); border-radius:99px; height:4px; overflow:hidden; }
+.loading-progress-bar  { height:100%; background:linear-gradient(90deg,#0E7490,#06B6D4,#8B5CF6); background-size:200% 100%; border-radius:99px; transition:width .8s cubic-bezier(.4,0,.2,1); animation:shimmer-bg 2s linear infinite; width:0%; box-shadow:0 0 8px rgba(6,182,212,.5); }
+
+/* ═══════════════════════════════════════════════
+   API KEY MODAL
+═══════════════════════════════════════════════ */
+.modal-overlay { position:fixed; inset:0; z-index:9998; background:rgba(5,11,24,.9); backdrop-filter:blur(16px); display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.active { display:flex; animation:fade-in .2s ease; }
+.modal-card { max-width:460px; width:100%; background:rgba(8,18,38,.98); border:1px solid rgba(6,182,212,.2); border-radius:24px; padding:40px; box-shadow:0 0 80px rgba(6,182,212,.15); }
+.modal-icon { width:52px; height:52px; background:linear-gradient(135deg,rgba(6,182,212,.2),rgba(124,58,237,.2)); border:1px solid rgba(6,182,212,.3); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto 20px; }
+.modal-title { font-size:20px; font-weight:800; color:var(--text-primary); text-align:center; margin-bottom:8px; }
+.modal-sub   { font-size:13.5px; color:var(--text-secondary); text-align:center; margin-bottom:28px; line-height:1.6; }
+.modal-input-wrap { margin-bottom:20px; }
+.modal-input-wrap label { font-size:12px; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:8px; text-transform:uppercase; letter-spacing:.05em; }
+.modal-actions { display:flex; gap:12px; }
+.btn-modal-primary { flex:1; padding:13px; background:linear-gradient(135deg,#0E7490,#06B6D4); color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .2s; }
+.btn-modal-primary:hover { transform:translateY(-1px); box-shadow:0 0 24px rgba(6,182,212,.4); }
+.btn-modal-cancel { padding:13px 20px; background:rgba(255,255,255,.05); color:var(--text-secondary); border:1px solid rgba(255,255,255,.1); border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .2s; }
+.btn-modal-cancel:hover { background:rgba(255,255,255,.08); }
+.modal-note { font-size:11.5px; color:var(--text-muted); text-align:center; margin-top:16px; line-height:1.6; }
+
+/* ═══════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════ */
+footer { position:relative; z-index:10; text-align:center; padding:28px 20px; font-size:12px; color:var(--text-muted); border-top:1px solid rgba(6,182,212,.07); background:rgba(5,11,24,.8); }
+footer strong { color:var(--cyan); }
+
+/* ═══════════════════════════════════════════════
+   MOBILE
+═══════════════════════════════════════════════ */
+@media (max-width:640px) {
+  .header{padding:16px 20px}
+  .hero{padding:48px 20px 40px}
+  .hero-stats{gap:14px}
+  .hero-divider{display:none}
+  .container{padding:0 16px 64px}
+  .form-section{padding:22px 18px}
+  .two-col{grid-template-columns:1fr}
+  .choice-grid-2{grid-template-columns:1fr}
+  .btn-generate{padding:16px 36px;font-size:15px}
+  .loading-card{padding:36px 24px}
+  .modal-card{padding:30px 24px}
+  .modal-actions{flex-direction:column}
+}
+@keyframes spin-slow { to{transform:rotate(360deg)} }
+::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:var(--bg-base)} ::-webkit-scrollbar-thumb{background:rgba(6,182,212,.25);border-radius:3px} ::-webkit-scrollbar-thumb:hover{background:rgba(6,182,212,.45)}
 </style>
 </head>
 <body>
 
-<div class="topbar"></div>
-<header>
-  <div class="logo">R.E.C. &middot; HUB de Neg&oacute;cios</div>
-  <div class="header-sub">Uso interno &middot; Equipe HUB</div>
+<div class="aurora-bg"></div>
+<div class="aurora-mid"></div>
+<div class="grid-overlay"></div>
+
+<div class="progress-bar-track"><div class="progress-bar-fill" id="progress_fill"></div></div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo-wrap">
+    <div class="logo-dot"></div>
+    <div class="logo-text">R.E.C. · Hub de Negócios</div>
+  </div>
+  <div class="header-right">
+    <div class="header-badge" id="creditos_display">Créditos: —</div>
+    <div class="header-badge">Uso interno · Equipe HUB</div>
+    <button class="btn-settings" disabled style="opacity:0.7;cursor:default;">
+      <span class="api-status-dot ok" id="api_dot"></span>
+      <span id="api_btn_label">✓ IA ativa</span>
+    </button>
+  </div>
 </header>
 
+<!-- HERO -->
 <section class="hero">
-  <div class="hero-badge">&#128203; Formul&aacute;rio Interno</div>
-  <h1>Solicita&ccedil;&atilde;o de <span>Diagn&oacute;stico Digital</span></h1>
-  <p class="hero-sub">Preencha este formul&aacute;rio com as informa&ccedil;&otilde;es do lead captado para que o diagn&oacute;stico seja criado corretamente e no menor tempo poss&iacute;vel.</p>
+  <div class="hero-eyebrow"><span class="dot-pulse"></span>Formulário Interno</div>
+  <h1 class="hero-title"><span class="white">Solicitação de</span><br><span class="gradient">Diagnóstico Digital</span></h1>
+  <p class="hero-sub">Preencha com as informações do lead captado. Ao enviar, o diagnóstico completo será gerado automaticamente pela IA e entregue em PDF.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="stat-icon">6</span>Seções</div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat"><span class="stat-icon">🤖</span>IA integrada</div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat"><span class="stat-icon">📄</span>PDF automático</div>
+  </div>
 </section>
 
+<!-- CONTAINER -->
 <div class="container">
 
-  <!-- BLOCO 1: IDENTIFICAÇÃO -->
+  <!-- BLOCO 1 -->
   <div class="form-section">
-    <div class="form-section-header">
-      <div class="section-num">1</div>
-      <div>
-        <div class="section-title">Identifica&ccedil;&atilde;o do Lead</div>
-        <div class="section-desc">Informa&ccedil;&otilde;es b&aacute;sicas do potencial cliente</div>
-      </div>
+    <div class="section-header">
+      <div class="section-num cyan">1</div>
+      <div><div class="section-title">Identificação do Lead</div><div class="section-desc">Informações básicas do potencial cliente</div></div>
     </div>
-
     <div class="two-col">
-      <div class="field-group">
-        <label class="field-label" for="nome">Nome da empresa / Estabelecimento <span class="req">*</span></label>
-        <input type="text" id="nome" placeholder="Ex: Grazi Hair Boutique">
-      </div>
-      <div class="field-group">
-        <label class="field-label" for="instagram">@ do Instagram <span class="req">*</span></label>
-        <input type="text" id="instagram" placeholder="Ex: @gracihair_boutique">
-      </div>
+      <div class="field-group"><label class="field-label" for="nome">Nome da empresa / Estabelecimento <span class="req">*</span></label><input type="text" id="nome" placeholder="Ex: Grazi Hair Boutique"></div>
+      <div class="field-group"><label class="field-label" for="instagram">@ do Instagram <span class="req">*</span></label><input type="text" id="instagram" placeholder="Ex: @gracihair_boutique"></div>
     </div>
-
     <div class="two-col">
       <div class="field-group">
         <label class="field-label" for="segmento">Segmento / Nicho <span class="req">*</span></label>
         <select id="segmento">
           <option value="">Selecione o segmento...</option>
-          <option>Sa&uacute;de &mdash; Cl&iacute;nica m&eacute;dica / Odontologia</option>
-          <option>Sa&uacute;de &mdash; Dermatologia / Est&eacute;tica</option>
-          <option>Sa&uacute;de &mdash; Psicologia / Terapia</option>
-          <option>Fitness &amp; Bem-estar &mdash; Academia / Pilates</option>
-          <option>Fitness &amp; Bem-estar &mdash; Nutri&ccedil;&atilde;o / Yoga</option>
-          <option>Pet &mdash; Veterin&aacute;ria / Pet Shop</option>
-          <option>Beleza &mdash; Sal&atilde;o / Barbearia</option>
-          <option>Beleza &mdash; Est&eacute;tica / Spa</option>
-          <option>M&oacute;veis &amp; Decora&ccedil;&atilde;o</option>
-          <option>Im&oacute;veis &mdash; Imobili&aacute;ria / Corretor</option>
-          <option>Alimenta&ccedil;&atilde;o &mdash; Restaurante / Delivery</option>
-          <option>Educa&ccedil;&atilde;o &mdash; Curso / Escola</option>
-          <option>Varejo &mdash; Loja f&iacute;sica / E-commerce</option>
-          <option>Servi&ccedil;os &mdash; Contabilidade / Advocacia</option>
-          <option>Servi&ccedil;os &mdash; Constru&ccedil;&atilde;o / Reforma</option>
-          <option>Energia Solar / Tecnologia</option>
-          <option>Outro &mdash; descrever em observa&ccedil;&otilde;es</option>
+          <option>Saúde — Clínica médica / Odontologia</option><option>Saúde — Dermatologia / Estética</option><option>Saúde — Psicologia / Terapia</option><option>Fitness &amp; Bem-estar — Academia / Pilates</option><option>Fitness &amp; Bem-estar — Nutrição / Yoga</option><option>Pet — Veterinária / Pet Shop</option><option>Beleza — Salão / Barbearia</option><option>Beleza — Estética / Spa</option><option>Móveis &amp; Decoração</option><option>Imóveis — Imobiliária / Corretor</option><option>Alimentação — Restaurante / Delivery</option><option>Educação — Curso / Escola</option><option>Varejo — Loja física / E-commerce</option><option>Serviços — Contabilidade / Advocacia</option><option>Serviços — Construção / Reforma</option><option>Energia Solar / Tecnologia</option><option>Outro — descrever em observações</option>
         </select>
       </div>
-      <div class="field-group">
-        <label class="field-label" for="cidade">Cidade / Regi&atilde;o <span class="req">*</span></label>
-        <input type="text" id="cidade" placeholder="Ex: Canoas, RS">
-      </div>
+      <div class="field-group"><label class="field-label" for="cidade">Cidade / Região <span class="req">*</span></label><input type="text" id="cidade" placeholder="Ex: Canoas, RS"></div>
     </div>
-
-    <div class="field-group">
-      <label class="field-label" for="site">Site ou link relevante (se tiver)</label>
-      <input type="url" id="site" placeholder="Ex: https://www.exemplo.com.br">
-    </div>
+    <div class="field-group"><label class="field-label" for="site">Site ou link relevante (se tiver)</label><input type="url" id="site" placeholder="Ex: https://www.exemplo.com.br"></div>
   </div>
 
-  <!-- BLOCO 2: ORIGEM DO LEAD -->
+  <!-- BLOCO 2 -->
   <div class="form-section">
-    <div class="form-section-header">
+    <div class="section-header">
       <div class="section-num orange">2</div>
-      <div>
-        <div class="section-title">Origem e Responsável</div>
-        <div class="section-desc">Como esse lead chegou e quem está conduzindo</div>
-      </div>
+      <div><div class="section-title">Origem e Responsável</div><div class="section-desc">Como esse lead chegou e quem está conduzindo</div></div>
     </div>
-
     <div class="two-col">
       <div class="field-group">
         <label class="field-label">Quem captou esse lead? <span class="req">*</span></label>
-        <div class="radio-group">
-          <label class="radio-item">
-            <input type="radio" name="responsavel" value="Francielle">
-            <div><div class="radio-item-text">Francielle</div><div class="radio-item-sub">Head Estrat&eacute;gico / Consultoria</div></div>
-          </label>
-          <label class="radio-item">
-            <input type="radio" name="responsavel" value="Paola">
-            <div><div class="radio-item-text">Paola</div><div class="radio-item-sub">Head de Comunica&ccedil;&atilde;o</div></div>
-          </label>
-          <label class="radio-item">
-            <input type="radio" name="responsavel" value="Consultora Comercial">
-            <div><div class="radio-item-text">Consultora Comercial</div><div class="radio-item-sub">Prospec&ccedil;&atilde;o ativa</div></div>
-          </label>
-          <label class="radio-item">
-            <input type="radio" name="responsavel" value="Outro">
-            <div><div class="radio-item-text">Outro / Indica&ccedil;&atilde;o</div><div class="radio-item-sub">Especificar em observa&ccedil;&otilde;es</div></div>
-          </label>
+        <div class="choice-group">
+          <label class="choice-item"><input type="radio" name="responsavel" value="Francielle"><div><div class="choice-label">Francielle</div><div class="choice-sub">Head Estratégico / Consultoria</div></div></label>
+          <label class="choice-item"><input type="radio" name="responsavel" value="Paola"><div><div class="choice-label">Paola</div><div class="choice-sub">Head de Comunicação</div></div></label>
+          <label class="choice-item"><input type="radio" name="responsavel" value="Consultora Comercial"><div><div class="choice-label">Consultora Comercial</div><div class="choice-sub">Prospecção ativa</div></div></label>
+          <label class="choice-item"><input type="radio" name="responsavel" value="Outro"><div><div class="choice-label">Outro / Indicação</div><div class="choice-sub">Especificar em observações</div></div></label>
         </div>
       </div>
       <div class="field-group">
         <label class="field-label">Como esse lead chegou ao REC? <span class="req">*</span></label>
-        <div class="radio-group">
-          <label class="radio-item">
-            <input type="radio" name="origem" value="Prospecção ativa (Instagram)">
-            <div><div class="radio-item-text">Prospec&ccedil;&atilde;o ativa</div><div class="radio-item-sub">DM / abordagem no Instagram</div></div>
-          </label>
-          <label class="radio-item">
-            <input type="radio" name="origem" value="Evento / Networking">
-            <div><div class="radio-item-text">Evento / Networking</div><div class="radio-item-sub">REC Encontros, feiras, outros</div></div>
-          </label>
-          <label class="radio-item">
-            <input type="radio" name="origem" value="Indicação de membro">
-            <div><div class="radio-item-text">Indica&ccedil;&atilde;o</div><div class="radio-item-sub">Indicado por membro ou parceiro</div></div>
-          </label>
-          <label class="radio-item">
-            <input type="radio" name="origem" value="Inbound (nos procurou)">
-            <div><div class="radio-item-text">Inbound</div><div class="radio-item-sub">Nos procurou diretamente</div></div>
-          </label>
+        <div class="choice-group">
+          <label class="choice-item"><input type="radio" name="origem" value="Prospecção ativa (Instagram)"><div><div class="choice-label">Prospecção ativa</div><div class="choice-sub">DM / abordagem no Instagram</div></div></label>
+          <label class="choice-item"><input type="radio" name="origem" value="Evento / Networking"><div><div class="choice-label">Evento / Networking</div><div class="choice-sub">REC Encontros, feiras, outros</div></div></label>
+          <label class="choice-item"><input type="radio" name="origem" value="Indicação de membro"><div><div class="choice-label">Indicação</div><div class="choice-sub">Indicado por membro ou parceiro</div></div></label>
+          <label class="choice-item"><input type="radio" name="origem" value="Inbound (nos procurou)"><div><div class="choice-label">Inbound</div><div class="choice-sub">Nos procurou diretamente</div></div></label>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- BLOCO 3: O QUE ANALISAR -->
+  <!-- BLOCO 3 -->
   <div class="form-section">
-    <div class="form-section-header">
-      <div class="section-num">3</div>
-      <div>
-        <div class="section-title">O que precisa ser analisado? <span style="color:var(--red)">*</span></div>
-        <div class="section-desc">Selecione todos os canais e frentes que devem ser cobertos no diagn&oacute;stico</div>
-      </div>
+    <div class="section-header">
+      <div class="section-num cyan">3</div>
+      <div><div class="section-title">O que precisa ser analisado? <span style="color:var(--red)">*</span></div><div class="section-desc">Selecione todos os canais que devem ser cobertos no diagnóstico</div></div>
     </div>
-
-    <div class="check-grid">
-      <label class="check-item">
-        <input type="checkbox" name="canais" value="Instagram">
-        <div class="check-item-text">&#128247; <strong>Instagram</strong><br><span class="check-item-sub">Seguidores, posts, Reels, engajamento, posicionamento</span></div>
-      </label>
-      <label class="check-item">
-        <input type="checkbox" name="canais" value="Facebook">
-        <div class="check-item-text">&#128100; <strong>Facebook</strong><br><span class="check-item-sub">P&aacute;gina, curtidas, frequ&ecirc;ncia, alcance org&acirc;nico</span></div>
-      </label>
-      <label class="check-item">
-        <input type="checkbox" name="canais" value="Google Empresa (GMB)">
-        <div class="check-item-text">&#127758; <strong>Google Empresa (GMB)</strong><br><span class="check-item-sub">Perfil, avalia&ccedil;&otilde;es, postagens, fotos, posicionamento local</span></div>
-      </label>
-      <label class="check-item">
-        <input type="checkbox" name="canais" value="Meta Ads (Tráfego Pago)">
-        <div class="check-item-text">&#128202; <strong>Meta Ads &mdash; Tr&aacute;fego Pago</strong><br><span class="check-item-sub">Biblioteca de an&uacute;ncios, campanhas ativas, criativo</span></div>
-      </label>
-      <label class="check-item">
-        <input type="checkbox" name="canais" value="TikTok">
-        <div class="check-item-text">&#127925; <strong>TikTok</strong><br><span class="check-item-sub">Perfil, seguidores, conte&uacute;do, potencial de alcance</span></div>
-      </label>
-      <label class="check-item">
-        <input type="checkbox" name="canais" value="Site / SEO">
-        <div class="check-item-text">&#128187; <strong>Site / SEO</strong><br><span class="check-item-sub">Presen&ccedil;a online, velocidade, conte&uacute;do, ranqueamento</span></div>
-      </label>
-      <label class="check-item">
-        <input type="checkbox" name="canais" value="YouTube">
-        <div class="check-item-text">&#9654; <strong>YouTube</strong><br><span class="check-item-sub">Canal, inscritos, freq&uuml;&ecirc;ncia de v&iacute;deos, autoridade</span></div>
-      </label>
-      <label class="check-item">
-        <input type="checkbox" name="canais" value="LinkedIn">
-        <div class="check-item-text">&#128188; <strong>LinkedIn</strong><br><span class="check-item-sub">Perfil da empresa, posi&ccedil;&atilde;o, presen&ccedil;a profissional</span></div>
-      </label>
+    <div class="choice-grid-2">
+      <label class="choice-item"><input type="checkbox" name="canais" value="Instagram"><div><div class="choice-label">📸 Instagram</div><div class="choice-sub">Seguidores, posts, Reels, engajamento, posicionamento</div></div></label>
+      <label class="choice-item"><input type="checkbox" name="canais" value="Facebook"><div><div class="choice-label">👤 Facebook</div><div class="choice-sub">Página, curtidas, frequência, alcance orgânico</div></div></label>
+      <label class="choice-item"><input type="checkbox" name="canais" value="Google Empresa (GMB)"><div><div class="choice-label">🌎 Google Empresa (GMB)</div><div class="choice-sub">Perfil, avaliações, postagens, fotos, posicionamento local</div></div></label>
+      <label class="choice-item"><input type="checkbox" name="canais" value="Meta Ads (Tráfego Pago)"><div><div class="choice-label">📊 Meta Ads — Tráfego Pago</div><div class="choice-sub">Biblioteca de anúncios, campanhas ativas, criativo</div></div></label>
+      <label class="choice-item"><input type="checkbox" name="canais" value="TikTok"><div><div class="choice-label">🎵 TikTok</div><div class="choice-sub">Perfil, seguidores, conteúdo, potencial de alcance</div></div></label>
+      <label class="choice-item"><input type="checkbox" name="canais" value="Site / SEO"><div><div class="choice-label">💻 Site / SEO</div><div class="choice-sub">Presença online, velocidade, conteúdo, ranqueamento</div></div></label>
+      <label class="choice-item"><input type="checkbox" name="canais" value="YouTube"><div><div class="choice-label">▶ YouTube</div><div class="choice-sub">Canal, inscritos, frequência de vídeos, autoridade</div></div></label>
+      <label class="choice-item"><input type="checkbox" name="canais" value="LinkedIn"><div><div class="choice-label">💼 LinkedIn</div><div class="choice-sub">Perfil da empresa, posição, presença profissional</div></div></label>
     </div>
   </div>
 
-  <!-- BLOCO 4: OBSERVAÇÕES -->
+  <!-- BLOCO 4 -->
   <div class="form-section">
-    <div class="form-section-header">
+    <div class="section-header">
       <div class="section-num purple">4</div>
-      <div>
-        <div class="section-title">Observa&ccedil;&otilde;es sobre o perfil</div>
-        <div class="section-desc">Informa&ccedil;&otilde;es que voc&ecirc; j&aacute; sabe e que ajudam na hora de criar o diagn&oacute;stico</div>
-      </div>
+      <div><div class="section-title">Observações sobre o perfil</div><div class="section-desc">Informações que você já sabe e que ajudam na hora de criar o diagnóstico</div></div>
     </div>
-
     <div class="field-group">
-      <label class="field-label">O cliente j&aacute; investe em tr&aacute;fego pago atualmente?</label>
-      <div class="radio-grid">
-        <label class="radio-item"><input type="radio" name="trafego_atual" value="Sim, investe"><div><div class="radio-item-text">Sim, j&aacute; investe</div></div></label>
-        <label class="radio-item"><input type="radio" name="trafego_atual" value="Não, nunca investiu"><div><div class="radio-item-text">N&atilde;o, nunca investiu</div></div></label>
-        <label class="radio-item"><input type="radio" name="trafego_atual" value="Já investiu, parou"><div><div class="radio-item-text">J&aacute; investiu, mas parou</div></div></label>
-        <label class="radio-item"><input type="radio" name="trafego_atual" value="Não sei informar"><div><div class="radio-item-text">N&atilde;o sei informar</div></div></label>
+      <label class="field-label">O cliente já investe em tráfego pago atualmente?</label>
+      <div class="choice-grid-2">
+        <label class="choice-item"><input type="radio" name="trafego_atual" value="Sim, investe"><div><div class="choice-label">Sim, já investe</div></div></label>
+        <label class="choice-item"><input type="radio" name="trafego_atual" value="Não, nunca investiu"><div><div class="choice-label">Não, nunca investiu</div></div></label>
+        <label class="choice-item"><input type="radio" name="trafego_atual" value="Já investiu, parou"><div><div class="choice-label">Já investiu, mas parou</div></div></label>
+        <label class="choice-item"><input type="radio" name="trafego_atual" value="Não sei informar"><div><div class="choice-label">Não sei informar</div></div></label>
       </div>
     </div>
-
     <div class="field-group">
       <label class="field-label">O cliente tem site?</label>
-      <div class="radio-grid">
-        <label class="radio-item"><input type="radio" name="tem_site" value="Sim, tem site"><div><div class="radio-item-text">Sim, tem site</div></div></label>
-        <label class="radio-item"><input type="radio" name="tem_site" value="Não tem site"><div><div class="radio-item-text">N&atilde;o tem site</div></div></label>
-        <label class="radio-item"><input type="radio" name="tem_site" value="Tem apenas landing page"><div><div class="radio-item-text">Tem landing page</div></div></label>
-        <label class="radio-item"><input type="radio" name="tem_site" value="Não sei informar"><div><div class="radio-item-text">N&atilde;o sei informar</div></div></label>
+      <div class="choice-grid-2">
+        <label class="choice-item"><input type="radio" name="tem_site" value="Sim, tem site"><div><div class="choice-label">Sim, tem site</div></div></label>
+        <label class="choice-item"><input type="radio" name="tem_site" value="Não tem site"><div><div class="choice-label">Não tem site</div></div></label>
+        <label class="choice-item"><input type="radio" name="tem_site" value="Tem apenas landing page"><div><div class="choice-label">Tem landing page</div></div></label>
+        <label class="choice-item"><input type="radio" name="tem_site" value="Não sei informar"><div><div class="choice-label">Não sei informar</div></div></label>
       </div>
     </div>
-
     <div class="field-group">
-      <label class="field-label">O que o cliente deseja? <span style="font-weight:400;color:var(--gray-400)">(pode selecionar mais de um)</span></label>
-      <div class="check-grid">
-        <label class="check-item"><input type="checkbox" name="objetivo" value="Gerar mais clientes / agendamentos"><div class="check-item-text"><strong>Gerar mais clientes</strong><br><span class="check-item-sub">Mais agendamentos, consultas, vendas</span></div></label>
-        <label class="check-item"><input type="checkbox" name="objetivo" value="Crescer no Instagram / melhorar presença"><div class="check-item-text"><strong>Crescer no Instagram</strong><br><span class="check-item-sub">Mais seguidores, engajamento e presen&ccedil;a</span></div></label>
-        <label class="check-item"><input type="checkbox" name="objetivo" value="Estruturar marketing do zero"><div class="check-item-text"><strong>Estruturar marketing do zero</strong><br><span class="check-item-sub">Ainda n&atilde;o tem nada organizado</span></div></label>
-        <label class="check-item"><input type="checkbox" name="objetivo" value="Investir em tráfego pago"><div class="check-item-text"><strong>Investir em tr&aacute;fego pago</strong><br><span class="check-item-sub">Quer iniciar ou melhorar Meta Ads / Google</span></div></label>
-        <label class="check-item"><input type="checkbox" name="objetivo" value="Melhorar posicionamento no Google"><div class="check-item-text"><strong>Aparecer no Google</strong><br><span class="check-item-sub">GMB, SEO local, buscas na regi&atilde;o</span></div></label>
-        <label class="check-item"><input type="checkbox" name="objetivo" value="Produzir conteúdo profissional"><div class="check-item-text"><strong>Produzir conte&uacute;do profissional</strong><br><span class="check-item-sub">Fotos, v&iacute;deos e posts com qualidade</span></div></label>
-        <label class="check-item"><input type="checkbox" name="objetivo" value="Aumentar autoridade / reconhecimento de marca"><div class="check-item-text"><strong>Aumentar autoridade</strong><br><span class="check-item-sub">Ser referência no segmento e na cidade</span></div></label>
-        <label class="check-item"><input type="checkbox" name="objetivo" value="Outro (descrever em obs)"><div class="check-item-text"><strong>Outro</strong><br><span class="check-item-sub">Descrever nas observa&ccedil;&otilde;es abaixo</span></div></label>
+      <label class="field-label">O que o cliente deseja? <span style="font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0">(pode selecionar mais de um)</span></label>
+      <div class="choice-grid-2">
+        <label class="choice-item"><input type="checkbox" name="objetivo" value="Gerar mais clientes / agendamentos"><div><div class="choice-label">Gerar mais clientes</div><div class="choice-sub">Mais agendamentos, consultas, vendas</div></div></label>
+        <label class="choice-item"><input type="checkbox" name="objetivo" value="Crescer no Instagram / melhorar presença"><div><div class="choice-label">Crescer no Instagram</div><div class="choice-sub">Mais seguidores, engajamento e presença</div></div></label>
+        <label class="choice-item"><input type="checkbox" name="objetivo" value="Estruturar marketing do zero"><div><div class="choice-label">Estruturar marketing do zero</div><div class="choice-sub">Ainda não tem nada organizado</div></div></label>
+        <label class="choice-item"><input type="checkbox" name="objetivo" value="Investir em tráfego pago"><div><div class="choice-label">Investir em tráfego pago</div><div class="choice-sub">Quer iniciar ou melhorar Meta Ads / Google</div></div></label>
+        <label class="choice-item"><input type="checkbox" name="objetivo" value="Melhorar posicionamento no Google"><div><div class="choice-label">Aparecer no Google</div><div class="choice-sub">GMB, SEO local, buscas na região</div></div></label>
+        <label class="choice-item"><input type="checkbox" name="objetivo" value="Produzir conteúdo profissional"><div><div class="choice-label">Produzir conteúdo profissional</div><div class="choice-sub">Fotos, vídeos e posts com qualidade</div></div></label>
+        <label class="choice-item"><input type="checkbox" name="objetivo" value="Aumentar autoridade / reconhecimento de marca"><div><div class="choice-label">Aumentar autoridade</div><div class="choice-sub">Ser referência no segmento e na cidade</div></div></label>
+        <label class="choice-item"><input type="checkbox" name="objetivo" value="Outro (descrever em obs)"><div><div class="choice-label">Outro</div><div class="choice-sub">Descrever nas observações abaixo</div></div></label>
       </div>
     </div>
-
     <div class="field-group">
-      <label class="field-label" for="obs">Observa&ccedil;&otilde;es livres sobre o perfil, o cliente ou o que voc&ecirc; j&aacute; sabe</label>
+      <label class="field-label" for="obs">Observações livres sobre o perfil, o cliente ou o que você já sabe</label>
       <textarea id="obs" placeholder="Ex: Google fraco, Instagram tem material mas sem estratégia, cliente quer foco em estética..."></textarea>
-      <div class="field-hint">Quanto mais detalhe voc&ecirc; colocar aqui, mais preciso e r&aacute;pido fica o diagn&oacute;stico.</div>
+      <div class="field-hint">Quanto mais detalhe você colocar aqui, mais preciso e rápido fica o diagnóstico.</div>
     </div>
   </div>
 
-  <!-- BLOCO 5: PROPOSTA -->
+  <!-- BLOCO 5 -->
   <div class="form-section">
-    <div class="form-section-header">
+    <div class="section-header">
       <div class="section-num green">5</div>
-      <div>
-        <div class="section-title">Proposta Comercial</div>
-        <div class="section-desc">Defina se o diagn&oacute;stico deve incluir uma proposta de contratação</div>
-      </div>
+      <div><div class="section-title">Proposta Comercial</div><div class="section-desc">Defina se o diagnóstico deve incluir uma proposta de contratação</div></div>
     </div>
-
     <div class="field-group">
-      <label class="field-label">Este diagn&oacute;stico deve incluir proposta de pre&ccedil;o? <span class="req">*</span></label>
-      <div class="radio-grid">
-        <label class="radio-item" style="border-color:var(--green);background:#F0FDF4;">
-          <input type="radio" name="com_proposta" value="Sim" id="prop_sim">
-          <div><div class="radio-item-text" style="color:var(--green-dark);">&#10003; Sim, incluir proposta</div><div class="radio-item-sub">Diagn&oacute;stico com plano e valores</div></div>
-        </label>
-        <label class="radio-item">
-          <input type="radio" name="com_proposta" value="Não" id="prop_nao">
-          <div><div class="radio-item-text">&#10005; N&atilde;o, apenas diagn&oacute;stico</div><div class="radio-item-sub">Sem se&ccedil;&atilde;o de proposta</div></div>
-        </label>
+      <label class="field-label">Este diagnóstico deve incluir proposta de preço? <span class="req">*</span></label>
+      <div class="choice-grid-2">
+        <label class="choice-item proposta-yes"><input type="radio" name="com_proposta" value="Sim" id="prop_sim"><div><div class="choice-label">✓ Sim, incluir proposta</div><div class="choice-sub">Diagnóstico com plano e valores</div></div></label>
+        <label class="choice-item"><input type="radio" name="com_proposta" value="Não" id="prop_nao"><div><div class="choice-label">✕ Não, apenas diagnóstico</div><div class="choice-sub">Sem seção de proposta</div></div></label>
       </div>
     </div>
-
     <div class="proposta-section" id="proposta_detalhes">
-      <div style="font-size:13px;font-weight:700;color:var(--green-dark);margin-bottom:14px;">&#128176; Qual plano deve aparecer na proposta?</div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-
-        <label class="plan-item">
-          <input type="radio" name="plano" value="Plano 1 — Gestão de Social Media + Captação de Conteúdo — R$ 1.500/mês">
-          <div>
-            <div class="plan-price">R$ 1.500/m&ecirc;s</div>
-            <div class="plan-name">Plano 1 &mdash; Social Media + Capta&ccedil;&atilde;o de Conte&uacute;do</div>
-            <div class="plan-desc">Planejamento, posts, capta&ccedil;&atilde;o de fotos e v&iacute;deos, edi&ccedil;&atilde;o e organiza&ccedil;&atilde;o do perfil</div>
-          </div>
-        </label>
-
-        <label class="plan-item">
-          <input type="radio" name="plano" value="Plano 2 — Gestão de Social Media + Captação de Conteúdo + Tráfego Pago Meta — R$ 2.500/mês">
-          <div>
-            <div class="plan-price">R$ 2.500/m&ecirc;s</div>
-            <div class="plan-name">Plano 2 &mdash; Social Media + Capta&ccedil;&atilde;o + Tr&aacute;fego Pago Meta</div>
-            <div class="plan-desc">Tudo do Plano 1 + at&eacute; 3 campanhas no Meta Ads por m&ecirc;s</div>
-          </div>
-        </label>
-
-        <label class="plan-item">
-          <input type="radio" name="plano" value="Plano 3 — Gestão de Social Media + Captação de Conteúdo + Tráfego Pago Meta + Google Empresa — R$ 2.900/mês">
-          <div>
-            <div class="plan-price">R$ 2.900/m&ecirc;s</div>
-            <div class="plan-name">Plano 3 &mdash; Social Media + Capta&ccedil;&atilde;o + Tr&aacute;fego Meta + Google Empresa</div>
-            <div class="plan-desc">Tudo do Plano 2 + gest&atilde;o completa do Google Empresa (GMB) &mdash; add-on TikTok +R$300</div>
-          </div>
-        </label>
-
-        <label class="plan-item">
-          <input type="radio" name="plano" value="Plano 4 — Gestão de Social Media + Captação de Conteúdo + Tráfego Pago + Google Empresa + Suporte Comercial — R$ 3.800/mês">
-          <div>
-            <div class="plan-price">R$ 3.800/m&ecirc;s</div>
-            <div class="plan-name">Plano 4 &mdash; Plano Completo + Suporte Comercial</div>
-            <div class="plan-desc">Tudo do Plano 3 + estrat&eacute;gia comercial, follow-up e marketing de relacionamento &mdash; add-on TikTok +R$300</div>
-          </div>
-        </label>
-
-        <label class="plan-item" id="plano_personalizado_label">
-          <input type="radio" name="plano" value="Personalizado" id="plano_personalizado">
-          <div>
-            <div class="plan-price" style="color:var(--gray-600);">Personalizado</div>
-            <div class="plan-name">Valor e escopo customizados</div>
-            <div class="plan-desc">Descreva o que foi combinado no campo abaixo</div>
-          </div>
-        </label>
-
-        <div class="custom-plan-obs" id="custom_plan_obs">
-          <label for="plano_obs_custom">Descreva o plano personalizado (valor, o que inclui, condições)</label>
-          <textarea id="plano_obs_custom" placeholder="Ex: R$ 2.100/mês — Social Media + Meta Ads com orçamento de R$ 600 de verba. Contrato trimestral." style="min-height:72px;"></textarea>
-        </div>
-
+      <div class="proposta-title">💰 Qual plano deve aparecer na proposta?</div>
+      <div class="plans-list">
+        <label class="plan-item"><input type="radio" name="plano" value="Plano 1 — Gestão de Social Media + Captação de Conteúdo — R$ 1.500/mês"><div><div class="plan-price">R$ 1.500<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div><div class="plan-name">Plano 1 — Social Media + Captação de Conteúdo</div><div class="plan-desc">Planejamento, posts, captação de fotos e vídeos, edição e organização do perfil</div></div></label>
+        <label class="plan-item"><input type="radio" name="plano" value="Plano 2 — Gestão de Social Media + Captação de Conteúdo + Tráfego Pago Meta — R$ 2.500/mês"><div><div class="plan-price">R$ 2.500<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div><div class="plan-name">Plano 2 — Social Media + Captação + Tráfego Pago Meta</div><div class="plan-desc">Tudo do Plano 1 + até 3 campanhas no Meta Ads por mês</div></div></label>
+        <label class="plan-item"><input type="radio" name="plano" value="Plano 3 — Gestão de Social Media + Captação de Conteúdo + Tráfego Pago Meta + Google Empresa — R$ 2.900/mês"><div><div class="plan-price">R$ 2.900<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div><div class="plan-name">Plano 3 — Social Media + Captação + Tráfego Meta + Google Empresa</div><div class="plan-desc">Tudo do Plano 2 + gestão completa do Google Empresa (GMB)</div></div></label>
+        <label class="plan-item"><input type="radio" name="plano" value="Plano 4 — Gestão de Social Media + Captação de Conteúdo + Tráfego Pago + Google Empresa + Suporte Comercial — R$ 3.800/mês"><div><div class="plan-price">R$ 3.800<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div><div class="plan-name">Plano 4 — Plano Completo + Suporte Comercial</div><div class="plan-desc">Tudo do Plano 3 + estratégia comercial, follow-up e marketing de relacionamento</div></div></label>
+        <label class="plan-item" id="plano_personalizado_label"><input type="radio" name="plano" value="Personalizado" id="plano_personalizado"><div><div class="plan-price" style="color:var(--text-secondary);font-size:15px">Personalizado</div><div class="plan-name">Valor e escopo customizados</div><div class="plan-desc">Descreva o que foi combinado no campo abaixo</div></div></label>
+        <div class="custom-plan-obs" id="custom_plan_obs"><label for="plano_obs_custom">Descreva o plano personalizado (valor, o que inclui, condições)</label><textarea id="plano_obs_custom" placeholder="Ex: R$ 2.100/mês — Social Media + Meta Ads com orçamento de R$ 600 de verba." style="min-height:72px;"></textarea></div>
       </div>
     </div>
   </div>
 
-  <!-- BLOCO 6: URGÊNCIA -->
+  <!-- BLOCO 6 -->
   <div class="form-section">
-    <div class="form-section-header">
+    <div class="section-header">
       <div class="section-num red">6</div>
-      <div>
-        <div class="section-title">Urg&ecirc;ncia e Entrega</div>
-        <div class="section-desc">Para organizar a fila de diagn&oacute;sticos da equipe</div>
+      <div><div class="section-title">Urgência e Entrega</div><div class="section-desc">Para organizar a fila de diagnósticos da equipe</div></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Qual a urgência para entrega deste diagnóstico? <span class="req">*</span></label>
+      <div class="choice-group">
+        <label class="choice-item urgent"><input type="radio" name="urgencia" value="Urgente — reunião em menos de 24h"><div><div class="choice-label">🔴 Urgente — reunião em menos de 24h</div></div></label>
+        <label class="choice-item warning"><input type="radio" name="urgencia" value="Normal — dentro de 2 a 3 dias"><div><div class="choice-label">🟠 Normal — dentro de 2 a 3 dias</div></div></label>
+        <label class="choice-item"><input type="radio" name="urgencia" value="Sem pressa — dentro de 5 dias"><div><div class="choice-label">🟢 Sem pressa — dentro de 5 dias</div></div></label>
       </div>
     </div>
-
-    <div class="field-group">
-      <label class="field-label">Qual a urg&ecirc;ncia para entrega deste diagn&oacute;stico? <span class="req">*</span></label>
-      <div class="radio-group">
-        <label class="radio-item" style="border-color:var(--red);background:var(--red-light);">
-          <input type="radio" name="urgencia" value="Urgente — reunião em menos de 24h">
-          <div><div class="radio-item-text" style="color:#B91C1C;">&#128308; Urgente &mdash; reuni&atilde;o em menos de 24h</div></div>
-        </label>
-        <label class="radio-item" style="border-color:var(--orange);background:var(--orange-light);">
-          <input type="radio" name="urgencia" value="Normal — dentro de 2 a 3 dias">
-          <div><div class="radio-item-text" style="color:#9A3412;">&#128992; Normal &mdash; dentro de 2 a 3 dias</div></div>
-        </label>
-        <label class="radio-item">
-          <input type="radio" name="urgencia" value="Sem pressa — dentro de 5 dias">
-          <div><div class="radio-item-text">&#128994; Sem pressa &mdash; dentro de 5 dias</div></div>
-        </label>
-      </div>
-    </div>
-
-    <div class="field-group">
-      <label class="field-label" for="data_reuniao">Data / hor&aacute;rio da reuni&atilde;o com o cliente (se j&aacute; marcada)</label>
-      <input type="text" id="data_reuniao" placeholder="Ex: Sexta-feira, 25/04 às 14h">
-    </div>
-
-    <div class="field-group">
-      <label class="field-label" for="obs_extra">Alguma informa&ccedil;&atilde;o extra importante que quem vai criar o diagn&oacute;stico precisa saber?</label>
-      <textarea id="obs_extra" placeholder="Ex: Cliente é bem exigente, prefere tom mais direto. Concorrente principal é X. Tem interesse especial em TikTok..." style="min-height:70px;"></textarea>
-    </div>
+    <div class="field-group"><label class="field-label" for="data_reuniao">Data / horário da reunião com o cliente (se já marcada)</label><input type="text" id="data_reuniao" placeholder="Ex: Sexta-feira, 25/04 às 14h"></div>
+    <div class="field-group"><label class="field-label" for="obs_extra">Informação extra importante para quem vai criar o diagnóstico</label><textarea id="obs_extra" placeholder="Ex: Cliente é bem exigente, prefere tom mais direto. Concorrente principal é X..." style="min-height:72px;"></textarea></div>
   </div>
 
+  <!-- SUBMIT -->
   <div class="submit-area">
     <button class="btn-generate" id="btn_enviar" onclick="enviarSolicitacao()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-      Gerar Resumo e Enviar
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Gerar Diagnóstico e Enviar
     </button>
-    <div class="submit-hint">O resumo ser&aacute; gerado na tela e enviado por e-mail automaticamente</div>
+    <div class="submit-hint">Salva no banco, envia e-mail <strong style="color:var(--cyan)">e gera o diagnóstico em PDF automaticamente</strong></div>
     <div class="status-bar" id="status_bar"></div>
   </div>
 
   <div class="output-box" id="output_box">
-    <div class="output-title">&#128203; Resumo da solicitação</div>
+    <div class="output-title">📋 Resumo da solicitação</div>
     <div class="output-text" id="output_text"></div>
     <br>
-    <button class="btn-copy" onclick="copiarTexto()">&#128203; Copiar texto</button>
-    <div class="copied-msg" id="copied_msg">&#10003; Copiado!</div>
+    <button class="btn-copy" onclick="copiarTexto()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      Copiar texto
+    </button>
+    <div class="copied-msg" id="copied_msg">✓ Copiado!</div>
   </div>
-
 </div>
 
-<footer style="background:var(--gray-900);color:var(--gray-400);text-align:center;padding:20px;font-size:12px;">
-  Formul&aacute;rio interno &middot; <strong style="color:var(--cyan);">R.E.C. HUB de Neg&oacute;cios</strong> &middot; recolaborativo.com.br
-</footer>
+<footer>Formulário interno · <strong>R.E.C. HUB de Negócios</strong> · recolaborativo.com.br</footer>
+
+<!-- ═══════════════════════════════════════════
+     LOADING OVERLAY
+════════════════════════════════════════════ -->
+<div class="loading-overlay" id="loading_overlay">
+  <div class="loading-card">
+    <div class="loading-orbit">
+      <div class="loading-orbit-ring"></div>
+      <div class="loading-orbit-ring"></div>
+      <div class="loading-orbit-ring"></div>
+      <div class="loading-orbit-center"><div class="loading-orbit-dot"></div></div>
+    </div>
+    <div class="loading-title">Criando seu Diagnóstico</div>
+    <div class="loading-subtitle" id="loading_subtitle">A IA está analisando a presença digital do lead...</div>
+    <div class="loading-steps">
+      <div class="loading-step" id="step_1">
+        <div class="step-icon">💾</div>
+        <div class="step-text">Salvando dados no banco</div>
+        <div class="step-check">✓</div>
+      </div>
+      <div class="loading-step" id="step_2">
+        <div class="step-icon">📧</div>
+        <div class="step-text">Enviando notificação por e-mail</div>
+        <div class="step-check">✓</div>
+      </div>
+      <div class="loading-step" id="step_3">
+        <div class="step-icon">🤖</div>
+        <div class="step-text">IA analisando presença digital</div>
+        <div class="step-check">✓</div>
+      </div>
+      <div class="loading-step" id="step_4">
+        <div class="step-icon">✍️</div>
+        <div class="step-text">Gerando diagnóstico personalizado</div>
+        <div class="step-check">✓</div>
+      </div>
+      <div class="loading-step" id="step_5">
+        <div class="step-icon">📄</div>
+        <div class="step-text">Preparando documento para impressão</div>
+        <div class="step-check">✓</div>
+      </div>
+    </div>
+    <div class="loading-progress-wrap">
+      <div class="loading-progress-bar" id="loading_prog"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     API KEY MODAL
+════════════════════════════════════════════ -->
+<div class="modal-overlay" id="api_modal">
+  <div class="modal-card">
+    <div class="modal-icon">🔑</div>
+    <div class="modal-title">Configurar IA</div>
+    <div class="modal-sub">Cole sua chave da API Anthropic (Claude). Ela fica salva apenas no seu navegador e nunca é compartilhada.</div>
+    <div class="modal-input-wrap">
+      <label>Chave da API Anthropic</label>
+      <input type="password" id="api_key_input" placeholder="sk-ant-api03-..." style="font-family:monospace">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="fecharModalApi()">Cancelar</button>
+      <button class="btn-modal-primary" onclick="salvarApiKey()">Salvar e ativar</button>
+    </div>
+    <div class="modal-note">A chave é usada diretamente do seu navegador para chamar a API da Anthropic.<br>Nunca é enviada para servidores do REC HUB.</div>
+  </div>
+</div>
 
 <script>
-  // ─── CONFIG ───────────────────────────────────────────────
-  var SUPABASE_URL  = 'https://dissknbpwxvhkjltuzya.supabase.co';
-  var SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpc3NrbmJwd3h2aGtqbHR1enlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzOTM4OTYsImV4cCI6MjA5MTk2OTg5Nn0.VcAUjRZ9thxNCJZ2QZ6IUQkFyzZ99cDB5ADdvu00a7M';
-  var EMAIL_DESTINO = 'relacionamento.rechub@gmail.com';
-  // ──────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════ */
+var SUPABASE_URL  = 'https://dissknbpwxvhkjltuzya.supabase.co';
+var SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpc3NrbmJwd3h2aGtqbHR1enlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzOTM4OTYsImV4cCI6MjA5MTk2OTg5Nn0.VcAUjRZ9thxNCJZ2QZ6IUQkFyzZ99cDB5ADdvu00a7M';
+var EMAIL_DESTINO = 'relacionamento.rechub@gmail.com';
+var CLAUDE_MODEL  = 'claude-sonnet-4-6';
+var ANTHROPIC_API_KEY = 'sk-ant-api03-QGirYYk8rXM2ypaI1FGDHfAVJvUnOyz6elaPVscNcpI5z6g6xC9T7WSaI6QZ5xL35atqGmQQ--HSVdwAA';
+var PRICING = { input: 0.000003, output: 0.000015 };
+var lastAnalysisCost = null;
 
-  // Mostrar/ocultar seção de proposta
-  document.querySelectorAll('input[name="com_proposta"]').forEach(function(el) {
-    el.addEventListener('change', function() {
-      var sec = document.getElementById('proposta_detalhes');
-      sec.classList.toggle('visible', this.value === 'Sim');
+/* ═══════════════════════════════════════════
+   API KEY MANAGEMENT
+═══════════════════════════════════════════ */
+function getApiKey() { return ANTHROPIC_API_KEY; }
+function salvarApiKey() { }
+function abrirModalApi() { }
+function fecharModalApi() { }
+function atualizarStatusApi() {
+  var ok = !!getApiKey();
+  document.getElementById('api_dot').className = 'api-status-dot ' + (ok ? 'ok' : 'off');
+  document.getElementById('api_btn_label').textContent = '✓ IA ativa';
+}
+atualizarStatusApi();
+
+/* ═══════════════════════════════════════════
+   FETCH ANTHROPIC CREDITS
+═══════════════════════════════════════════ */
+async function carregarCreditos() {
+  try {
+    var resp = await fetch('https://api.anthropic.com/v1/usage', {
+      method: 'GET',
+      headers: {
+        'x-api-key': getApiKey(),
+        'anthropic-version': '2023-06-01'
+      }
+    });
+    if (!resp.ok) throw new Error('Erro ao buscar créditos');
+    var data = await resp.json();
+    return data.total_quota || 0;
+  } catch(e) {
+    return null;
+  }
+}
+
+async function atualizarCreditosHeader() {
+  var creditos = await carregarCreditos();
+  var el = document.getElementById('creditos_display');
+  if (!el) return;
+  if (creditos === null) {
+    el.textContent = 'Créditos: —';
+    el.style.color = 'var(--text-muted)';
+  } else {
+    var cred_usd = (creditos / 1000000).toFixed(2);
+    el.textContent = 'Créditos: $' + cred_usd;
+    el.style.color = creditos < 5 ? '#EF4444' : 'var(--text-secondary)';
+  }
+}
+setTimeout(atualizarCreditosHeader, 500);
+
+/* ═══════════════════════════════════════════
+   SCROLL ANIMATIONS
+═══════════════════════════════════════════ */
+(function() {
+  var obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (!entry.isIntersecting) return;
+      var el = entry.target, delay = el.dataset.delay || 0;
+      setTimeout(function() { el.classList.add('visible'); }, +delay);
+      obs.unobserve(el);
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.form-section').forEach(function(el, i) { el.dataset.delay = i * 80; obs.observe(el); });
+})();
+
+/* ═══════════════════════════════════════════
+   PROGRESS BAR
+═══════════════════════════════════════════ */
+function updateProgress() {
+  var filled = 0;
+  ['nome','instagram','segmento','cidade'].forEach(function(id) { if ((document.getElementById(id)||{}).value) filled++; });
+  ['responsavel','origem','urgencia','com_proposta'].forEach(function(n) { if (document.querySelector('input[name="'+n+'"]:checked')) filled++; });
+  if (document.querySelectorAll('input[name="canais"]:checked').length) filled++;
+  document.getElementById('progress_fill').style.width = Math.round(filled/9*100) + '%';
+}
+document.addEventListener('input', updateProgress);
+document.addEventListener('change', updateProgress);
+
+/* ═══════════════════════════════════════════
+   VISUAL SELECTION
+═══════════════════════════════════════════ */
+document.querySelectorAll('.choice-item input[type="radio"]').forEach(function(inp) {
+  inp.addEventListener('change', function() {
+    document.querySelectorAll('input[name="'+this.name+'"]').forEach(function(el) {
+      var item = el.closest('.choice-item'); if (!item) return;
+      item.style.borderColor = el.checked ? 'rgba(6,182,212,0.5)' : '';
+      item.style.background  = el.checked ? 'rgba(6,182,212,0.07)' : '';
     });
   });
-
-  // Mostrar/ocultar campo de obs do plano personalizado
-  document.querySelectorAll('input[name="plano"]').forEach(function(el) {
-    el.addEventListener('change', function() {
-      var obs = document.getElementById('custom_plan_obs');
-      obs.classList.toggle('visible', this.value === 'Personalizado');
-    });
+});
+document.querySelectorAll('.choice-item input[type="checkbox"]').forEach(function(inp) {
+  inp.addEventListener('change', function() {
+    var item = this.closest('.choice-item'); if (!item) return;
+    item.style.borderColor = this.checked ? 'rgba(6,182,212,0.5)' : '';
+    item.style.background  = this.checked ? 'rgba(6,182,212,0.07)' : '';
   });
+});
+document.querySelectorAll('.plan-item input').forEach(function(inp) {
+  inp.addEventListener('change', function() {
+    document.querySelectorAll('.plan-item').forEach(function(i) { i.classList.remove('selected'); });
+    this.closest('.plan-item').classList.add('selected');
+  });
+});
+document.querySelectorAll('input[name="com_proposta"]').forEach(function(el) {
+  el.addEventListener('change', function() { document.getElementById('proposta_detalhes').classList.toggle('visible', this.value === 'Sim'); });
+});
+document.querySelectorAll('input[name="plano"]').forEach(function(el) {
+  el.addEventListener('change', function() { document.getElementById('custom_plan_obs').classList.toggle('visible', this.value === 'Personalizado'); });
+});
 
-  function getChecked(name) {
-    var vals = [];
-    document.querySelectorAll('input[name="' + name + '"]:checked').forEach(function(el) { vals.push(el.value); });
-    return vals;
+/* ═══════════════════════════════════════════
+   LOADING OVERLAY
+═══════════════════════════════════════════ */
+function setStep(id, state) {
+  var el = document.getElementById(id);
+  el.classList.remove('active','done','error-step');
+  if (state) el.classList.add(state);
+}
+function setProgress(pct) { document.getElementById('loading_prog').style.width = pct + '%'; }
+function setSubtitle(txt) { document.getElementById('loading_subtitle').textContent = txt; }
+function showLoading() { document.getElementById('loading_overlay').classList.add('active'); setProgress(0); }
+function hideLoading() { document.getElementById('loading_overlay').classList.remove('active'); }
+
+/* ═══════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════ */
+function getChecked(n) { var v=[]; document.querySelectorAll('input[name="'+n+'"]:checked').forEach(function(e){v.push(e.value);}); return v; }
+function getVal(id)    { var e=document.getElementById(id); return e?e.value.trim():''; }
+function getRadio(n)   { var e=document.querySelector('input[name="'+n+'"]:checked'); return e?e.value:''; }
+function coletarDados() {
+  return {
+    nome_empresa: getVal('nome')||'(não informado)', instagram: getVal('instagram')||'(não informado)',
+    segmento: getVal('segmento')||'', cidade: getVal('cidade')||'', site: getVal('site')||'',
+    responsavel: getRadio('responsavel')||'', origem: getRadio('origem')||'',
+    canais: getChecked('canais').join(', '), trafego_atual: getRadio('trafego_atual')||'',
+    tem_site: getRadio('tem_site')||'', objetivo: getChecked('objetivo').join(', '),
+    observacoes: getVal('obs')||'', com_proposta: getRadio('com_proposta')||'Não',
+    plano: getRadio('plano')==='Personalizado' ? 'Personalizado — '+(getVal('plano_obs_custom')||'ver observações') : getRadio('plano')||'',
+    urgencia: getRadio('urgencia')||'', data_reuniao: getVal('data_reuniao')||'', obs_extra: getVal('obs_extra')||''
+  };
+}
+function gerarResumoTexto(d) {
+  var p = d.com_proposta==='Sim' ? 'Sim — '+d.plano : 'Não';
+  return '📋 SOLICITAÇÃO DE DIAGNÓSTICO DIGITAL\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n'
+    +'🏢 CLIENTE\nNome: '+d.nome_empresa+'\nInstagram: '+d.instagram+'\nSegmento: '+(d.segmento||'Não informado')+'\nCidade: '+(d.cidade||'Não informada')+'\nSite: '+(d.site||'Não informado')+'\n\n'
+    +'👤 ORIGEM\nCaptado por: '+(d.responsavel||'Não informado')+'\nComo chegou: '+(d.origem||'Não informado')+'\n\n'
+    +'🔍 O QUE ANALISAR\n'+(d.canais||'Nenhum selecionado')+'\n\n'
+    +'📊 CONTEXTO\nTráfego pago atual: '+(d.trafego_atual||'Não informado')+'\nTem site: '+(d.tem_site||'Não informado')+'\nObjetivo: '+(d.objetivo||'Não informado')+'\n\n'
+    +'📝 OBSERVAÇÕES\n'+(d.observacoes||'Nenhuma')+'\n\n'
+    +'💰 PROPOSTA\n'+p+'\n\n⏱ URGÊNCIA\n'+(d.urgencia||'Não informada')+'\nReunião: '+(d.data_reuniao||'Não marcada')+'\n\n'
+    +'📌 NOTAS ADICIONAIS\n'+(d.obs_extra||'Nenhuma')+'\n\n'
+    +'━━━━━━━━━━━━━━━━━━━━━━━━━\nR.E.C. HUB de Negócios · recolaborativo.com.br';
+}
+
+/* ═══════════════════════════════════════════
+   CLAUDE: SYSTEM PROMPT
+═══════════════════════════════════════════ */
+var SYSTEM_PROMPT = `Você é o gerador de diagnósticos digitais do R.E.C. HUB de Negócios.
+Gere um arquivo HTML completo e auto-contido — diagnóstico profissional em formato A4 imprimível.
+Retorne APENAS o HTML puro, sem markdown, sem blocos de código, sem explicações. Comece com <!DOCTYPE html>.
+
+REGRAS DE ESCRITA:
+- Sem traços como pontuação (—, –). Use vírgula ou reescreva.
+- Sem title case em frases corridas. Apenas primeira letra maiúscula e nomes próprios.
+- Sem frases genéricas. Use dados concretos e situacionais.
+- HTML entities para acentos: ã=&atilde; ç=&ccedil; ê=&ecirc; ó=&oacute; á=&aacute; é=&eacute; í=&iacute; ú=&uacute; â=&acirc; etc.
+- Tom direto, baseado no que foi informado no formulário.
+
+SISTEMA DE PÁGINAS A4 — OBRIGATÓRIO:
+Todo conteúdo deve estar dentro de div.pdf-page. Cada div = uma página A4 exata.
+NUNCA usar fluxo livre com @page + break-inside. Sempre div.pdf-page explícitos.
+
+CSS OBRIGATÓRIO (copie exatamente no <style>):
+:root{--cyan:#06B6D4;--cyan-light:#CFFAFE;--cyan-dark:#0E7490;--red:#EF4444;--red-light:#FEE2E2;--orange:#F97316;--orange-light:#FFEDD5;--green:#10B981;--green-light:#D1FAE5;--green-dark:#065F46;--gray-50:#F9FAFB;--gray-100:#F3F4F6;--gray-200:#E5E7EB;--gray-400:#9CA3AF;--gray-500:#6B7280;--gray-600:#4B5563;--gray-700:#374151;--gray-800:#1F2937;--gray-900:#111827;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#D1D5DB;color:var(--gray-900);line-height:1.6;-webkit-font-smoothing:antialiased;}
+.pdf-page{width:794px;min-height:1123px;margin:20px auto;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,0.18);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+.pdf-page.dark{background:var(--gray-900);}
+.pdf-page.gray{background:var(--gray-50);border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200);}
+.pdf-page .inner{padding:36px 40px;flex:1;display:flex;flex-direction:column;}
+@page{size:210mm 297mm;margin:0;}
+@media print{body{background:white;}.pdf-page{width:210mm;height:297mm;min-height:unset;margin:0;box-shadow:none;break-after:page;page-break-after:always;}.pdf-page:last-child{break-after:auto;page-break-after:auto;}}
+.topbar{height:5px;background:linear-gradient(90deg,var(--cyan-dark),var(--cyan),#67E8F9);}
+header{background:#fff;border-bottom:1px solid var(--gray-200);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.logo{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan-dark);}
+.date-badge{font-size:12px;color:var(--gray-400);background:var(--gray-100);padding:4px 12px;border-radius:20px;}
+.hero{flex:1;background:linear-gradient(135deg,var(--gray-900) 0%,#1e3a4a 100%);padding:48px 32px 40px;text-align:center;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.alert-badge{display:inline-block;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#FCA5A5;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:5px 16px;border-radius:20px;margin-bottom:18px;}
+.hero h1{font-size:clamp(20px,3.5vw,32px);font-weight:800;line-height:1.2;margin-bottom:10px;}
+.hero h1 span{color:var(--cyan);}
+.hero-sub{font-size:13.5px;color:#94A3B8;margin-bottom:12px;max-width:540px;}
+.hero-meta{font-size:12px;color:#64748B;margin-bottom:28px;}
+.hero-meta strong{color:#CBD5E1;}
+.channels{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:28px;}
+.ch-tag{font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;}
+.ch-instagram{background:rgba(131,58,180,.2);color:#D8B4FE;border:1px solid rgba(131,58,180,.3);}
+.ch-facebook{background:rgba(59,130,246,.2);color:#93C5FD;border:1px solid rgba(59,130,246,.3);}
+.ch-google{background:rgba(234,179,8,.2);color:#FDE047;border:1px solid rgba(234,179,8,.3);}
+.ch-meta{background:rgba(239,68,68,.2);color:#FCA5A5;border:1px solid rgba(239,68,68,.3);}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:680px;width:100%;}
+.kpi-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px 14px;text-align:center;}
+.kpi-value{font-size:clamp(18px,3vw,26px);font-weight:800;color:var(--cyan);display:block;margin-bottom:4px;}
+.kpi-label{font-size:10px;color:#CBD5E1;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:block;}
+.kpi-verdict{font-size:10px;font-weight:700;background:rgba(239,68,68,.2);color:#FCA5A5;padding:3px 8px;border-radius:10px;display:inline-block;}
+.kpi-verdict.ok{background:rgba(16,185,129,.2);color:#6EE7B7;}
+.section-header{display:flex;align-items:center;gap:14px;}
+.section-icon{width:40px;height:40px;background:var(--cyan-light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.section-icon.orange{background:var(--orange-light);}
+.section-icon.green{background:var(--green-light);}
+.section-label{font-size:11px;font-weight:700;color:var(--cyan-dark);text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;}
+.section-label.orange{color:#C2410C;}
+.section-label.green{color:var(--green-dark);}
+.section-title{font-size:clamp(16px,2.5vw,22px);font-weight:800;color:var(--gray-900);}
+.page-cont{font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.12em;margin-bottom:20px;}
+.problems{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;align-content:start;}
+.card{background:#fff;border:1px solid var(--gray-200);border-radius:12px;padding:20px;}
+.card.instagram{border-left:4px solid #A855F7;}.card.facebook{border-left:4px solid #3B82F6;}.card.google{border-left:4px solid #EAB308;}.card.meta{border-left:4px solid var(--red);}.card.tiktok{border-left:4px solid #000;}.card.site{border-left:4px solid var(--green);}
+.card-channel{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;display:inline-block;padding:2px 8px;border-radius:8px;}
+.card-channel.instagram{background:rgba(168,85,247,.1);color:#9333EA;}.card-channel.facebook{background:rgba(59,130,246,.1);color:#2563EB;}.card-channel.google{background:rgba(234,179,8,.1);color:#B45309;}.card-channel.meta{background:rgba(239,68,68,.1);color:#DC2626;}.card-channel.tiktok{background:rgba(0,0,0,.07);color:#111;}.card-channel.site{background:rgba(16,185,129,.1);color:#065F46;}
+.card-num{font-size:11px;font-weight:800;color:var(--cyan);letter-spacing:.1em;margin-bottom:6px;display:block;}
+.card-title{font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:8px;line-height:1.3;}
+.card-body{font-size:13px;color:var(--gray-600);margin-bottom:12px;line-height:1.55;}
+.card-tags{display:flex;flex-wrap:wrap;gap:5px;}
+.tag{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;display:inline-block;}
+.tag.dado{background:var(--orange-light);color:#C2410C;}.tag.impacto{background:var(--red-light);color:#B91C1C;}
+.bench-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.bench-card{background:#fff;border:1px solid var(--gray-200);border-radius:12px;padding:20px;}
+.bench-label{font-size:13px;font-weight:700;color:var(--gray-900);margin-bottom:14px;}
+.bench-compare{display:flex;align-items:stretch;gap:8px;margin-bottom:12px;}
+.bench-col{flex:1;border-radius:8px;padding:10px;}
+.bench-col.market{background:#F0FDF4;}.bench-col.you{background:var(--red-light);}
+.bench-value{font-size:15px;font-weight:800;line-height:1.2;margin-bottom:4px;}
+.bench-col.market .bench-value{color:var(--green-dark);}.bench-col.you .bench-value{color:var(--red);}
+.bench-sub{font-size:10px;line-height:1.3;}
+.bench-col.market .bench-sub{color:#166534;}.bench-col.you .bench-sub{color:#991B1B;}
+.bench-vs{font-size:11px;font-weight:800;color:var(--gray-400);flex-shrink:0;align-self:center;}
+.bench-impact{font-size:12px;color:var(--gray-600);line-height:1.5;padding-top:12px;border-top:1px solid var(--gray-100);}
+.opportunity-strip{background:linear-gradient(135deg,#FFF7ED,#FFEDD5);border:1px solid #FED7AA;border-radius:12px;padding:20px 24px;}
+.opportunity-strip h3{font-size:14px;font-weight:800;color:#9A3412;margin-bottom:8px;}
+.opportunity-strip p{font-size:13px;color:#7C2D12;line-height:1.6;}
+.deliverable-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;align-content:start;}
+.del-card{background:#fff;border:1px solid var(--gray-200);border-radius:12px;padding:20px;border-top:3px solid var(--cyan);}
+.del-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+.del-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.del-icon.ig{background:rgba(168,85,247,.1);}.del-icon.ads{background:var(--red-light);}.del-icon.goog{background:var(--green-light);}.del-icon.tik{background:rgba(0,0,0,.07);}.del-icon.web{background:var(--cyan-light);}.del-icon.gen{background:var(--gray-100);}
+.del-title{font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:4px;}
+.del-plan-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;letter-spacing:.05em;text-transform:uppercase;background:var(--cyan-light);color:var(--cyan-dark);}
+.del-body{font-size:12.5px;color:var(--gray-600);margin-bottom:12px;line-height:1.55;}
+.del-items{display:flex;flex-direction:column;gap:5px;}
+.del-item{display:flex;align-items:flex-start;gap:7px;font-size:12px;color:var(--gray-700);}
+.del-bullet{color:var(--cyan);font-weight:700;font-size:13px;flex-shrink:0;margin-top:1px;}
+.plan-box{display:flex;align-items:flex-start;gap:24px;background:linear-gradient(135deg,var(--gray-900) 0%,#1a3040 100%);border:1.5px solid var(--cyan);border-radius:14px;padding:20px 24px;margin-bottom:18px;}
+.plan-box-left{flex-shrink:0;min-width:170px;}
+.plan-box-badge{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:rgba(6,182,212,.15);color:var(--cyan);border:1px solid rgba(6,182,212,.3);border-radius:20px;padding:3px 10px;display:inline-block;margin-bottom:12px;}
+.plan-box-name{font-size:13px;font-weight:700;color:#fff;margin-bottom:10px;line-height:1.4;}
+.plan-box-price{font-size:28px;font-weight:900;color:var(--cyan);line-height:1;}
+.plan-box-price span{font-size:13px;font-weight:500;color:var(--gray-400);}
+.plan-box-items{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;align-content:start;flex:1;}
+.plan-box-items li{font-size:12px;color:#CBD5E1;display:flex;align-items:flex-start;gap:6px;line-height:1.4;}
+.plan-box-items li::before{content:"✔";color:var(--cyan);font-size:10px;flex-shrink:0;margin-top:2px;}
+.hub-why-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--cyan);background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.3);border-radius:99px;padding:4px 16px;margin-bottom:14px;}
+.hub-why-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:10px;line-height:1.25;}
+.hub-why-sub{font-size:14px;color:var(--gray-400);line-height:1.7;margin-bottom:28px;}
+.hub-benefits{display:flex;flex-direction:column;gap:0;margin-bottom:28px;}
+.hub-benefit{display:flex;gap:18px;align-items:flex-start;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.hub-benefit:first-child{padding-top:0;}.hub-benefit:last-child{border-bottom:none;}
+.hub-b-num{font-size:11px;font-weight:800;color:var(--cyan);letter-spacing:.05em;padding-top:2px;flex-shrink:0;width:22px;}
+.hub-b-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;}
+.hub-b-desc{font-size:13px;color:var(--gray-400);line-height:1.6;}
+.hub-why-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);flex-wrap:wrap;gap:8px;}
+.hub-why-tagline{font-size:14px;font-weight:600;font-style:italic;color:var(--cyan);}
+.hub-why-handle{font-size:12px;color:var(--gray-600);letter-spacing:.05em;}
+
+PLANO DE PÁGINAS PADRÃO:
+Página 1: dark — topbar + header + hero com KPIs (3 KPIs baseados nos dados informados)
+Página 2: white — "Parte 1 · Pontos identificados" + 4 problem cards (grid 2x2)
+Página 3: white — continuação dos pontos (mais 4 cards) se 8 pontos, OU ir direto para benchmark se 6 pontos
+Página 4: gray — "Parte 2 · Análise de mercado" + 4 bench-cards (grid 2x2) + opportunity-strip
+Página 5: white — "Parte 3 · O que solucionamos" + plan-box (se com_proposta=Sim) + 4 del-cards
+Página 6: dark — hub-why + footer
+
+REGRA PARA QUANTIDADE DE PROBLEMAS:
+- Gere 8 pontos se houver 3+ canais a analisar (4 por página = 2 páginas)
+- Gere 6 pontos se houver 1-2 canais (todos na página 2, página 3 pode ser benchmark)
+- Todos os pontos devem ser baseados nos dados informados
+
+CANAIS — TAGS HTML para uso na section de channels da página 1:
+- Instagram: <span class="ch-tag ch-instagram">Instagram</span>
+- Facebook: <span class="ch-tag ch-facebook">Facebook</span>
+- Google Empresa: <span class="ch-tag ch-google">Google Empresa</span>
+- Meta Ads: <span class="ch-tag ch-meta">Meta Ads</span>
+- TikTok: <span class="ch-tag" style="background:rgba(0,0,0,.35);color:#fff;border:1px solid rgba(255,255,255,.2);">TikTok</span>
+- Site/SEO: <span class="ch-tag" style="background:rgba(16,185,129,.2);color:#6EE7B7;border:1px solid rgba(16,185,129,.3);">Site / SEO</span>
+
+PLANOS (usar apenas se com_proposta = "Sim"):
+Plano 1 — R$ 1.500/mês: Social Media + Captação de Conteúdo. Itens: planejamento estratégico mensal, conteúdo para redes sociais (3 posts/semana), captação de fotos e vídeos, edição de materiais, organização do perfil, acompanhamento contínuo.
+Plano 2 — R$ 2.500/mês: Social Media + Captação + Tráfego Pago Meta. Tudo do Plano 1 mais: Meta Ads até 3 campanhas/mês, estratégia e segmentação, otimização e escala.
+Plano 3 — R$ 2.900/mês: Social Media + Captação + Tráfego Meta + Google Empresa. Tudo do Plano 2 mais: gestão Google Empresa (GMB), otimização de perfil, posicionamento local. Add-on TikTok +R$300.
+Plano 4 — R$ 3.800/mês: Plano Completo + Suporte Comercial. Tudo do Plano 3 mais: estratégia comercial, follow-up, marketing de relacionamento. Add-on TikTok +R$300.
+
+Regra de escolha: use o plano que melhor cobre os canais solicitados. Se houver plano informado no formulário, use esse.
+
+IMPORTANTE: ao final do HTML, adicione este script exato para auto-impressão:
+<script>window.onload=function(){setTimeout(function(){window.print();},1200);};<\/script>`;
+
+/* ═══════════════════════════════════════════
+   BUILD PROMPT
+═══════════════════════════════════════════ */
+function buildPrompt(d) {
+  var mes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var now = new Date(); var mesAno = mes[now.getMonth()] + ' ' + now.getFullYear();
+  return 'Gere o diagnóstico digital completo com as seguintes informações do lead:\n\n'
+    +'EMPRESA: '+d.nome_empresa+'\nINSTAGRAM: '+d.instagram+'\nSEGMENTO: '+(d.segmento||'Não informado')+'\nCIDADE: '+(d.cidade||'Não informada')+'\nSITE: '+(d.site||'Não tem')+'\n\n'
+    +'CANAIS A ANALISAR: '+(d.canais||'Nenhum especificado')+'\n\n'
+    +'CONTEXTO DO CLIENTE:\n- Tráfego pago atual: '+(d.trafego_atual||'Não informado')+'\n- Tem site: '+(d.tem_site||'Não informado')+'\n- Objetivos: '+(d.objetivo||'Não informado')+'\n\n'
+    +'OBSERVAÇÕES DO CAPTADOR: '+(d.observacoes||'Nenhuma')+'\n\n'
+    +'PROPOSTA COMERCIAL: '+d.com_proposta+(d.plano ? '\nPLANO INDICADO: '+d.plano : '')+'\n\n'
+    +'URGÊNCIA: '+(d.urgencia||'Normal')+'\nDATA DA REUNIÃO: '+(d.data_reuniao||'Não definida')+'\n\n'
+    +'NOTAS EXTRAS: '+(d.obs_extra||'Nenhuma')+'\n\nMÊS/ANO DO DIAGNÓSTICO: '+mesAno;
+}
+
+/* ═══════════════════════════════════════════
+   CLAUDE API CALL
+═══════════════════════════════════════════ */
+async function chamarClaude(dados) {
+  var apiKey = getApiKey();
+  if (!apiKey) throw new Error('SEM_API_KEY');
+  var resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: CLAUDE_MODEL,
+      max_tokens: 16000,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: buildPrompt(dados) }]
+    })
+  });
+  if (!resp.ok) {
+    var err = await resp.json().catch(function(){return{};});
+    throw new Error(err.error && err.error.message ? err.error.message : 'Erro na API ('+resp.status+')');
   }
-  function getVal(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
-  function getRadio(name) { var el = document.querySelector('input[name="' + name + '"]:checked'); return el ? el.value : ''; }
+  var data = await resp.json();
+  var usage = data.usage || {};
+  var inputTokens = usage.input_tokens || 0;
+  var outputTokens = usage.output_tokens || 0;
+  var custo = (inputTokens * PRICING.input) + (outputTokens * PRICING.output);
+  lastAnalysisCost = { input: inputTokens, output: outputTokens, total_usd: custo };
+  return data.content[0].text;
+}
 
-  function coletarDados() {
-    return {
-      nome_empresa:  getVal('nome')           || '(não informado)',
-      instagram:     getVal('instagram')      || '(não informado)',
-      segmento:      getVal('segmento')       || '',
-      cidade:        getVal('cidade')         || '',
-      site:          getVal('site')           || '',
-      responsavel:   getRadio('responsavel')  || '',
-      origem:        getRadio('origem')       || '',
-      canais:        getChecked('canais').join(', '),
-      trafego_atual: getRadio('trafego_atual')|| '',
-      tem_site:      getRadio('tem_site')     || '',
-      objetivo:      getChecked('objetivo').join(', '),
-      observacoes:   getVal('obs')            || '',
-      com_proposta:  getRadio('com_proposta') || 'Não',
-      plano:         getRadio('plano') === 'Personalizado'
-                       ? 'Personalizado — ' + (getVal('plano_obs_custom') || 'ver observações')
-                       : getRadio('plano') || '',
-      urgencia:      getRadio('urgencia')     || '',
-      data_reuniao:  getVal('data_reuniao')   || '',
-      obs_extra:     getVal('obs_extra')      || ''
-    };
+/* ═══════════════════════════════════════════
+   OPEN DIAGNOSTIC IN NEW TAB
+═══════════════════════════════════════════ */
+function abrirDiagnostico(html) {
+  var htmlComCusto = html;
+  if (lastAnalysisCost) {
+    var footerCusto = '<div style="position:fixed;bottom:12px;right:16px;font-size:10px;color:#666;background:#f0f0f0;padding:6px 12px;border-radius:6px;z-index:10;font-family:monospace;border-left:3px solid #0E7490;">'
+      +'<strong style="color:#333;">Custo desta análise:</strong><br/>'
+      +'🔹 '+lastAnalysisCost.input.toLocaleString('pt-BR')+' tokens entrada<br/>'
+      +'🔹 '+lastAnalysisCost.output.toLocaleString('pt-BR')+' tokens saída<br/>'
+      +'💰 Total: $'+lastAnalysisCost.total_usd.toFixed(3)+' USD'
+      +'</div>'
+      +'<style>@media print { [data-cost] { display:none!important; } }</style>';
+    htmlComCusto = html.replace('</body>', footerCusto + '</body>');
+  }
+  var blob = new Blob([htmlComCusto], { type: 'text/html;charset=utf-8' });
+  var url  = URL.createObjectURL(blob);
+  var win  = window.open(url, '_blank');
+  if (!win) {
+    var a = document.createElement('a');
+    a.href = url; a.download = 'diagnostico.html'; a.click();
+  }
+  setTimeout(function() { URL.revokeObjectURL(url); }, 60000);
+}
+
+/* ═══════════════════════════════════════════
+   MAIN SUBMIT
+═══════════════════════════════════════════ */
+async function enviarSolicitacao() {
+  var d = coletarDados();
+  if (!d.nome_empresa || d.nome_empresa === '(não informado)' || !d.instagram || d.instagram === '(não informado)') {
+    document.getElementById('status_bar').className = 'status-bar error';
+    document.getElementById('status_bar').innerHTML = '⚠️ Preencha ao menos o nome da empresa e o Instagram antes de enviar.';
+    document.getElementById('status_bar').scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
   }
 
-  function gerarResumo() {
-    var d = coletarDados();
-    var propostaStr = d.com_proposta === 'Sim' ? 'Sim — ' + d.plano : 'Não';
+  var temApi = !!getApiKey();
+  var btn = document.getElementById('btn_enviar');
+  btn.disabled = true;
 
-    var txt = '📋 SOLICITAÇÃO DE DIAGNÓSTICO DIGITAL\n';
-    txt += '━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
-    txt += '🏢 CLIENTE\n';
-    txt += 'Nome: ' + d.nome_empresa + '\n';
-    txt += 'Instagram: ' + d.instagram + '\n';
-    txt += 'Segmento: ' + (d.segmento || 'Não informado') + '\n';
-    txt += 'Cidade: ' + (d.cidade || 'Não informada') + '\n';
-    txt += 'Site: ' + (d.site || 'Não informado') + '\n\n';
-    txt += '👤 ORIGEM\n';
-    txt += 'Captado por: ' + (d.responsavel || 'Não informado') + '\n';
-    txt += 'Como chegou: ' + (d.origem || 'Não informado') + '\n\n';
-    txt += '🔍 O QUE ANALISAR\n';
-    txt += (d.canais || 'Nenhum selecionado') + '\n\n';
-    txt += '📊 CONTEXTO\n';
-    txt += 'Tráfego pago atual: ' + (d.trafego_atual || 'Não informado') + '\n';
-    txt += 'Tem site: ' + (d.tem_site || 'Não informado') + '\n';
-    txt += 'Objetivo: ' + (d.objetivo || 'Não informado') + '\n\n';
-    txt += '📝 OBSERVAÇÕES\n';
-    txt += (d.observacoes || 'Nenhuma') + '\n\n';
-    txt += '💰 PROPOSTA\n';
-    txt += propostaStr + '\n\n';
-    txt += '⏱ URGÊNCIA\n';
-    txt += (d.urgencia || 'Não informada') + '\n';
-    txt += 'Reunião: ' + (d.data_reuniao || 'Não marcada') + '\n\n';
-    txt += '📌 NOTAS ADICIONAIS\n';
-    txt += (d.obs_extra || 'Nenhuma') + '\n\n';
-    txt += '━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-    txt += 'R.E.C. HUB de Negócios · recolaborativo.com.br';
+  showLoading();
+  setSubtitle('Inicializando, aguarde...');
 
-    document.getElementById('output_text').textContent = txt;
-    document.getElementById('output_box').classList.add('visible');
-    document.getElementById('output_box').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  var erros = [];
+  var resumoTxt = gerarResumoTexto(d);
+  document.getElementById('output_text').textContent = resumoTxt;
+  document.getElementById('output_box').classList.add('visible');
 
-  function setStatus(type, msg) {
-    var bar = document.getElementById('status_bar');
-    bar.className = 'status-bar ' + type;
-    bar.innerHTML = msg;
-  }
-
-  async function enviarSolicitacao() {
-    var d = coletarDados();
-
-    // Validação mínima
-    if (!d.nome_empresa || d.nome_empresa === '(não informado)' || !d.instagram || d.instagram === '(não informado)') {
-      setStatus('error', '⚠️ Preencha ao menos o nome da empresa e o Instagram antes de enviar.');
-      return;
-    }
-
-    var btn = document.getElementById('btn_enviar');
-    btn.disabled = true;
-    btn.textContent = '⏳ Enviando...';
-    setStatus('loading', '⏳ Gerando resumo e enviando...');
-
-    // Gera e exibe o resumo na tela
-    gerarResumo();
-    var resumoTxt = document.getElementById('output_text').textContent;
-
-    var erros = [];
-
-    // 1 ── SUPABASE: salvar no banco
-    try {
-      var resSupa = await fetch(SUPABASE_URL + '/rest/v1/solicitacoes_diagnostico', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify(d)
-      });
-      if (!resSupa.ok) erros.push('banco');
-    } catch(e) { erros.push('banco'); }
-
-    // 2 ── FORMSUBMIT: enviar e-mail com o resumo completo formatado
-    try {
-      var urgLabel = d.urgencia ? d.urgencia.split('—')[0].trim() : 'Normal';
-      var resEmail = await fetch('https://formsubmit.co/ajax/' + EMAIL_DESTINO, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({
-          _subject: '🔍 Nova Solicitação de Diagnóstico — ' + d.instagram + ' [' + urgLabel + ']',
-          message:  resumoTxt
-        })
-      });
-      if (!resEmail.ok) erros.push('email');
-    } catch(e) { erros.push('email'); }
-
-    // 3 ── Resultado
-    btn.disabled = false;
-    btn.textContent = '⚡ Gerar Resumo e Enviar';
-
-    if (erros.length === 0) {
-      setStatus('success', '✅ Resumo gerado, salvo no banco e enviado por e-mail!');
-      btn.style.display = 'none';
-    } else if (erros.includes('banco') && erros.includes('email')) {
-      setStatus('error', '❌ Erro ao enviar. Verifique a conexão e tente novamente. O resumo acima pode ser copiado manualmente.');
-    } else if (erros.includes('banco')) {
-      setStatus('success', '⚠️ E-mail com resumo enviado, mas houve erro ao salvar no banco. Copie o resumo acima como backup.');
-    } else {
-      setStatus('success', '✅ Salvo no banco! O e-mail pode demorar alguns minutos na primeira vez (confirme o link que vai chegar no Gmail do REC).');
-    }
-  }
-
-  function copiarTexto() {
-    var txt = document.getElementById('output_text').textContent;
-    navigator.clipboard.writeText(txt).then(function() {
-      var msg = document.getElementById('copied_msg');
-      msg.style.display = 'block';
-      setTimeout(function() { msg.style.display = 'none'; }, 3000);
+  // STEP 1: Supabase
+  setStep('step_1', 'active'); setSubtitle('Salvando dados do lead...'); setProgress(10);
+  try {
+    var r1 = await fetch(SUPABASE_URL+'/rest/v1/solicitacoes_diagnostico', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'},
+      body:JSON.stringify(d)
     });
+    if (!r1.ok) erros.push('banco');
+  } catch(e) { erros.push('banco'); }
+  setStep('step_1', 'done'); setProgress(20);
+
+  // STEP 2: Email
+  setStep('step_2', 'active'); setSubtitle('Enviando notificação por e-mail...'); setProgress(25);
+  try {
+    var urgLabel = d.urgencia ? d.urgencia.split('—')[0].trim() : 'Normal';
+    var r2 = await fetch('https://formsubmit.co/ajax/'+EMAIL_DESTINO, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({ _subject:'🔍 Nova Solicitação de Diagnóstico — '+d.instagram+' ['+urgLabel+']', message:resumoTxt })
+    });
+    if (!r2.ok) erros.push('email');
+  } catch(e) { erros.push('email'); }
+  setStep('step_2', 'done'); setProgress(40);
+
+  // STEPS 3+4: Claude
+  if (temApi) {
+    setStep('step_3', 'active'); setSubtitle('IA analisando a presença digital do lead...'); setProgress(50);
+    await new Promise(function(r){ setTimeout(r, 600); }); // UX pause
+    setStep('step_3', 'done'); setStep('step_4', 'active');
+    setSubtitle('Gerando diagnóstico personalizado com IA...'); setProgress(65);
+    try {
+      var html = await chamarClaude(d);
+      setStep('step_4', 'done'); setProgress(85);
+      setStep('step_5', 'active'); setSubtitle('Abrindo documento para impressão em PDF...'); setProgress(95);
+      await new Promise(function(r){ setTimeout(r, 500); });
+      abrirDiagnostico(html);
+      setStep('step_5', 'done'); setProgress(100);
+      setSubtitle('Diagnóstico gerado! Imprima como PDF no documento que abriu.');
+      await new Promise(function(r){ setTimeout(r, 1800); });
+      hideLoading();
+      var costMsg = lastAnalysisCost ? ' · Custo: $'+lastAnalysisCost.total_usd.toFixed(3) : '';
+      document.getElementById('status_bar').className = 'status-bar success';
+      document.getElementById('status_bar').innerHTML = '✅ Diagnóstico gerado e aberto! Use Ctrl+P (ou Cmd+P) para salvar como PDF.' + costMsg;
+      atualizarCreditosHeader();
+    } catch(err) {
+      setStep('step_4', 'error-step'); setStep('step_5', 'error-step');
+      setSubtitle('Erro ao gerar diagnóstico: ' + err.message);
+      await new Promise(function(r){ setTimeout(r, 2500); });
+      hideLoading();
+      if (err.message === 'SEM_API_KEY') {
+        document.getElementById('status_bar').className = 'status-bar error';
+        document.getElementById('status_bar').innerHTML = '⚠️ Configure a chave da API Anthropic para gerar o diagnóstico automaticamente. Resumo salvo acima.';
+        abrirModalApi();
+      } else {
+        document.getElementById('status_bar').className = 'status-bar error';
+        document.getElementById('status_bar').innerHTML = '⚠️ Erro na IA: '+err.message+'. Dados salvos. Tente novamente.';
+      }
+    }
+  } else {
+    setStep('step_3', 'error-step'); setStep('step_4', 'error-step'); setStep('step_5', 'error-step');
+    setSubtitle('API Anthropic não configurada. Configure para gerar diagnóstico automático.');
+    await new Promise(function(r){ setTimeout(r, 2000); });
+    hideLoading();
+    document.getElementById('status_bar').className = erros.length === 0 ? 'status-bar success' : 'status-bar error';
+    document.getElementById('status_bar').innerHTML = erros.length === 0
+      ? '✅ Dados salvos e e-mail enviado! Configure a chave da API para gerar o diagnóstico em PDF.'
+      : '⚠️ Houve erros no envio. Resumo disponível acima.';
+    abrirModalApi();
   }
+
+  btn.disabled = false;
+  if (erros.length === 0 && temApi) btn.style.display = 'none';
+  document.getElementById('status_bar').scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function copiarTexto() {
+  navigator.clipboard.writeText(document.getElementById('output_text').textContent).then(function() {
+    var m = document.getElementById('copied_msg'); m.style.display='block';
+    setTimeout(function(){ m.style.display='none'; }, 3000);
+  });
+}
 </script>
+<style>
+@keyframes spin { to{transform:rotate(360deg)} }
+</style>
 </body>
 </html>
