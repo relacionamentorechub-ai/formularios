@@ -163,12 +163,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages, max_tokens } = req.body;
+    const { messages, max_tokens, system } = req.body;
 
     const body = {
       model: 'claude-sonnet-4-20250514',
       max_tokens: max_tokens || 8000,
-      system: SYSTEM_PROMPT,
+      system: system || SYSTEM_PROMPT,
       messages: messages,
     };
 
