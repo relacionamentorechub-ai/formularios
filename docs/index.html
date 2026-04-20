@@ -1034,6 +1034,12 @@ async function chamarClaude(dados) {
 
   if (!fullText) throw new Error('Resposta vazia da IA. Tente novamente.');
 
+  // Remove markdown code block se Claude inseriu (```html ... ```)
+  fullText = fullText.trim();
+  if (fullText.startsWith('```')) {
+    fullText = fullText.replace(/^```(?:html)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+  }
+
   var custo = (inputTokens * PRICING.input) + (outputTokens * PRICING.output);
   lastAnalysisCost = { input: inputTokens, output: outputTokens, total_usd: custo };
   return fullText;
