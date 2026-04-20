@@ -920,25 +920,61 @@ function buildPrompt(d) {
 async function chamarClaude(dados) {
   var resp = await fetch('/api/claude', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       messages: [{ role: 'user', content: buildPrompt(dados) }],
       max_tokens: 8000
     })
   });
+
   if (!resp.ok) {
-    var err = await resp.json().catch(function(){return{};});
-    throw new Error(err.error && err.error.message ? err.error.message : 'Erro na API ('+resp.status+')');
+    var err = await resp.json().catch(function(){ return {}; });
+    throw new Error(err.error && err.error.message ? err.error.message : 'Erro na API (' + resp.status + ')');
   }
-  var data = await resp.json();
-  var usage = data.usage || {};
-  var inputTokens = usage.input_tokens || 0;
-  var outputTokens = usage.output_tokens || 0;
+
+  // Lê stream SSE
+  var reader = resp.body.getReader();
+  var decoder = new TextDecoder();
+  var buffer = '';
+  var fullText = '';
+  var inputTokens = 0, outputTokens = 0;
+  var charCount = 0;
+
+  while (true) {
+    var chunk = await reader.read();
+    if (chunk.done) break;
+
+    buffer += decoder.decode(chunk.value, { stream: true });
+    var lines = buffer.split('\n');
+    buffer = lines.pop();
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      if (!line.startsWith('data: ')) continue;
+      var raw = line.slice(6).trim();
+      if (!raw) continue;
+      try {
+        var ev = JSON.parse(raw);
+        if (ev.type === 'content_block_delta' && ev.delta && ev.delta.type === 'text_delta') {
+          fullText += ev.delta.text;
+          charCount += ev.delta.text.length;
+          if (charCount % 600 < ev.delta.text.length) {
+            setSubtitle('Gerando diagn&oacute;stico... (~' + Math.round(charCount / 4) + ' tokens gerados)');
+          }
+        } else if (ev.type === 'message_start' && ev.message && ev.message.usage) {
+          inputTokens = ev.message.usage.input_tokens || 0;
+        } else if (ev.type === 'message_delta' && ev.usage) {
+          outputTokens = ev.usage.output_tokens || 0;
+        }
+      } catch (e) {}
+    }
+  }
+
+  if (!fullText) throw new Error('Resposta vazia da IA. Tente novamente.');
+
   var custo = (inputTokens * PRICING.input) + (outputTokens * PRICING.output);
   lastAnalysisCost = { input: inputTokens, output: outputTokens, total_usd: custo };
-  return data.content[0].text;
+  return fullText;
 }
 
 /* ═══════════════════════════════════════════

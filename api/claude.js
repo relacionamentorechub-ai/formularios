@@ -162,17 +162,18 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'API key not configured' });
   }
 
+  const { messages, max_tokens, system } = req.body;
+
+  const body = {
+    model: 'claude-3-5-haiku-20241022',
+    max_tokens: max_tokens || 8000,
+    system: system || SYSTEM_PROMPT,
+    messages: messages,
+    stream: true,
+  };
+
   try {
-    const { messages, max_tokens, system } = req.body;
-
-    const body = {
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: max_tokens || 8000,
-      system: system || SYSTEM_PROMPT,
-      messages: messages,
-    };
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const upstream = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'x-api-key': apiKey,
@@ -182,15 +183,30 @@ export default async function handler(req, res) {
       body: JSON.stringify(body),
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      return res.status(response.status).json(data);
+    if (!upstream.ok) {
+      const err = await upstream.text();
+      return res.status(upstream.status).json({ error: err });
     }
 
-    return res.status(200).json(data);
+    // Stream SSE diretamente ao cliente
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Transfer-Encoding', 'chunked');
+
+    const reader = upstream.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      res.write(decoder.decode(value, { stream: true }));
+    }
+    res.end();
   } catch (error) {
     console.error('Error:', error);
-    return res.status(500).json({ error: error.message });
+    if (!res.headersSent) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.end();
   }
 }
