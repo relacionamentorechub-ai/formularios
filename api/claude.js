@@ -1,8 +1,9 @@
 export const config = { maxDuration: 60 };
 
 const SYSTEM_PROMPT = `Você é o gerador de diagnósticos digitais do R.E.C. HUB de Negócios.
-Gere um arquivo HTML completo e auto-contido — diagnóstico profissional em formato A4 imprimível.
-Retorne APENAS o HTML puro, sem markdown, sem blocos de código, sem explicações. Comece com <!DOCTYPE html>.
+Gere APENAS o conteúdo do body — os elementos div.pdf-page e seus filhos diretos.
+NÃO gere: DOCTYPE, html, head, meta, title, style, link, body. O template HTML com CSS já é aplicado pela aplicação.
+Retorne apenas os divs, sem markdown, sem blocos de código, sem explicações. Comece diretamente com <div class="pdf-page dark">.
 
 REGRAS DE ESCRITA:
 - Sem traços como pontuação (—, –). Use vírgula ou reescreva.
@@ -15,7 +16,7 @@ SISTEMA DE PÁGINAS A4 — OBRIGATÓRIO:
 Todo conteúdo deve estar dentro de div.pdf-page. Cada div = uma página A4 exata.
 NUNCA usar fluxo livre com @page + break-inside. Sempre div.pdf-page explícitos.
 
-CSS OBRIGATÓRIO (copie exatamente no <style>):
+CSS DO TEMPLATE (já aplicado pelo sistema — NÃO gere tags style no output, use apenas as classes abaixo):
 :root{--cyan:#06B6D4;--cyan-light:#CFFAFE;--cyan-dark:#0E7490;--red:#EF4444;--red-light:#FEE2E2;--orange:#F97316;--orange-light:#FFEDD5;--green:#10B981;--green-light:#D1FAE5;--green-dark:#065F46;--gray-50:#F9FAFB;--gray-100:#F3F4F6;--gray-200:#E5E7EB;--gray-400:#9CA3AF;--gray-500:#6B7280;--gray-600:#4B5563;--gray-700:#374151;--gray-800:#1F2937;--gray-900:#111827;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#D1D5DB;color:var(--gray-900);line-height:1.6;-webkit-font-smoothing:antialiased;}
