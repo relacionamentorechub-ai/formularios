@@ -165,7 +165,7 @@ export default async function handler(req, res) {
   const { messages, max_tokens, system } = req.body;
 
   const body = {
-    model: 'claude-3-haiku-20240307',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: max_tokens || 8000,
     system: system || SYSTEM_PROMPT,
     messages: messages,
