@@ -3,7 +3,6 @@
   "outputDirectory": "docs",
   "functions": {
     "api/claude.js": { "maxDuration": 60 },
-    "api/generate-pdf.js": { "maxDuration": 30 },
-    "api/mercadinho.js": { "maxDuration": 10 }
+    "api/generate-pdf.js": { "maxDuration": 30 }
   }
 }
