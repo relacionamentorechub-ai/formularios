@@ -640,6 +640,11 @@ var PDF_HTML_HEADER = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UT
 '.hub-b-num{font-size:11px;font-weight:800;color:var(--cyan);letter-spacing:.05em;padding-top:2px;flex-shrink:0;width:22px;}.hub-b-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;}.hub-b-desc{font-size:13px;color:var(--gray-400);line-height:1.6;}' +
 '.hub-why-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);flex-wrap:wrap;gap:8px;}' +
 '.hub-why-tagline{font-size:14px;font-weight:600;font-style:italic;color:var(--cyan);}.hub-why-handle{font-size:12px;color:var(--gray-600);letter-spacing:.05em;}' +
+'@page{size:210mm 297mm;margin:0;}' +
+'@media print{body{background:white;}' +
+'.pdf-page{width:210mm!important;height:297mm!important;min-height:unset!important;max-height:297mm!important;margin:0!important;box-shadow:none!important;overflow:hidden!important;break-after:page;page-break-after:always;}' +
+'.pdf-page:last-child{break-after:auto!important;page-break-after:auto!important;}' +
+'}' +
 '</style></head><body>';
 var PDF_HTML_FOOTER = '</body></html>';
 
@@ -1056,14 +1061,7 @@ async function abrirDiagnostico(htmlRaw, instagram) {
     html = PDF_HTML_HEADER + html + PDF_HTML_FOOTER;
   }
 
-  if (lastAnalysisCost) {
-    var footerCusto = '<div style="position:fixed;bottom:12px;right:16px;font-size:10px;color:#666;background:#f0f0f0;padding:6px 12px;border-radius:6px;z-index:9999;font-family:monospace;border-left:3px solid #0E7490;">'
-      +'<strong style="color:#333;">Custo desta an&aacute;lise:</strong><br>'
-      +'Tokens entrada: '+lastAnalysisCost.input.toLocaleString('pt-BR')+'<br>'
-      +'Tokens sa&iacute;da: '+lastAnalysisCost.output.toLocaleString('pt-BR')+'<br>'
-      +'Total: $'+lastAnalysisCost.total_usd.toFixed(3)+' USD</div>';
-    html = html.replace('</body>', footerCusto + '</body>');
-  }
+  // Custo NÃO vai no PDF — exibido na status bar da UI após download
 
   var handle = (instagram || 'rec').replace('@','').replace(/[^a-zA-Z0-9_-]/g,'');
   var nomeArquivo = 'Analise-' + handle + '.pdf';

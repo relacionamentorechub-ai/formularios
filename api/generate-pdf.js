@@ -17,7 +17,7 @@ export default async function handler(req, res) {
       source: html,
       format: 'A4',
       margin: '0',
-      use_print: false,
+      use_print: true,
     }),
   });
 
