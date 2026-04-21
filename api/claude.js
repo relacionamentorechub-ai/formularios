@@ -5,6 +5,7 @@ Gere APENAS o conteúdo do body — os elementos div.pdf-page e seus filhos dire
 NÃO gere: DOCTYPE, html, head, meta, title, style, link, body.
 PROIBIDO: blocos de código markdown, comentários HTML, ou qualquer texto fora das tags HTML.
 Sua resposta deve começar EXATAMENTE com: <div class="pdf-page dark">
+A última div deve ser: <div class="pdf-page dark"> (página hub-why sempre dark).
 Nada antes ou depois das tags HTML. Zero texto fora do HTML.
 
 REGRAS DE ESCRITA:
@@ -121,17 +122,18 @@ header{background:#fff;border-bottom:1px solid var(--gray-200);padding:16px 32px
 
 PLANO DE PÁGINAS — ATÉ 10 PÁGINAS:
 Página 1: dark — topbar + header + hero com KPIs (3 KPIs baseados nos dados informados)
-Página 2: white — "Parte 1 · Pontos identificados" + 4 problem cards (grid 2x2)
-Página 3: white — continuação dos pontos (mais 4 cards se 8+ pontos) OU benchmark se 6 pontos
-Página 4: gray — "Parte 2 · Análise de mercado" + 4 bench-cards (grid 2x2) + opportunity-strip
-Página 5: white — "Parte 3 · O que solucionamos" + plan-box(es) (se com_proposta=Sim) + del-cards
+Página 2: white — "Parte 1 · Pontos identificados" + problem cards (grid 2x2)
+Página 3 (se necessário): white — continuação dos pontos com 4 cards
+Página seguinte: gray — "Parte 2 · Análise de mercado" + 4 bench-cards (grid 2x2) + opportunity-strip
+Página seguinte: white — "Parte 3 · O que solucionamos" + plan-box(es) + del-cards
 Páginas extras: se houver muitos planos ou entregáveis, use páginas adicionais (máximo 10 no total)
-Última página: dark — hub-why + footer
+ÚLTIMA PÁGINA OBRIGATÓRIA: sempre usar class="pdf-page dark" — hub-why + footer
 
 REGRA PARA QUANTIDADE DE PROBLEMAS:
-- Gere 8 pontos se houver 3+ canais a analisar (4 por página = 2 páginas de problemas)
-- Gere 6 pontos se houver 1-2 canais (todos na página 2)
-- Todos os pontos devem ser baseados nos dados informados
+- Com 1-2 canais: gere EXATAMENTE 6 pontos, todos na página 2 (grid 3x2), SEM página 3 de problemas
+- Com 3+ canais: gere EXATAMENTE 8 pontos, 4 na página 2 e 4 na página 3
+- NUNCA coloque menos de 4 cards em uma página de problemas (se sobrar espaço, enriqueça o conteúdo dos cards)
+- Todos os pontos devem ser específicos e baseados nos dados informados
 
 REGRA PARA MÚLTIPLOS PLANOS (se com_proposta = "Sim"):
 - 1 plano: 1 plan-box normal
