@@ -120,14 +120,15 @@ header{background:#fff;border-bottom:1px solid var(--gray-200);padding:16px 32px
 .hub-why-tagline{font-size:14px;font-weight:600;font-style:italic;color:var(--cyan);}
 .hub-why-handle{font-size:12px;color:var(--gray-600);letter-spacing:.05em;}
 
-PLANO DE PÁGINAS — ATÉ 10 PÁGINAS:
+PLANO DE PÁGINAS — FIXO E OBRIGATÓRIO:
 Página 1: dark — topbar + header + hero com KPIs (3 KPIs baseados nos dados informados)
 Página 2: white — "Parte 1 · Pontos identificados" + problem cards (grid 2x2)
 Página 3 (se necessário): white — continuação dos pontos com 4 cards
 Página seguinte: gray — "Parte 2 · Análise de mercado" + 4 bench-cards (grid 2x2) + opportunity-strip
-Página seguinte: white — "Parte 3 · O que solucionamos" + plan-box(es) + del-cards
-Páginas extras: se houver muitos planos ou entregáveis, use páginas adicionais (máximo 10 no total)
+Página seguinte: white — "Parte 3 · O que solucionamos" + del-cards (grid 2x2) [+ plan-box SOMENTE se com_proposta = "Sim"]
 ÚLTIMA PÁGINA OBRIGATÓRIA: sempre usar class="pdf-page dark" — hub-why + footer
+
+PROIBIDO gerar qualquer página fora deste plano. NUNCA crie páginas de: "Cronograma", "Implementação", "Como Começar", "Próximos Passos", "Investimento" ou qualquer outra seção não listada acima. O plano de páginas é fixo e não pode ser expandido com seções improvisadas.
 
 REGRA PARA QUANTIDADE DE PROBLEMAS:
 - Com 1-2 canais: gere EXATAMENTE 6 pontos, todos na página 2 (grid 3x2), SEM página 3 de problemas
@@ -135,11 +136,9 @@ REGRA PARA QUANTIDADE DE PROBLEMAS:
 - NUNCA coloque menos de 4 cards em uma página de problemas (se sobrar espaço, enriqueça o conteúdo dos cards)
 - Todos os pontos devem ser específicos e baseados nos dados informados
 
-REGRA PARA MÚLTIPLOS PLANOS (se com_proposta = "Sim"):
-- 1 plano: 1 plan-box normal
-- 2 planos: 2 plan-box lado a lado (display:flex; gap:16px; margin-bottom:18px)
-- 3 planos: 3 plan-box empilhados, padding reduzido (padding:16px 20px)
-- Os planos chegam separados por " | " no campo PLANO INDICADO
+REGRA DE PROPOSTA — CRÍTICA:
+- Se com_proposta = "Não": NÃO gere plan-box, NÃO mencione valores, NÃO crie páginas de plano ou investimento. A página "Parte 3" mostra SOMENTE del-cards (grid 2x2).
+- Se com_proposta = "Sim": inserir plan-box ANTES do deliverable-grid, na mesma página "Parte 3". Usar 1 plan-box (ou 2 lado a lado com display:flex;gap:16px se 2 planos). Os planos chegam separados por " | " no campo PLANO INDICADO.
 
 CANAIS — TAGS HTML para uso na section de channels da página 1:
 - Instagram: <span class="ch-tag ch-instagram">Instagram</span>
