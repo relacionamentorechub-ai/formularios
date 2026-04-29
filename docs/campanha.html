@@ -998,7 +998,7 @@ async function chamarClaude(dados) {
     body: JSON.stringify({
       system: SYSTEM_PROMPT,
       messages: buildMessages(dados),
-      max_tokens: 6000
+      max_tokens: 10000
     })
   });
   if (!resp.ok) {
@@ -1170,10 +1170,17 @@ async function gerarBriefing() {
     var rawJson = await chamarClaude(dados);
     rawResultText = rawJson;
 
-    // Parse JSON — handle possible markdown wrapping
+    // Parse JSON — handle markdown wrapping or extra text around JSON
     var jsonStr = rawJson.trim();
+    // Strip markdown code blocks if present
     if (jsonStr.startsWith('```')) {
-      jsonStr = jsonStr.replace(/^```[a-z]*\n?/, '').replace(/\n?```$/, '').trim();
+      jsonStr = jsonStr.replace(/^```[a-zA-Z]*\n?/, '').replace(/\n?```$/, '').trim();
+    }
+    // Extract first { ... } block in case Claude added text before/after
+    var firstBrace = jsonStr.indexOf('{');
+    var lastBrace  = jsonStr.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      jsonStr = jsonStr.slice(firstBrace, lastBrace + 1);
     }
     var result = JSON.parse(jsonStr);
 
@@ -1207,7 +1214,10 @@ async function gerarBriefing() {
 function copiarTudo() {
   if (!rawResultText) return;
   try {
-    var parsed = JSON.parse(rawResultText.replace(/^```[a-z]*\n?/, '').replace(/\n?```$/, '').trim());
+    var _s = rawResultText.replace(/^```[a-zA-Z]*\n?/, '').replace(/\n?```$/, '').trim();
+    var _f = _s.indexOf('{'), _l = _s.lastIndexOf('}');
+    if (_f !== -1 && _l > _f) _s = _s.slice(_f, _l + 1);
+    var parsed = JSON.parse(_s);
     var texto = '📊 BRIEFING DE CAMPANHA META ADS — R.E.C. HUB\n'
       + '═══════════════════════════════\n\n'
       + '🔍 DIAGNÓSTICO\n' + parsed.diagnostico.veredicto + '\nConcorrência: ' + parsed.diagnostico.nivel_concorrencia + '\n\n'
