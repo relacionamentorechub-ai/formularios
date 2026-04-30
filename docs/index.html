@@ -605,6 +605,15 @@ footer strong { color:var(--cyan); }
           <div class="plan-desc">Tudo do Plano 2 + gestão completa do Google Empresa (GMB) e posicionamento local</div>
         </div>
       </label>
+      <div class="tiktok-addon" id="tiktok_addon_3" style="display:none;">
+        <label style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:10px 14px;background:rgba(0,0,0,.25);border:1px dashed rgba(16,185,129,.3);border-radius:8px;margin:-4px 0 10px 0;">
+          <input type="checkbox" name="prop_tiktok" value="3" style="accent-color:#10B981;width:auto;padding:0;border:none;background:transparent;flex-shrink:0;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#34D399;">🎵 Add-on TikTok — <span style="color:#fff;">+ R$ 300/mês</span></div>
+            <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">Gestão e criação de conteúdo para TikTok (Plano 3 vai a R$ 3.200/mês)</div>
+          </div>
+        </label>
+      </div>
       <label class="prop-plan-item" id="ppi_4">
         <input type="checkbox" name="prop_plano" value="4" onchange="togglePropPlan(this,'ppi_4')">
         <div style="flex:1">
@@ -613,6 +622,15 @@ footer strong { color:var(--cyan); }
           <div class="plan-desc">Tudo do Plano 3 + estratégia comercial, follow-up de leads e marketing de relacionamento</div>
         </div>
       </label>
+      <div class="tiktok-addon" id="tiktok_addon_4" style="display:none;">
+        <label style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:10px 14px;background:rgba(0,0,0,.25);border:1px dashed rgba(16,185,129,.3);border-radius:8px;margin:-4px 0 10px 0;">
+          <input type="checkbox" name="prop_tiktok" value="4" style="accent-color:#10B981;width:auto;padding:0;border:none;background:transparent;flex-shrink:0;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#34D399;">🎵 Add-on TikTok — <span style="color:#fff;">+ R$ 300/mês</span></div>
+            <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">Gestão e criação de conteúdo para TikTok (Plano 4 vai a R$ 4.100/mês)</div>
+          </div>
+        </label>
+      </div>
     </div>
     <div class="prop-hint">Pode selecionar mais de um plano. Cada plano selecionado gera um bloco comparativo no PDF.</div>
   </div>
@@ -1283,6 +1301,16 @@ function switchTab(tab) {
 ═══════════════════════════════════════════ */
 function togglePropPlan(inp, itemId) {
   document.getElementById(itemId).classList.toggle('prop-selected', inp.checked);
+  // Mostrar/esconder add-on TikTok para planos 3 e 4
+  if (inp.value === '3' || inp.value === '4') {
+    var addonEl = document.getElementById('tiktok_addon_' + inp.value);
+    if (addonEl) addonEl.style.display = inp.checked ? 'block' : 'none';
+    // Se desselecionar o plano, desmarcar o add-on junto
+    if (!inp.checked) {
+      var addonChk = document.querySelector('input[name="prop_tiktok"][value="' + inp.value + '"]');
+      if (addonChk) addonChk.checked = false;
+    }
+  }
 }
 
 function syncPropIg(val) { /* só sincroniza o campo — verificarInstagram cuida do resto */ }
@@ -1348,6 +1376,7 @@ function buildPropostaHtml(dados) {
   var cid  = dados.cidade || '';
   var planos = dados.planos.sort(function(a,b){return a-b;});
   var maxPlano = Math.max.apply(null, planos);
+  var tiktokAddons = dados.tiktokAddons || [];
 
   /* CHANNEL TAGS — tags de plano para o hero */
   var tagMap = { 1:'Social Media', 2:'Social + Meta Ads', 3:'Social + Meta + Google', 4:'Plano Completo' };
@@ -1358,12 +1387,21 @@ function buildPropostaHtml(dados) {
   /* PLAN-BOXES */
   function planBox(n) {
     var p = PLANOS_INFO[n];
-    var itensHtml = p.items.map(function(it){ return '<li>' + it + '</li>'; }).join('');
+    var hasTiktok = tiktokAddons.indexOf(n) !== -1;
+    var items = p.items.slice();
+    var price = p.price;
+    if (hasTiktok) {
+      items.push('TikTok &mdash; gest&atilde;o e cria&ccedil;&atilde;o de conte&uacute;do');
+      // Soma R$300 ao valor do plano
+      var num = parseInt(price.replace(/\D/g,''));
+      price = 'R$ ' + (num + 300).toLocaleString('pt-BR');
+    }
+    var itensHtml = items.map(function(it){ return '<li>' + it + '</li>'; }).join('');
     return '<div class="plan-box" style="margin-bottom:16px;">'
       + '<div class="plan-box-left">'
-      + '<div class="plan-box-badge">' + p.badge + '</div>'
-      + '<div class="plan-box-name">' + p.name + '</div>'
-      + '<div class="plan-box-price">' + p.price + '<span>/m&ecirc;s</span></div>'
+      + '<div class="plan-box-badge">' + p.badge + (hasTiktok ? ' + TIKTOK' : '') + '</div>'
+      + '<div class="plan-box-name">' + p.name + (hasTiktok ? ' + TikTok' : '') + '</div>'
+      + '<div class="plan-box-price">' + price + '<span>/m&ecirc;s</span></div>'
       + '</div>'
       + '<ul class="plan-box-items">' + itensHtml + '</ul>'
       + '</div>';
@@ -1490,6 +1528,8 @@ async function gerarProposta() {
   var cidade   = (document.getElementById('prop_cidade') || {}).value || '';
   var planosEl = document.querySelectorAll('input[name="prop_plano"]:checked');
   var planos   = []; planosEl.forEach(function(el){ planos.push(parseInt(el.value)); });
+  var tiktokEl = document.querySelectorAll('input[name="prop_tiktok"]:checked');
+  var tiktokAddons = []; tiktokEl.forEach(function(el){ tiktokAddons.push(parseInt(el.value)); });
 
   var sb = document.getElementById('prop_status_bar');
   sb.className = 'status-bar'; sb.innerHTML = '';
@@ -1531,7 +1571,8 @@ async function gerarProposta() {
       instagram: instagram.trim(),
       segmento: segmento,
       cidade: cidade.trim(),
-      planos: planos
+      planos: planos,
+      tiktokAddons: tiktokAddons
     });
     setStep('step_4', 'done');
     setStep('step_5', 'active');
@@ -1567,6 +1608,8 @@ function novaProposta() {
     var item = el.closest('.prop-plan-item');
     if (item) item.classList.remove('prop-selected');
   });
+  document.querySelectorAll('input[name="prop_tiktok"]').forEach(function(el){ el.checked = false; });
+  ['tiktok_addon_3','tiktok_addon_4'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
   var sb = document.getElementById('prop_status_bar');
   sb.className = 'status-bar'; sb.innerHTML = '';
   document.getElementById('btn_prop_nova').style.display = 'none';
