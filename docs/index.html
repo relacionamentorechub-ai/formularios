@@ -269,6 +269,32 @@ footer strong { color:var(--cyan); }
 }
 @keyframes spin-slow { to{transform:rotate(360deg)} }
 ::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:var(--bg-base)} ::-webkit-scrollbar-thumb{background:rgba(6,182,212,.25);border-radius:3px} ::-webkit-scrollbar-thumb:hover{background:rgba(6,182,212,.45)}
+
+/* ═══════════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════════ */
+.tab-bar-wrap{position:relative;z-index:10;display:flex;justify-content:center;padding:0 20px 36px;}
+.tab-bar{display:inline-flex;background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.12);border-radius:99px;padding:5px;gap:5px;}
+.tab-btn{display:flex;align-items:center;gap:8px;padding:11px 30px;border:none;border-radius:99px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .25s;background:transparent;color:var(--text-secondary);letter-spacing:.01em;}
+.tab-btn:hover{color:var(--text-primary);background:rgba(6,182,212,.08);}
+.tab-btn.tab-active{background:linear-gradient(135deg,#0E7490,#06B6D4);color:#fff;box-shadow:0 0 24px rgba(6,182,212,.35);}
+.tab-btn-green.tab-active{background:linear-gradient(135deg,#065F46,#10B981);box-shadow:0 0 24px rgba(16,185,129,.35);}
+
+/* ═══════════════════════════════════════════════
+   PROPOSTA FORM
+═══════════════════════════════════════════════ */
+.prop-plan-item{display:flex;align-items:flex-start;gap:14px;background:rgba(6,15,35,.6);border:1.5px solid rgba(16,185,129,.12);border-radius:var(--radius-sm);padding:16px 18px;cursor:pointer;transition:all .2s;user-select:none;margin-bottom:10px;}
+.prop-plan-item:last-child{margin-bottom:0;}
+.prop-plan-item:hover{border-color:rgba(16,185,129,.35);transform:translateY(-1px);}
+.prop-plan-item.prop-selected{border-color:rgba(16,185,129,.5);background:rgba(16,185,129,.06);}
+.prop-plan-item input{width:auto;padding:0;border:none;background:transparent;flex-shrink:0;margin-top:3px;accent-color:#10B981;}
+.btn-generate-green{position:relative;display:inline-flex;align-items:center;gap:12px;background:linear-gradient(135deg,#065F46 0%,#059669 50%,#10B981 100%);color:#fff;border:none;border-radius:14px;padding:18px 52px;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:.02em;overflow:hidden;transition:transform .2s,box-shadow .2s;box-shadow:0 0 40px rgba(16,185,129,.4),0 4px 20px rgba(0,0,0,.3);}
+.btn-generate-green::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transition:left .5s;}
+.btn-generate-green:hover::before{left:100%;}
+.btn-generate-green:hover{transform:translateY(-3px);box-shadow:0 0 60px rgba(16,185,129,.55),0 8px 32px rgba(0,0,0,.35);}
+.btn-generate-green:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+.section-num.teal{background:linear-gradient(135deg,#065F46,#10B981);color:#fff;box-shadow:0 4px 16px rgba(16,185,129,.4);}
+.prop-hint{font-size:12px;color:rgba(52,211,153,.7);margin-top:10px;text-align:center;}
 </style>
 </head>
 <body>
@@ -309,8 +335,23 @@ footer strong { color:var(--cyan); }
   </div>
 </section>
 
+<!-- TABS -->
+<div class="tab-bar-wrap">
+  <div class="tab-bar">
+    <button class="tab-btn tab-active" id="tab_btn_diag" onclick="switchTab('diagnostico')">
+      🔍 Diagnóstico Digital
+    </button>
+    <button class="tab-btn tab-btn-green" id="tab_btn_prop" onclick="switchTab('proposta')">
+      📋 Proposta Comercial
+    </button>
+  </div>
+</div>
+
 <!-- CONTAINER -->
 <div class="container">
+
+<!-- ── ABA DIAGNÓSTICO ── -->
+<div id="tab_diagnostico_content">
 
   <!-- BLOCO 1 -->
   <div class="form-section">
@@ -499,7 +540,100 @@ footer strong { color:var(--cyan); }
     </button>
     <div class="copied-msg" id="copied_msg">✓ Copiado!</div>
   </div>
-</div>
+
+</div><!-- /tab_diagnostico_content -->
+
+<!-- ── ABA PROPOSTA ── -->
+<div id="tab_proposta_content" style="display:none;">
+
+  <!-- PROPOSTA BLOCO 1 -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num teal">1</div>
+      <div><div class="section-title">Identificação do cliente</div><div class="section-desc">Dados básicos que aparecem na capa da proposta</div></div>
+    </div>
+    <div class="two-col">
+      <div class="field-group"><label class="field-label" for="prop_nome">Nome da empresa / Estabelecimento <span class="req">*</span></label><input type="text" id="prop_nome" placeholder="Ex: Clínica Sorriso Perfeito"></div>
+      <div class="field-group">
+        <label class="field-label" for="prop_instagram">@ do Instagram <span class="req">*</span></label>
+        <div style="position:relative;">
+          <input type="text" id="prop_instagram" placeholder="Ex: @clinicasorriso" onblur="verificarInstagram(this.value, 'prop_ig_status')" oninput="syncPropIg(this.value)">
+          <span class="ig-status" id="prop_ig_status"></span>
+        </div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="field-group">
+        <label class="field-label" for="prop_segmento">Segmento <span style="font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0">(opcional — aparece na capa)</span></label>
+        <select id="prop_segmento">
+          <option value="">Selecione o segmento...</option>
+          <option>Saúde — Clínica médica / Odontologia</option><option>Saúde — Dermatologia / Estética</option><option>Saúde — Psicologia / Terapia</option><option>Fitness &amp; Bem-estar — Academia / Pilates</option><option>Pet — Veterinária / Pet Shop</option><option>Beleza — Salão / Barbearia</option><option>Beleza — Estética / Spa</option><option>Alimentação — Restaurante / Delivery</option><option>Educação — Curso / Escola</option><option>Varejo — Loja física / E-commerce</option><option>Serviços — Contabilidade / Advocacia</option><option>Imóveis — Imobiliária / Corretor</option><option>Outro</option>
+        </select>
+      </div>
+      <div class="field-group"><label class="field-label" for="prop_cidade">Cidade <span style="font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0">(opcional)</span></label><input type="text" id="prop_cidade" placeholder="Ex: Canoas, RS"></div>
+    </div>
+  </div>
+
+  <!-- PROPOSTA BLOCO 2 -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num teal">2</div>
+      <div><div class="section-title">Planos a incluir na proposta <span style="color:var(--red)">*</span></div><div class="section-desc">Selecione um ou mais planos — cada um gera um bloco no PDF</div></div>
+    </div>
+    <div id="prop_plans_list">
+      <label class="prop-plan-item" id="ppi_1">
+        <input type="checkbox" name="prop_plano" value="1" onchange="togglePropPlan(this,'ppi_1')">
+        <div style="flex:1">
+          <div class="plan-price">R$ 1.500<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div>
+          <div class="plan-name">Plano 1 — Social Media + Captação de Conteúdo</div>
+          <div class="plan-desc">Planejamento editorial, posts (3×/semana), captação de fotos e vídeos, edição e organização do perfil</div>
+        </div>
+      </label>
+      <label class="prop-plan-item" id="ppi_2">
+        <input type="checkbox" name="prop_plano" value="2" onchange="togglePropPlan(this,'ppi_2')">
+        <div style="flex:1">
+          <div class="plan-price">R$ 2.500<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div>
+          <div class="plan-name">Plano 2 — Social Media + Captação + Tráfego Pago Meta</div>
+          <div class="plan-desc">Tudo do Plano 1 + até 3 campanhas no Meta Ads por mês, segmentação e relatórios</div>
+        </div>
+      </label>
+      <label class="prop-plan-item" id="ppi_3">
+        <input type="checkbox" name="prop_plano" value="3" onchange="togglePropPlan(this,'ppi_3')">
+        <div style="flex:1">
+          <div class="plan-price">R$ 2.900<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div>
+          <div class="plan-name">Plano 3 — Social Media + Captação + Tráfego Meta + Google Empresa</div>
+          <div class="plan-desc">Tudo do Plano 2 + gestão completa do Google Empresa (GMB) e posicionamento local</div>
+        </div>
+      </label>
+      <label class="prop-plan-item" id="ppi_4">
+        <input type="checkbox" name="prop_plano" value="4" onchange="togglePropPlan(this,'ppi_4')">
+        <div style="flex:1">
+          <div class="plan-price">R$ 3.800<span style="font-size:13px;font-weight:500;color:#6EE7B7">/mês</span></div>
+          <div class="plan-name">Plano 4 — Plano Completo + Suporte Comercial</div>
+          <div class="plan-desc">Tudo do Plano 3 + estratégia comercial, follow-up de leads e marketing de relacionamento</div>
+        </div>
+      </label>
+    </div>
+    <div class="prop-hint">Pode selecionar mais de um plano. Cada plano selecionado gera um bloco comparativo no PDF.</div>
+  </div>
+
+  <!-- PROPOSTA SUBMIT -->
+  <div class="submit-area">
+    <button class="btn-generate-green" id="btn_prop_enviar" onclick="gerarProposta()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Gerar Proposta em PDF
+    </button>
+    <div class="submit-hint">Gera o PDF da proposta <strong style="color:#10B981">sem chamar a IA</strong> — instantâneo</div>
+    <div class="status-bar" id="prop_status_bar"></div>
+    <button class="btn-nova" id="btn_prop_nova" onclick="novaProposta()" style="display:none;border-color:rgba(16,185,129,0.35);color:#10B981;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      Nova Proposta
+    </button>
+  </div>
+
+</div><!-- /tab_proposta_content -->
+
+</div><!-- /container -->
 
 <footer>Formulário interno · <strong>R.E.C. HUB de Negócios</strong> · recolaborativo.com.br</footer>
 
@@ -702,7 +836,8 @@ setTimeout(atualizarCreditosHeader, 500);
       obs.unobserve(el);
     });
   }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-  document.querySelectorAll('.form-section').forEach(function(el, i) { el.dataset.delay = i * 80; obs.observe(el); });
+  document.querySelectorAll('#tab_diagnostico_content .form-section').forEach(function(el, i) { el.dataset.delay = i * 80; obs.observe(el); });
+  document.querySelectorAll('#tab_proposta_content .form-section').forEach(function(el) { el.classList.add('visible'); });
 })();
 
 /* ═══════════════════════════════════════════
@@ -935,9 +1070,9 @@ async function abrirDiagnostico(htmlRaw, instagram) {
 ═══════════════════════════════════════════ */
 var lastIgCheck = null;
 
-async function verificarInstagram(val) {
+async function verificarInstagram(val, statusId) {
   var handle = val.replace('@','').trim();
-  var el = document.getElementById('ig_status');
+  var el = document.getElementById(statusId || 'ig_status');
   if (!handle || handle.length < 2) { el.textContent = ''; el.className = 'ig-status'; lastIgCheck = null; return; }
 
   // Validação de formato primeiro
@@ -1126,6 +1261,321 @@ function copiarTexto() {
     var m = document.getElementById('copied_msg'); m.style.display='block';
     setTimeout(function(){ m.style.display='none'; }, 3000);
   });
+}
+
+/* ═══════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════ */
+var currentTab = 'diagnostico';
+
+function switchTab(tab) {
+  currentTab = tab;
+  var isDiag = tab === 'diagnostico';
+  document.getElementById('tab_diagnostico_content').style.display = isDiag ? '' : 'none';
+  document.getElementById('tab_proposta_content').style.display   = isDiag ? 'none' : '';
+  document.getElementById('tab_btn_diag').className = 'tab-btn' + (isDiag ? ' tab-active' : '');
+  document.getElementById('tab_btn_prop').className = 'tab-btn tab-btn-green' + (!isDiag ? ' tab-active' : '');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ═══════════════════════════════════════════
+   PROPOSTA — PLAN TOGGLE
+═══════════════════════════════════════════ */
+function togglePropPlan(inp, itemId) {
+  document.getElementById(itemId).classList.toggle('prop-selected', inp.checked);
+}
+
+function syncPropIg(val) { /* só sincroniza o campo — verificarInstagram cuida do resto */ }
+
+/* ═══════════════════════════════════════════
+   PROPOSTA — DADOS DOS PLANOS
+═══════════════════════════════════════════ */
+var PLANOS_INFO = {
+  1: {
+    badge: 'PLANO 1', tag: 'Social Media',
+    name: 'Social Media + Capta&ccedil;&atilde;o de Conte&uacute;do',
+    price: 'R$ 1.500',
+    items: ['Planejamento estrat&eacute;gico mensal','Conte&uacute;do para redes (3 posts/semana)','Capta&ccedil;&atilde;o de fotos e v&iacute;deos','Edi&ccedil;&atilde;o de materiais profissionais','Organiza&ccedil;&atilde;o do perfil Instagram','Acompanhamento cont&iacute;nuo']
+  },
+  2: {
+    badge: 'PLANO 2', tag: 'Social Media + Meta Ads',
+    name: 'Social Media + Capta&ccedil;&atilde;o + Tr&aacute;fego Pago Meta',
+    price: 'R$ 2.500',
+    items: ['Planejamento estrat&eacute;gico mensal','Conte&uacute;do para redes (3 posts/semana)','Capta&ccedil;&atilde;o de fotos e v&iacute;deos','Edi&ccedil;&atilde;o de materiais profissionais','Meta Ads (at&eacute; 3 campanhas/m&ecirc;s)','Estrat&eacute;gia e segmenta&ccedil;&atilde;o de p&uacute;blico','Otimiza&ccedil;&atilde;o e escala de an&uacute;ncios','Relat&oacute;rios de performance']
+  },
+  3: {
+    badge: 'PLANO 3', tag: 'Social Media + Meta + Google',
+    name: 'Social Media + Capta&ccedil;&atilde;o + Tr&aacute;fego Meta + Google Empresa',
+    price: 'R$ 2.900',
+    items: ['Planejamento estrat&eacute;gico mensal','Conte&uacute;do para redes (3 posts/semana)','Capta&ccedil;&atilde;o de fotos e v&iacute;deos','Meta Ads (at&eacute; 3 campanhas/m&ecirc;s)','Estrat&eacute;gia e segmenta&ccedil;&atilde;o de p&uacute;blico','Gest&atilde;o Google Empresa (GMB)','Otimiza&ccedil;&atilde;o de perfil local','Relat&oacute;rios de performance']
+  },
+  4: {
+    badge: 'PLANO 4', tag: 'Plano Completo',
+    name: 'Plano Completo + Suporte Comercial',
+    price: 'R$ 3.800',
+    items: ['Planejamento estrat&eacute;gico mensal','Conte&uacute;do para redes (3 posts/semana)','Capta&ccedil;&atilde;o de fotos e v&iacute;deos','Meta Ads (at&eacute; 3 campanhas/m&ecirc;s)','Gest&atilde;o Google Empresa (GMB)','Otimiza&ccedil;&atilde;o de perfil local','Estrat&eacute;gia comercial e follow-up','Marketing de relacionamento']
+  }
+};
+
+/* Entregáveis por plano máximo selecionado */
+var DEL_CARDS = {
+  social:    { icon:'&#128241;', cls:'ig',   title:'Gest&atilde;o de Instagram',          tag:'Social Media', body:'Planejamento editorial mensal, cria&ccedil;&atilde;o de conte&uacute;do estrat&eacute;gico, intera&ccedil;&atilde;o e crescimento de perfil.',   items:['3-4 posts/semana no feed','Stories di&aacute;rios e engajamento','Calend&aacute;rio estrat&eacute;gico mensal','Monitoramento de resultados'] },
+  conteudo:  { icon:'&#127909;', cls:'gen',  title:'Produ&ccedil;&atilde;o de Conte&uacute;do', tag:'Capta&ccedil;&atilde;o', body:'Capta&ccedil;&atilde;o profissional de fotos e v&iacute;deos, edi&ccedil;&atilde;o e cria&ccedil;&atilde;o de materiais dentro da identidade visual.',  items:['Capta&ccedil;&atilde;o mensal de fotos','Edi&ccedil;&atilde;o de Reels e v&iacute;deos','Design de artes e stories','Identidade visual consistente'] },
+  meta:      { icon:'&#128202;', cls:'ads',  title:'Tr&aacute;fego Pago &mdash; Meta Ads',  tag:'Meta Ads',    body:'Cria&ccedil;&atilde;o, gest&atilde;o e otimiza&ccedil;&atilde;o de campanhas no Meta Ads para gerar leads e agendamentos qualificados.',          items:['At&eacute; 3 campanhas/m&ecirc;s','Segmenta&ccedil;&atilde;o local e por interesse','Otimiza&ccedil;&atilde;o di&aacute;ria de performance','Relat&oacute;rio semanal de resultados'] },
+  gmb:       { icon:'&#128205;', cls:'goog', title:'Google Empresa &mdash; GMB',           tag:'Google',      body:'Otimiza&ccedil;&atilde;o completa do perfil Google, gest&atilde;o de avalia&ccedil;&otilde;es, postagens e posicionamento local nas buscas.',      items:['Otimiza&ccedil;&atilde;o de perfil GMB','Resposta a avalia&ccedil;&otilde;es e perguntas','Postagens e atualiza&ccedil;&otilde;es peri&oacute;dicas','Monitoramento de insights locais'] },
+  comercial: { icon:'&#128172;', cls:'gen',  title:'Suporte Comercial',                   tag:'Comercial',   body:'Estrutura de relacionamento com leads, follow-up p&oacute;s-atendimento e estrat&eacute;gia para aumentar reten&ccedil;&atilde;o e indica&ccedil;&otilde;es.', items:['Follow-up de leads n&atilde;o convertidos','Automa&ccedil;&atilde;o de confirma&ccedil;&atilde;o','Estrat&eacute;gia de indica&ccedil;&atilde;o','Nutri&ccedil;&atilde;o de relacionamento'] },
+  relatorios:{ icon:'&#128202;', cls:'gen',  title:'Acompanhamento + Relat&oacute;rios', tag:'Gest&atilde;o', body:'Dashboard mensal com m&eacute;tricas integradas de todos os canais, an&aacute;lise de resultados e reuni&atilde;o estrat&eacute;gica.',           items:['Dashboard mensal unificado','An&aacute;lise de comportamento','Reuni&atilde;o estrat&eacute;gica mensal','Ajuste cont&iacute;nuo de estrat&eacute;gia'] }
+};
+
+function getDelCards(maxPlano) {
+  if (maxPlano >= 4) return ['social','conteudo','meta','gmb','comercial','relatorios'];
+  if (maxPlano >= 3) return ['social','conteudo','meta','gmb'];
+  if (maxPlano >= 2) return ['social','conteudo','meta','relatorios'];
+  return ['social','conteudo','relatorios','social']; // P1: 4 cards, repetindo social como captação
+}
+
+/* ═══════════════════════════════════════════
+   PROPOSTA — BUILDER HTML
+═══════════════════════════════════════════ */
+function buildPropostaHtml(dados) {
+  var mes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var now = new Date();
+  var mesAno = mes[now.getMonth()] + ' ' + now.getFullYear();
+
+  var nome = dados.nome || 'Cliente';
+  var ig   = (dados.instagram || '').replace('@','');
+  var seg  = dados.segmento || '';
+  var cid  = dados.cidade || '';
+  var planos = dados.planos.sort(function(a,b){return a-b;});
+  var maxPlano = Math.max.apply(null, planos);
+
+  /* CHANNEL TAGS — tags de plano para o hero */
+  var tagMap = { 1:'Social Media', 2:'Social + Meta Ads', 3:'Social + Meta + Google', 4:'Plano Completo' };
+  var channelTags = planos.map(function(n) {
+    return '<span class="ch-tag ch-google">' + tagMap[n] + '</span>';
+  }).join('');
+
+  /* PLAN-BOXES */
+  function planBox(n) {
+    var p = PLANOS_INFO[n];
+    var itensHtml = p.items.map(function(it){ return '<li>' + it + '</li>'; }).join('');
+    return '<div class="plan-box" style="margin-bottom:16px;">'
+      + '<div class="plan-box-left">'
+      + '<div class="plan-box-badge">' + p.badge + '</div>'
+      + '<div class="plan-box-name">' + p.name + '</div>'
+      + '<div class="plan-box-price">' + p.price + '<span>/m&ecirc;s</span></div>'
+      + '</div>'
+      + '<ul class="plan-box-items">' + itensHtml + '</ul>'
+      + '</div>';
+  }
+
+  /* DEL-CARDS */
+  function delCard(key) {
+    var c = DEL_CARDS[key] || DEL_CARDS['relatorios'];
+    var itensDel = c.items.map(function(it){
+      return '<div class="del-item"><span class="del-bullet">&#10003;</span>' + it + '</div>';
+    }).join('');
+    return '<div class="del-card">'
+      + '<div class="del-header">'
+      + '<div class="del-icon ' + c.cls + '">' + c.icon + '</div>'
+      + '<div><div class="del-title">' + c.title + '</div><span class="del-plan-tag">' + c.tag + '</span></div>'
+      + '</div>'
+      + '<div class="del-body">' + c.body + '</div>'
+      + '<div class="del-items">' + itensDel + '</div>'
+      + '</div>';
+  }
+
+  /* ───── PÁGINA 1: HERO DARK ───── */
+  var heroSub = seg ? seg + (cid ? ' &mdash; ' + cid : '') : (cid || '');
+  var page1 = '<div class="pdf-page dark">'
+    + '<div class="topbar"></div>'
+    + '<header><div class="logo">R.E.C. &middot; HUB de Neg&oacute;cios</div><div class="date-badge">Proposta Comercial &middot; ' + mesAno + '</div></header>'
+    + '<section class="hero">'
+    + '<div class="alert-badge">&#128203; PROPOSTA COMERCIAL</div>'
+    + '<h1>' + nome + '<br><span>proposta de servi&ccedil;os digitais</span></h1>'
+    + (heroSub ? '<p class="hero-sub">' + heroSub + '</p>' : '')
+    + '<div class="hero-meta"><strong>@' + ig + '</strong></div>'
+    + '<div class="channels">' + channelTags + '</div>'
+    + '<div class="kpi-grid">'
+    + '<div class="kpi-card"><span class="kpi-label">Planos apresentados</span><span class="kpi-value">' + planos.length + '</span><span class="kpi-verdict ok">Selecionados</span></div>'
+    + '<div class="kpi-card"><span class="kpi-label">Investimento a partir de</span><span class="kpi-value">' + PLANOS_INFO[Math.min.apply(null,planos)].price + '</span><span class="kpi-verdict ok">Por m&ecirc;s</span></div>'
+    + '<div class="kpi-card"><span class="kpi-label">Canais cobertos</span><span class="kpi-value">' + (maxPlano >= 3 ? '3+' : maxPlano >= 2 ? '2' : '1') + '</span><span class="kpi-verdict ok">Integrados</span></div>'
+    + '</div>'
+    + '</section>'
+    + '</div>';
+
+  /* ───── PÁGINA 2: PLAN-BOXES ───── */
+  var planBoxesHtml = planos.map(planBox).join('');
+  var page2 = '<div class="pdf-page">'
+    + '<div class="inner">'
+    + '<div class="section-header" style="margin-bottom:24px;">'
+    + '<div class="section-icon" style="background:#D1FAE5;">&#128176;</div>'
+    + '<div><div class="section-label green">Investimento</div><div class="section-title">Op&ccedil;&otilde;es de plano para ' + nome + '</div></div>'
+    + '</div>'
+    + planBoxesHtml
+    + '</div>'
+    + '</div>';
+
+  /* ───── PÁGINA 3: DEL-CARDS ───── */
+  var delKeys = getDelCards(maxPlano);
+  // se 6 del-cards, divide em 2 páginas de 4; se 4, uma página
+  var delPages = '';
+  if (delKeys.length <= 4) {
+    var delGrid = delKeys.map(delCard).join('');
+    delPages = '<div class="pdf-page">'
+      + '<div class="inner">'
+      + '<div class="section-header" style="margin-bottom:24px;">'
+      + '<div class="section-icon green">&#127919;</div>'
+      + '<div><div class="section-label green">Entregas</div><div class="section-title">O que o REC HUB desenvolve para ' + nome + '</div></div>'
+      + '</div>'
+      + '<div class="deliverable-grid">' + delGrid + '</div>'
+      + '</div>'
+      + '</div>';
+  } else {
+    // 6 cards: página 3 com 4, página 4 com 2
+    var del1 = delKeys.slice(0,4).map(delCard).join('');
+    var del2 = delKeys.slice(4).map(delCard).join('');
+    delPages = '<div class="pdf-page">'
+      + '<div class="inner">'
+      + '<div class="section-header" style="margin-bottom:24px;">'
+      + '<div class="section-icon green">&#127919;</div>'
+      + '<div><div class="section-label green">Entregas</div><div class="section-title">O que o REC HUB desenvolve para ' + nome + '</div></div>'
+      + '</div>'
+      + '<div class="deliverable-grid">' + del1 + '</div>'
+      + '</div>'
+      + '</div>'
+      + '<div class="pdf-page">'
+      + '<div class="inner">'
+      + '<div class="page-cont">Entregas &mdash; continua&ccedil;&atilde;o</div>'
+      + '<div class="deliverable-grid">' + del2 + '</div>'
+      + '</div>'
+      + '</div>';
+  }
+
+  /* ───── ÚLTIMA PÁGINA: HUB-WHY DARK ───── */
+  var pageHub = '<div class="pdf-page dark">'
+    + '<div class="inner" style="justify-content:center;">'
+    + '<section class="hub-why-section" style="padding:0;background:none;">'
+    + '<div class="hub-why-inner" style="max-width:100%;padding:0;">'
+    + '<div class="hub-why-tag">REC HUB DE NEG&Oacute;CIOS</div>'
+    + '<h2 class="hub-why-title">Por que fechar com o REC HUB?</h2>'
+    + '<p class="hub-why-sub">N&atilde;o somos uma ag&ecirc;ncia tradicional. Somos um ecossistema estrat&eacute;gico que ajuda empres&aacute;rios a pensar, estruturar e escalar seus neg&oacute;cios, com conex&otilde;es reais, estrutura completa e resultados concretos.</p>'
+    + '<div class="hub-benefits">'
+    + '<div class="hub-benefit"><div class="hub-b-num">01</div><div><div class="hub-b-title">Conte&uacute;do com estrat&eacute;gia</div><div class="hub-b-desc">Planejamento, roteiro e produ&ccedil;&atilde;o orientados a autoridade e vendas. N&atilde;o postamos por postar, cada pe&ccedil;a tem um objetivo claro.</div></div></div>'
+    + '<div class="hub-benefit"><div class="hub-b-num">02</div><div><div class="hub-b-title">Tr&aacute;fego pago integrado</div><div class="hub-b-desc">Campanhas no Meta Ads e Google constru&iacute;das em cima do posicionamento da marca, para gerar leads qualificados.</div></div></div>'
+    + '<div class="hub-benefit"><div class="hub-b-num">03</div><div><div class="hub-b-title">Estrutura comercial</div><div class="hub-b-desc">Marketing e vendas trabalhando juntos. Do primeiro contato &agrave; convers&atilde;o, com processos que se repetem e escalam o faturamento.</div></div></div>'
+    + '<div class="hub-benefit"><div class="hub-b-num">04</div><div><div class="hub-b-title">Ecossistema de conex&otilde;es</div><div class="hub-b-desc">Acesso a uma comunidade ativa de empreendedores no RS com mais de 38 mil seguidores, grupos segmentados e eventos presenciais.</div></div></div>'
+    + '<div class="hub-benefit"><div class="hub-b-num">05</div><div><div class="hub-b-title">Acompanhamento estrat&eacute;gico cont&iacute;nuo</div><div class="hub-b-desc">Reuni&atilde;o mensal de alinhamento, relat&oacute;rios de resultado e ajuste de estrat&eacute;gia conforme o desempenho. O trabalho evolui junto com o neg&oacute;cio, sem contratos engessados.</div></div></div>'
+    + '</div>'
+    + '<div class="hub-why-bottom"><span class="hub-why-tagline">&ldquo;Movimento gera movimento.&rdquo;</span><span class="hub-why-handle">recolaborativo.com.br &middot; @somosrecoficial</span></div>'
+    + '</div>'
+    + '</section>'
+    + '<footer style="background:none;border-top:1px solid rgba(255,255,255,0.08);margin-top:24px;padding-top:20px;text-align:center;font-size:12px;color:var(--gray-400);">'
+    + 'Proposta elaborada por <strong style="color:var(--cyan);">R.E.C. &middot; Ecossistema de Conex&otilde;es e Solu&ccedil;&otilde;es Empresariais</strong><br>'
+    + '<span style="margin-top:4px;display:block;">recolaborativo.com.br &middot; @somosrecoficial</span>'
+    + '</footer>'
+    + '</div>'
+    + '</div>';
+
+  return PDF_HTML_HEADER + page1 + page2 + delPages + pageHub + PDF_HTML_FOOTER;
+}
+
+/* ═══════════════════════════════════════════
+   PROPOSTA — SUBMIT
+═══════════════════════════════════════════ */
+async function gerarProposta() {
+  var nome     = (document.getElementById('prop_nome') || {}).value || '';
+  var instagram= (document.getElementById('prop_instagram') || {}).value || '';
+  var segmento = (document.getElementById('prop_segmento') || {}).value || '';
+  var cidade   = (document.getElementById('prop_cidade') || {}).value || '';
+  var planosEl = document.querySelectorAll('input[name="prop_plano"]:checked');
+  var planos   = []; planosEl.forEach(function(el){ planos.push(parseInt(el.value)); });
+
+  var sb = document.getElementById('prop_status_bar');
+  sb.className = 'status-bar'; sb.innerHTML = '';
+
+  if (!nome.trim()) {
+    sb.className = 'status-bar error';
+    sb.innerHTML = '⚠️ Preencha o nome da empresa.';
+    sb.scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+  if (!instagram.trim()) {
+    sb.className = 'status-bar error';
+    sb.innerHTML = '⚠️ Informe o @ do Instagram.';
+    sb.scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+  if (!planos.length) {
+    sb.className = 'status-bar error';
+    sb.innerHTML = '⚠️ Selecione ao menos um plano.';
+    sb.scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+
+  var btn = document.getElementById('btn_prop_enviar');
+  btn.disabled = true;
+  showLoading();
+  setSubtitle('Montando proposta...');
+  setProgress(30);
+  setStep('step_1', 'done');
+  setStep('step_2', 'done');
+  setStep('step_3', 'done');
+  setStep('step_4', 'active');
+  setSubtitle('Gerando PDF da proposta...');
+  setProgress(70);
+
+  try {
+    var html = buildPropostaHtml({
+      nome: nome.trim(),
+      instagram: instagram.trim(),
+      segmento: segmento,
+      cidade: cidade.trim(),
+      planos: planos
+    });
+    setStep('step_4', 'done');
+    setStep('step_5', 'active');
+    setSubtitle('Baixando PDF...');
+    setProgress(90);
+    var handle = instagram.replace('@','').replace(/[^a-zA-Z0-9_-]/g,'');
+    await abrirDiagnostico(html, 'proposta-' + handle);
+    setStep('step_5', 'done');
+    setProgress(100);
+    setSubtitle('Proposta gerada com sucesso!');
+    await new Promise(function(r){ setTimeout(r, 1500); });
+    hideLoading();
+    sb.className = 'status-bar success';
+    sb.innerHTML = '✅ PDF da proposta baixado com sucesso!';
+    document.getElementById('btn_prop_nova').style.display = 'inline-flex';
+  } catch(err) {
+    setStep('step_4', 'error-step'); setStep('step_5', 'error-step');
+    setSubtitle('Erro: ' + err.message);
+    await new Promise(function(r){ setTimeout(r, 2000); });
+    hideLoading();
+    sb.className = 'status-bar error';
+    sb.innerHTML = '⚠️ Erro ao gerar PDF: ' + err.message;
+  }
+
+  btn.disabled = false;
+  sb.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function novaProposta() {
+  document.querySelectorAll('#tab_proposta_content input[type="text"], #tab_proposta_content select').forEach(function(el){ el.value=''; });
+  document.querySelectorAll('input[name="prop_plano"]').forEach(function(el){
+    el.checked = false;
+    var item = el.closest('.prop-plan-item');
+    if (item) item.classList.remove('prop-selected');
+  });
+  var sb = document.getElementById('prop_status_bar');
+  sb.className = 'status-bar'; sb.innerHTML = '';
+  document.getElementById('btn_prop_nova').style.display = 'none';
+  document.getElementById('btn_prop_enviar').disabled = false;
+  var propIgStatus = document.getElementById('prop_ig_status');
+  if (propIgStatus) { propIgStatus.textContent=''; propIgStatus.className='ig-status'; }
+  ['step_1','step_2','step_3','step_4','step_5'].forEach(function(id){ setStep(id, null); });
+  setProgress(0);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 </script>
 <style>
