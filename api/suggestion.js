@@ -1,6 +1,6 @@
 export const config = { maxDuration: 10 };
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://dissknbpwxvhkjltuzya.supabase.co';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ooufmzqdiehrxnqoqvsi.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const DESTINO = 'henrique.callefi@gmail.com';

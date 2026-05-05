@@ -613,6 +613,29 @@ footer strong { color:var(--cyan); }
           <div class="plan-desc">Tudo do Plano 3 + estratégia comercial, follow-up de leads e marketing de relacionamento</div>
         </div>
       </label>
+      <label class="prop-plan-item" id="ppi_custom">
+        <input type="checkbox" name="prop_plano" value="custom" onchange="togglePropPlan(this,'ppi_custom')">
+        <div style="flex:1">
+          <div class="plan-price" style="font-size:15px;color:var(--text-secondary)">Personalizado</div>
+          <div class="plan-name">Valor e escopo customizados</div>
+          <div class="plan-desc">Ideal para propostas com serviços específicos (ex: só tráfego pago, só geração de vídeo)</div>
+        </div>
+      </label>
+      <div id="custom_prop_fields" style="display:none;padding:16px;background:rgba(6,15,35,.5);border:1.5px solid rgba(16,185,129,.2);border-radius:10px;margin-top:-4px;margin-bottom:4px;">
+        <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:120px;">
+            <label style="font-size:11px;color:#64748B;font-weight:600;display:block;margin-bottom:5px;">Valor mensal</label>
+            <input type="text" id="custom_valor" placeholder="Ex: R$ 2.100" style="width:100%;background:rgba(6,15,35,.8);border:1.5px solid rgba(6,182,212,.15);border-radius:8px;padding:9px 12px;color:#F0F6FF;font-family:inherit;font-size:13px;outline:none;">
+          </div>
+          <div style="flex:2;min-width:180px;">
+            <label style="font-size:11px;color:#64748B;font-weight:600;display:block;margin-bottom:5px;">Nome do plano</label>
+            <input type="text" id="custom_nome_plano" placeholder="Ex: Tráfego Pago Meta Ads" style="width:100%;background:rgba(6,15,35,.8);border:1.5px solid rgba(6,182,212,.15);border-radius:8px;padding:9px 12px;color:#F0F6FF;font-family:inherit;font-size:13px;outline:none;">
+          </div>
+        </div>
+        <label style="font-size:11px;color:#64748B;font-weight:600;display:block;margin-bottom:5px;">O que está incluso <span style="font-weight:400;opacity:.7">(um item por linha)</span></label>
+        <textarea id="custom_incluso" placeholder="Ex:&#10;Gestão de campanhas Meta Ads&#10;Criação de criativos&#10;Segmentação de públicos&#10;Relatório mensal de performance" style="width:100%;background:rgba(6,15,35,.8);border:1.5px solid rgba(6,182,212,.15);border-radius:8px;padding:9px 12px;color:#F0F6FF;font-family:inherit;font-size:13px;min-height:90px;resize:vertical;outline:none;"></textarea>
+        <div style="margin-top:8px;font-size:11px;color:#4A5A72;">💡 Para tráfego pago: já inclui automaticamente a nota <em>"Investimento em mídia não incluso"</em> no PDF.</div>
+      </div>
     </div>
     <div class="prop-hint">Pode selecionar mais de um plano. Cada plano selecionado gera um bloco comparativo no PDF.</div>
   </div>
@@ -1287,6 +1310,10 @@ function switchTab(tab) {
 ═══════════════════════════════════════════ */
 function togglePropPlan(inp, itemId) {
   document.getElementById(itemId).classList.toggle('prop-selected', inp.checked);
+  if (itemId === 'ppi_custom') {
+    var fields = document.getElementById('custom_prop_fields');
+    if (fields) fields.style.display = inp.checked ? 'block' : 'none';
+  }
 }
 
 function syncPropIg(val) { /* só sincroniza o campo — verificarInstagram cuida do resto */ }
@@ -1323,7 +1350,7 @@ var PLANOS_INFO = {
 
 /* Entregáveis por plano máximo selecionado */
 var DEL_CARDS = {
-  social:    { icon:'&#128241;', cls:'ig',   title:'Gest&atilde;o de Instagram',          tag:'Social Media', body:'Planejamento editorial mensal, cria&ccedil;&atilde;o de conte&uacute;do estrat&eacute;gico, intera&ccedil;&atilde;o e crescimento de perfil.',   items:['3-4 posts/semana no feed','Stories di&aacute;rios e engajamento','Calend&aacute;rio estrat&eacute;gico mensal','Monitoramento de resultados'] },
+  social:    { icon:'&#128241;', cls:'ig',   title:'Gest&atilde;o de Instagram',          tag:'Social Media', body:'Planejamento editorial mensal, cria&ccedil;&atilde;o de conte&uacute;do estrat&eacute;gico, intera&ccedil;&atilde;o e crescimento de perfil.',   items:['At&eacute; 3 posts/semana no feed','Calend&aacute;rio editorial mensal','Gest&atilde;o e resposta a coment&aacute;rios','Monitoramento de resultados'] },
   conteudo:  { icon:'&#127909;', cls:'gen',  title:'Produ&ccedil;&atilde;o de Conte&uacute;do', tag:'Capta&ccedil;&atilde;o', body:'Capta&ccedil;&atilde;o profissional de fotos e v&iacute;deos, edi&ccedil;&atilde;o e cria&ccedil;&atilde;o de materiais dentro da identidade visual.',  items:['Capta&ccedil;&atilde;o mensal de fotos','Edi&ccedil;&atilde;o de Reels e v&iacute;deos','Design de artes e stories','Identidade visual consistente'] },
   meta:      { icon:'&#128202;', cls:'ads',  title:'Tr&aacute;fego Pago &mdash; Meta Ads',  tag:'Meta Ads',    body:'Cria&ccedil;&atilde;o, gest&atilde;o e otimiza&ccedil;&atilde;o de campanhas no Meta Ads para gerar leads e agendamentos qualificados.',          items:['At&eacute; 3 campanhas/m&ecirc;s','Segmenta&ccedil;&atilde;o local e por interesse','Otimiza&ccedil;&atilde;o di&aacute;ria de performance','Relat&oacute;rio semanal de resultados'] },
   gmb:       { icon:'&#128205;', cls:'goog', title:'Google Empresa &mdash; GMB',           tag:'Google',      body:'Otimiza&ccedil;&atilde;o completa do perfil Google, gest&atilde;o de avalia&ccedil;&otilde;es, postagens e posicionamento local nas buscas.',      items:['Otimiza&ccedil;&atilde;o de perfil GMB','Resposta a avalia&ccedil;&otilde;es e perguntas','Postagens e atualiza&ccedil;&otilde;es peri&oacute;dicas','Monitoramento de insights locais'] },
@@ -1350,14 +1377,16 @@ function buildPropostaHtml(dados) {
   var ig   = (dados.instagram || '').replace('@','');
   var seg  = dados.segmento || '';
   var cid  = dados.cidade || '';
-  var planos = dados.planos.sort(function(a,b){return a-b;});
-  var maxPlano = Math.max.apply(null, planos);
+  var planos = (dados.planos || []).slice().sort(function(a,b){return a-b;});
+  var customDados = dados.customDados || null;
+  var maxPlano = planos.length ? Math.max.apply(null, planos) : (customDados ? 2 : 1);
 
   /* CHANNEL TAGS — tags de plano para o hero */
   var tagMap = { 1:'Social Media', 2:'Social + Meta Ads', 3:'Social + Meta + Google', 4:'Plano Completo' };
   var channelTags = planos.map(function(n) {
     return '<span class="ch-tag ch-google">' + tagMap[n] + '</span>';
   }).join('');
+  if (customDados) channelTags += '<span class="ch-tag ch-google">Personalizado</span>';
 
   /* PLAN-BOXES */
   function planBox(n) {
@@ -1371,13 +1400,16 @@ function buildPropostaHtml(dados) {
         + '<span class="plan-addon-text">Gest&atilde;o TikTok &mdash; Planejamento, cria&ccedil;&atilde;o e postagem de conte&uacute;dos &middot; <strong>+ R$ 300/m&ecirc;s</strong></span>'
         + '</div></div>'
       : '';
+    var metaNoteHtml = (n >= 2)
+      ? '<li style="color:#94A3B8;font-size:11px;border-top:1px solid rgba(255,255,255,0.1);margin-top:8px;padding-top:8px;grid-column:1/-1;list-style:none;">* Investimento em m&iacute;dia (verba Meta Ads) n&atilde;o incluso no plano</li>'
+      : '';
     return '<div class="plan-box" style="margin-bottom:16px;">'
       + '<div class="plan-box-left">'
       + '<div class="plan-box-badge">' + p.badge + '</div>'
       + '<div class="plan-box-name">' + p.name + '</div>'
       + '<div class="plan-box-price">' + p.price + '<span>/m&ecirc;s</span></div>'
       + '</div>'
-      + '<div class="plan-box-right"><ul class="plan-box-items">' + itensHtml + '</ul>' + addonHtml + '</div>'
+      + '<div class="plan-box-right"><ul class="plan-box-items">' + itensHtml + metaNoteHtml + '</ul>' + addonHtml + '</div>'
       + '</div>';
   }
 
@@ -1407,17 +1439,36 @@ function buildPropostaHtml(dados) {
     + '<h1>' + nome + '<br><span>proposta de servi&ccedil;os digitais</span></h1>'
     + (heroSub ? '<p class="hero-sub">' + heroSub + '</p>' : '')
     + '<div class="hero-meta"><strong>@' + ig + '</strong></div>'
+    + '<div style="margin-top:12px;margin-bottom:16px;font-size:11px;color:#64748B;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:5px 16px;border-radius:20px;display:inline-block;">&#9201; Proposta v&aacute;lida por 7 dias a partir da emiss&atilde;o</div>'
     + '<div class="channels">' + channelTags + '</div>'
     + '<div class="kpi-grid">'
     + '<div class="kpi-card"><span class="kpi-label">Planos apresentados</span><span class="kpi-value">' + planos.length + '</span><span class="kpi-verdict ok">Selecionados</span></div>'
-    + '<div class="kpi-card"><span class="kpi-label">Investimento a partir de</span><span class="kpi-value">' + PLANOS_INFO[Math.min.apply(null,planos)].price + '</span><span class="kpi-verdict ok">Por m&ecirc;s</span></div>'
+    + '<div class="kpi-card"><span class="kpi-label">Investimento a partir de</span><span class="kpi-value">' + (planos.length ? PLANOS_INFO[Math.min.apply(null,planos)].price : (customDados ? customDados.valor : 'Personalizado')) + '</span><span class="kpi-verdict ok">Por m&ecirc;s</span></div>'
     + '<div class="kpi-card"><span class="kpi-label">Canais cobertos</span><span class="kpi-value">' + (maxPlano >= 3 ? '3+' : maxPlano >= 2 ? '2' : '1') + '</span><span class="kpi-verdict ok">Integrados</span></div>'
     + '</div>'
     + '</section>'
     + '</div>';
 
+  /* PLAN-BOX PERSONALIZADO */
+  function customPlanBox(cd) {
+    var incluso = (cd.incluso || '').trim();
+    var itens = incluso ? incluso.split('\n').filter(function(l){ return l.trim(); }) : ['Servi&ccedil;os conforme combinado'];
+    var itensHtml = itens.map(function(it){ return '<li>' + it.trim() + '</li>'; }).join('');
+    var temMeta = /meta|tr.?fego|ads/i.test(incluso + cd.nome);
+    var metaNoteHtml = temMeta ? '<li style="color:#94A3B8;font-size:11px;border-top:1px solid rgba(255,255,255,0.1);margin-top:8px;padding-top:8px;grid-column:1/-1;list-style:none;">* Investimento em m&iacute;dia (verba Meta Ads) n&atilde;o incluso no plano</li>' : '';
+    return '<div class="plan-box" style="margin-bottom:16px;">'
+      + '<div class="plan-box-left">'
+      + '<div class="plan-box-badge">PERSONALIZADO</div>'
+      + '<div class="plan-box-name">' + cd.nome + '</div>'
+      + '<div class="plan-box-price">' + cd.valor + '<span>/m&ecirc;s</span></div>'
+      + '</div>'
+      + '<div class="plan-box-right"><ul class="plan-box-items">' + itensHtml + metaNoteHtml + '</ul></div>'
+      + '</div>';
+  }
+
   /* ───── PÁGINA 2: PLAN-BOXES ───── */
   var planBoxesHtml = planos.map(planBox).join('');
+  if (customDados) planBoxesHtml += customPlanBox(customDados);
   var page2 = '<div class="pdf-page">'
     + '<div class="inner">'
     + '<div class="section-header" style="margin-bottom:24px;">'
@@ -1501,7 +1552,16 @@ async function gerarProposta() {
   var segmento = (document.getElementById('prop_segmento') || {}).value || '';
   var cidade   = (document.getElementById('prop_cidade') || {}).value || '';
   var planosEl = document.querySelectorAll('input[name="prop_plano"]:checked');
-  var planos   = []; planosEl.forEach(function(el){ planos.push(parseInt(el.value)); });
+  var planos = []; var temCustom = false;
+  planosEl.forEach(function(el){
+    if (el.value === 'custom') { temCustom = true; }
+    else { var n = parseInt(el.value); if (!isNaN(n)) planos.push(n); }
+  });
+  var customDados = temCustom ? {
+    valor: (document.getElementById('custom_valor')||{}).value || '',
+    nome:  (document.getElementById('custom_nome_plano')||{}).value || 'Plano Personalizado',
+    incluso: (document.getElementById('custom_incluso')||{}).value || ''
+  } : null;
 
   var sb = document.getElementById('prop_status_bar');
   sb.className = 'status-bar'; sb.innerHTML = '';
@@ -1518,9 +1578,15 @@ async function gerarProposta() {
     sb.scrollIntoView({ behavior:'smooth', block:'center' });
     return;
   }
-  if (!planos.length) {
+  if (!planos.length && !temCustom) {
     sb.className = 'status-bar error';
     sb.innerHTML = '⚠️ Selecione ao menos um plano.';
+    sb.scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+  if (temCustom && !customDados.valor.trim()) {
+    sb.className = 'status-bar error';
+    sb.innerHTML = '⚠️ Preencha o valor do plano personalizado.';
     sb.scrollIntoView({ behavior:'smooth', block:'center' });
     return;
   }
@@ -1543,7 +1609,8 @@ async function gerarProposta() {
       instagram: instagram.trim(),
       segmento: segmento,
       cidade: cidade.trim(),
-      planos: planos
+      planos: planos,
+      customDados: customDados
     });
     setStep('step_4', 'done');
     setStep('step_5', 'active');
@@ -1574,11 +1641,14 @@ async function gerarProposta() {
 
 function novaProposta() {
   document.querySelectorAll('#tab_proposta_content input[type="text"], #tab_proposta_content select').forEach(function(el){ el.value=''; });
+  document.querySelectorAll('#tab_proposta_content textarea').forEach(function(el){ el.value=''; });
   document.querySelectorAll('input[name="prop_plano"]').forEach(function(el){
     el.checked = false;
     var item = el.closest('.prop-plan-item');
     if (item) item.classList.remove('prop-selected');
   });
+  var cf = document.getElementById('custom_prop_fields');
+  if (cf) cf.style.display = 'none';
   var sb = document.getElementById('prop_status_bar');
   sb.className = 'status-bar'; sb.innerHTML = '';
   document.getElementById('btn_prop_nova').style.display = 'none';

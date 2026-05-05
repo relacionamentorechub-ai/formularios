@@ -148,11 +148,28 @@ CANAIS — TAGS HTML para uso na section de channels da página 1:
 - TikTok: <span class="ch-tag" style="background:rgba(0,0,0,.35);color:#fff;border:1px solid rgba(255,255,255,.2);">TikTok</span>
 - Site/SEO: <span class="ch-tag" style="background:rgba(16,185,129,.2);color:#6EE7B7;border:1px solid rgba(16,185,129,.3);">Site / SEO</span>
 
+ENTREGÁVEIS EXATOS DO REC HUB (usar APENAS estes, sem inventar outros):
+- Social Media: planejamento editorial mensal, até 3 posts/semana no feed, calendário estratégico, acompanhamento e resposta a comentários. PROIBIDO mencionar stories diários — a REC HUB NÃO faz stories diários.
+- Captação de Conteúdo: visita mensal para fotos e vídeos, edição de Reels e imagens, alinhamento à identidade visual.
+- Tráfego Pago Meta Ads: até 3 campanhas/mês, segmentação por público local e interesse, otimização contínua, relatório de performance.
+- Google Empresa (GMB): otimização de perfil, publicações periódicas, gestão de avaliações, posicionamento local.
+- Suporte Comercial: follow-up de leads, marketing de relacionamento, estratégia de recorrência.
+
+REGRA ANTI-DUPLICAÇÃO (CRÍTICA):
+O plan-box (seção "Plano recomendado") lista os ITENS DO PACOTE contratado — o que o cliente recebe no plano.
+Os del-cards mostram os MÓDULOS DE TRABALHO (ex: "Gestão de Instagram", "Produção de Conteúdo", "Tráfego Pago Meta Ads") — com sub-entregáveis DIFERENTES dos itens do plan-box.
+NUNCA colocar os mesmos bullets nos dois. Se o plan-box diz "conteúdo para redes (3 posts/semana)", o del-card de Instagram NÃO repete isso — ele detalha COMO o trabalho é feito (calendário, temas, formatos, revisões).
+
+NOTA OBRIGATÓRIA PARA PLANOS COM TRÁFEGO PAGO (Planos 2, 3, 4 e qualquer plano personalizado com Meta Ads):
+Adicionar como último item da lista plan-box-items (span full width):
+<li style="color:#94A3B8;font-size:11px;border-top:1px solid rgba(255,255,255,0.08);margin-top:6px;padding-top:6px;grid-column:1/-1;">* Investimento em m&iacute;dia (verba Meta Ads) n&atilde;o incluso no plano</li>
+
 PLANOS (usar apenas se com_proposta = "Sim"):
-Plano 1 — R$ 1.500/mês: Social Media + Captação de Conteúdo. Itens: planejamento estratégico mensal, conteúdo para redes sociais (3 posts/semana), captação de fotos e vídeos, edição de materiais, organização do perfil, acompanhamento contínuo.
-Plano 2 — R$ 2.500/mês: Social Media + Captação + Tráfego Pago Meta. Tudo do Plano 1 mais: Meta Ads até 3 campanhas/mês, estratégia e segmentação, otimização e escala.
-Plano 3 — R$ 2.900/mês: Social Media + Captação + Tráfego Meta + Google Empresa. Tudo do Plano 2 mais: gestão Google Empresa (GMB), otimização de perfil, posicionamento local. Add-on TikTok +R$300.
-Plano 4 — R$ 3.800/mês: Plano Completo + Suporte Comercial. Tudo do Plano 3 mais: estratégia comercial, follow-up, marketing de relacionamento. Add-on TikTok +R$300.
+Plano 1 — R$ 1.500/mês: Social Media + Captação de Conteúdo. Itens: planejamento estratégico mensal, conteúdo para redes sociais (até 3 posts/semana), captação de fotos e vídeos, edição de materiais, organização do perfil, acompanhamento contínuo.
+Plano 2 — R$ 2.500/mês: Social Media + Captação + Tráfego Pago Meta. Tudo do Plano 1 mais: Meta Ads até 3 campanhas/mês, estratégia e segmentação, otimização e escala. [Adicionar nota de verba Meta Ads]
+Plano 3 — R$ 2.900/mês: Social Media + Captação + Tráfego Meta + Google Empresa. Tudo do Plano 2 mais: gestão Google Empresa (GMB), otimização de perfil, posicionamento local. Add-on TikTok +R$300. [Adicionar nota de verba Meta Ads]
+Plano 4 — R$ 3.800/mês: Plano Completo + Suporte Comercial. Tudo do Plano 3 mais: estratégia comercial, follow-up, marketing de relacionamento. Add-on TikTok +R$300. [Adicionar nota de verba Meta Ads]
+Plano Personalizado: se o campo PLANO INDICADO contiver "Personalizado —", usar o valor e descrição informados. Se mencionar Meta Ads ou tráfego pago, adicionar nota de verba.
 
 Regra de escolha: use o plano que melhor cobre os canais solicitados. Se houver plano informado no formulário, use esse.`;
 
