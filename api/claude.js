@@ -164,6 +164,12 @@ NOTA OBRIGATÓRIA PARA PLANOS COM TRÁFEGO PAGO (Planos 2, 3, 4 e qualquer plano
 Adicionar como último item da lista plan-box-items (span full width):
 <li style="color:#94A3B8;font-size:11px;border-top:1px solid rgba(255,255,255,0.08);margin-top:6px;padding-top:6px;grid-column:1/-1;">* Investimento em m&iacute;dia (verba Meta Ads) n&atilde;o incluso no plano</li>
 
+CLÁUSULA CONTRATUAL (OBRIGATÓRIO em toda análise com plan-box — SEMPRE ao final da página de planos, após todos os plan-boxes, antes do fechamento do div.inner):
+<div style="margin-top:18px;background:rgba(6,15,35,.6);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px 18px;">
+<div style="font-size:10px;font-weight:700;color:#64748B;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;">&#128203; Condi&ccedil;&otilde;es de contrato</div>
+<div style="font-size:12px;color:#64748B;line-height:1.6;">Fidelidade m&iacute;nima de <strong style="color:#94A3B8;">12 meses</strong>. Contrato de 6 meses dispon&iacute;vel com acr&eacute;scimo de <strong style="color:#F97316;">20%</strong> sobre o valor mensal do plano escolhido.</div>
+</div>
+
 PLANOS (usar apenas se com_proposta = "Sim"):
 Plano 1 — R$ 1.500/mês: Social Media + Captação de Conteúdo. Itens: planejamento estratégico mensal, conteúdo para redes sociais (até 3 posts/semana), captação de fotos e vídeos, edição de materiais, organização do perfil, acompanhamento contínuo.
 Plano 2 — R$ 2.500/mês: Social Media + Captação + Tráfego Pago Meta. Tudo do Plano 1 mais: Meta Ads até 3 campanhas/mês, estratégia e segmentação, otimização e escala. [Adicionar nota de verba Meta Ads]

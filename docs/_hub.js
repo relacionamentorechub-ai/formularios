@@ -127,6 +127,10 @@
       '<a href="conteudo.html" class="hub-nav-link" data-page="conteudo">✍️ Conteúdo</a>',
       '<a href="briefing.html" class="hub-nav-link" data-page="briefing">📋 Briefing</a>',
       '<a href="reunioes.html" class="hub-nav-link" data-page="reunioes">📅 Reuniões</a>',
+      '<div class="hub-nav-divider"></div>',
+      '<a href="crm.html" class="hub-nav-link" data-page="crm">🎯 CRM</a>',
+      '<a href="relatorio.html" class="hub-nav-link" data-page="relatorio">📈 Relatório</a>',
+      '<a href="contrato.html" class="hub-nav-link" data-page="contrato">📄 Contrato</a>',
     ].join('');
 
     // User + actions

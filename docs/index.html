@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -105,6 +106,31 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg-base);colo
 .stat-value{font-size:22px;font-weight:900;color:var(--cyan);line-height:1;margin-bottom:4px;}
 .stat-label{font-size:11px;color:var(--text-muted);font-weight:500;letter-spacing:.04em;}
 
+/* DASHBOARD */
+.dash-section{position:relative;z-index:10;max-width:900px;margin:0 auto 32px;padding:0 24px;animation:fade-up .6s ease-out .35s both;}
+.dash-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+.dash-title{font-size:13px;font-weight:700;color:var(--text-secondary);letter-spacing:.06em;text-transform:uppercase;}
+.dash-filters{display:flex;gap:6px;flex-wrap:wrap;}
+.dash-filter-btn{padding:6px 16px;border:1.5px solid rgba(6,182,212,.15);border-radius:30px;background:transparent;color:var(--text-muted);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.dash-filter-btn:hover{border-color:rgba(6,182,212,.35);color:var(--cyan);}
+.dash-filter-btn.df-active{background:rgba(6,182,212,.12);border-color:rgba(6,182,212,.4);color:var(--cyan-light);}
+.dash-filter-btn.df-paola.df-active{background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.4);color:#C4B5FD;}
+.dash-filter-btn.df-fran.df-active{background:rgba(249,115,22,.12);border-color:rgba(249,115,22,.4);color:#FDBA74;}
+.dash-filter-btn.df-jaque.df-active{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.4);color:#6EE7B7;}
+.dash-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.dash-kpi{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px 14px;text-align:center;transition:border-color .2s;}
+.dash-kpi:hover{border-color:rgba(6,182,212,.3);}
+.dash-kpi-val{font-size:22px;font-weight:900;line-height:1;margin-bottom:4px;}
+.dash-kpi-label{font-size:10.5px;color:var(--text-muted);font-weight:500;letter-spacing:.04em;}
+.dash-chart-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:22px 24px;position:relative;}
+.dash-chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.dash-chart-title{font-size:14px;font-weight:700;color:var(--text-primary);}
+.dash-chart-sub{font-size:12px;color:var(--text-muted);}
+.dash-loading{text-align:center;padding:32px 0;font-size:13px;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:10px;}
+.dash-spinner{width:18px;height:18px;border:2px solid rgba(6,182,212,.2);border-top-color:var(--cyan);border-radius:50%;animation:spin-dash 1s linear infinite;flex-shrink:0;}
+@keyframes spin-dash{to{transform:rotate(360deg)}}
+@media(max-width:640px){.dash-kpis{grid-template-columns:repeat(2,1fr);}}
+
 /* FOOTER */
 .hub-footer{position:relative;z-index:10;text-align:center;padding:20px;font-size:11.5px;color:var(--text-muted);border-top:1px solid rgba(6,182,212,.06);}
 </style>
@@ -138,11 +164,43 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg-base);colo
   </div>
 </section>
 
-<div class="stats-bar">
-  <div class="stat-item"><div class="stat-value">5</div><div class="stat-label">Ferramentas</div></div>
-  <div class="stat-item"><div class="stat-value">🤖</div><div class="stat-label">IA integrada</div></div>
-  <div class="stat-item"><div class="stat-value">📄</div><div class="stat-label">PDF automático</div></div>
-  <div class="stat-item"><div class="stat-value">📅</div><div class="stat-label">Google Agenda</div></div>
+<!-- DASHBOARD COM GRÁFICO -->
+<div class="dash-section" id="dash_section">
+  <div class="dash-top">
+    <span class="dash-title">📊 Pipeline da equipe</span>
+    <div class="dash-filters">
+      <button class="dash-filter-btn df-active" onclick="setDashFilter('todas',this)">Todas</button>
+      <button class="dash-filter-btn df-paola" onclick="setDashFilter('paola',this)">Paola</button>
+      <button class="dash-filter-btn df-fran" onclick="setDashFilter('fran',this)">Fran</button>
+      <button class="dash-filter-btn df-jaque" onclick="setDashFilter('jaque',this)">Jaque</button>
+    </div>
+  </div>
+  <div class="dash-kpis">
+    <div class="dash-kpi">
+      <div class="dash-kpi-val" id="dk_leads" style="color:var(--cyan);">—</div>
+      <div class="dash-kpi-label">Leads ativos</div>
+    </div>
+    <div class="dash-kpi">
+      <div class="dash-kpi-val" id="dk_pdfs" style="color:#A78BFA;">—</div>
+      <div class="dash-kpi-label">PDFs gerados</div>
+    </div>
+    <div class="dash-kpi">
+      <div class="dash-kpi-val" id="dk_fechados" style="color:#34D399;">—</div>
+      <div class="dash-kpi-label">Fechados</div>
+    </div>
+    <div class="dash-kpi">
+      <div class="dash-kpi-val" id="dk_valor" style="color:#FDBA74;font-size:16px;">—</div>
+      <div class="dash-kpi-label">Em proposta (R$)</div>
+    </div>
+  </div>
+  <div class="dash-chart-card">
+    <div class="dash-chart-header">
+      <span class="dash-chart-title">Estágios do pipeline</span>
+      <span class="dash-chart-sub" id="dash_chart_sub">Carregando...</span>
+    </div>
+    <div class="dash-loading" id="dash_loading"><div class="dash-spinner"></div> Buscando dados...</div>
+    <canvas id="dash_chart" style="display:none;max-height:200px;"></canvas>
+  </div>
 </div>
 
 <div class="tools-grid">
@@ -249,13 +307,112 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg-base);colo
 <script src="_hub.js"></script>
 <script>
 hubInit('dashboard');
-// Atualiza nome na saudação após hub validar o login
-var _origPatch = window._hubPatchDone;
 setTimeout(function(){
   var u = localStorage.getItem('rec_hub_user') || '';
   var el = document.getElementById('dash_username');
   if(el && u) el.textContent = u;
 }, 400);
+
+/* ── DASHBOARD ─────────────────────────────── */
+var _dashData = { leads: [], pdfs: [], reunioes: [] };
+var _dashFilter = 'todas';
+var _chart = null;
+
+var STATUS_LABELS = { novo:'Novo', contato:'Contato', reuniao:'Reunião', proposta:'Proposta', fechado:'Fechado', perdido:'Perdido' };
+var STATUS_COLORS = {
+  novo:    'rgba(100,116,139,0.7)',
+  contato: 'rgba(56,189,248,0.7)',
+  reuniao: 'rgba(167,139,250,0.7)',
+  proposta:'rgba(253,186,116,0.7)',
+  fechado: 'rgba(52,211,153,0.7)',
+  perdido: 'rgba(252,165,165,0.5)'
+};
+var STATUS_ORDER = ['novo','contato','reuniao','proposta','fechado','perdido'];
+
+async function loadDashboard() {
+  try {
+    var r = await fetch('/api/dashboard');
+    var data = await r.json();
+    if (data.ok) { _dashData = data; renderDashboard(); }
+    else { showDashError(); }
+  } catch(e) { showDashError(); }
+}
+
+function showDashError() {
+  document.getElementById('dash_loading').innerHTML = '<span style="color:var(--text-muted);font-size:12px;">Dados indisponíveis — Supabase não configurado ainda.</span>';
+}
+
+function setDashFilter(f, btn) {
+  _dashFilter = f;
+  document.querySelectorAll('.dash-filter-btn').forEach(function(b){ b.classList.remove('df-active'); });
+  btn.classList.add('df-active');
+  renderDashboard();
+}
+
+function filterByMember(arr) {
+  if (_dashFilter === 'todas') return arr;
+  return arr.filter(function(x){ return (x.responsavel||'').toLowerCase().includes(_dashFilter); });
+}
+
+function renderDashboard() {
+  var leads    = filterByMember(_dashData.leads || []);
+  var pdfs     = filterByMember(_dashData.pdfs || []);
+  var ativos   = leads.filter(function(l){ return l.status !== 'fechado' && l.status !== 'perdido'; }).length;
+  var fechados = leads.filter(function(l){ return l.status === 'fechado'; }).length;
+  var valorProp = leads.filter(function(l){ return l.status === 'proposta'; })
+    .reduce(function(a,l){ return a + (parseFloat(l.valor_proposta)||0); }, 0);
+
+  document.getElementById('dk_leads').textContent   = ativos;
+  document.getElementById('dk_pdfs').textContent    = pdfs.length;
+  document.getElementById('dk_fechados').textContent = fechados;
+  document.getElementById('dk_valor').textContent   = valorProp
+    ? 'R$ ' + valorProp.toLocaleString('pt-BR',{maximumFractionDigits:0})
+    : '—';
+
+  var sub = _dashFilter === 'todas' ? 'Toda a equipe' : (_dashFilter.charAt(0).toUpperCase() + _dashFilter.slice(1));
+  document.getElementById('dash_chart_sub').textContent = sub + ' · ' + leads.length + ' leads';
+
+  var counts = {};
+  STATUS_ORDER.forEach(function(s){ counts[s] = 0; });
+  leads.forEach(function(l){ if(counts[l.status] !== undefined) counts[l.status]++; });
+
+  var ctx = document.getElementById('dash_chart');
+  document.getElementById('dash_loading').style.display = 'none';
+  ctx.style.display = 'block';
+
+  var cfg = {
+    type: 'bar',
+    data: {
+      labels: STATUS_ORDER.map(function(s){ return STATUS_LABELS[s]; }),
+      datasets: [{
+        data: STATUS_ORDER.map(function(s){ return counts[s]; }),
+        backgroundColor: STATUS_ORDER.map(function(s){ return STATUS_COLORS[s]; }),
+        borderColor:     STATUS_ORDER.map(function(s){ return STATUS_COLORS[s].replace('0.7','1').replace('0.5','0.8'); }),
+        borderWidth: 1.5, borderRadius: 6, borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: 'rgba(8,18,38,.95)',
+        titleColor: '#F0F6FF', bodyColor: '#94A3B8',
+        borderColor: 'rgba(6,182,212,.3)', borderWidth: 1,
+        padding: 10,
+        callbacks: { label: function(ctx){ return ' ' + ctx.parsed.y + ' lead' + (ctx.parsed.y !== 1 ? 's' : ''); }}
+      }},
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#64748B', font: { size: 12, family: 'Inter' }}},
+        y: { grid: { color: 'rgba(255,255,255,.06)' }, ticks: { color: '#64748B', font: { size: 12, family: 'Inter' }, stepSize: 1 }, beginAtZero: true }
+      },
+      animation: { duration: 600, easing: 'easeOutQuart' }
+    }
+  };
+
+  if (_chart) { _chart.data = cfg.data; _chart.update(); }
+  else { _chart = new Chart(ctx, cfg); }
+}
+
+loadDashboard();
 </script>
 </body>
 </html>

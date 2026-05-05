@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Contrato · Hub R.E.C.</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --cyan:#06B6D4;--cyan-light:#22D3EE;--cyan-dark:#0E7490;
+  --purple:#7C3AED;--green:#10B981;--orange:#F97316;--red:#EF4444;
+  --bg-base:#050B18;--bg-card:rgba(8,18,38,0.75);--bg-input:rgba(6,15,35,0.8);
+  --border:rgba(6,182,212,0.15);--text-primary:#F0F6FF;--text-secondary:#94A3B8;--text-muted:#4A5A72;
+  --radius:16px;--radius-sm:10px;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg-base);color:var(--text-primary);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden;}
+.aurora-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.aurora-bg::before{content:'';position:absolute;border-radius:50%;filter:blur(80px);opacity:.18;animation:aurora-drift 18s ease-in-out infinite alternate;width:700px;height:500px;background:radial-gradient(ellipse,#5B21B6,#7C3AED,transparent);top:-150px;right:-200px;}
+.aurora-bg::after{content:'';position:absolute;border-radius:50%;filter:blur(80px);opacity:.14;width:600px;height:450px;background:radial-gradient(ellipse,#0E7490,#06B6D4,transparent);bottom:-100px;left:-150px;}
+.grid-overlay{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(6,182,212,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(6,182,212,.03) 1px,transparent 1px);background-size:60px 60px;}
+@keyframes aurora-drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-60px,60px) scale(1.08)}}
+@keyframes fade-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
+
+.header{position:relative;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 32px;background:rgba(5,11,24,.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(6,182,212,.1);gap:12px;flex-wrap:wrap;}
+.logo-wrap{display:flex;align-items:center;gap:10px;}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan),0 0 20px rgba(6,182,212,.5);animation:pulse-dot 2s ease-in-out infinite;}
+.logo-text{font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;background:linear-gradient(135deg,#22D3EE,#06B6D4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.header-right{display:flex;align-items:center;gap:10px;}
+
+.hero{position:relative;z-index:10;padding:52px 32px 36px;text-align:center;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);color:#C4B5FD;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:7px 18px;border-radius:50px;margin-bottom:18px;animation:fade-up .6s ease-out both;}
+.hero-title{font-size:clamp(24px,4vw,40px);font-weight:900;line-height:1.2;margin-bottom:10px;background:linear-gradient(135deg,#7C3AED,#A78BFA,#06B6D4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fade-up .6s ease-out .1s both;}
+.hero-sub{font-size:14px;color:var(--text-secondary);max-width:500px;margin:0 auto;animation:fade-up .6s ease-out .2s both;}
+
+.container{position:relative;z-index:10;max-width:800px;margin:0 auto;padding:0 20px 80px;}
+.form-section{background:var(--bg-card);backdrop-filter:blur(24px);border:1px solid var(--border);border-radius:var(--radius);padding:32px;margin-bottom:20px;opacity:0;transform:translateY(24px);transition:opacity .5s,transform .5s cubic-bezier(.23,1,.32,1);position:relative;overflow:hidden;}
+.form-section.visible{opacity:1;transform:translateY(0);}
+.form-section::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(124,58,237,.4),transparent);opacity:0;transition:opacity .3s;}
+.form-section:hover::before{opacity:1;}
+.section-header{display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid rgba(6,182,212,.08);}
+.section-num{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;}
+.section-num.purple{background:linear-gradient(135deg,#5B21B6,#7C3AED);color:#fff;box-shadow:0 4px 16px rgba(124,58,237,.4);}
+.section-num.cyan{background:linear-gradient(135deg,#0E7490,#06B6D4);color:#fff;box-shadow:0 4px 16px rgba(6,182,212,.4);}
+.section-num.green{background:linear-gradient(135deg,#065F46,#10B981);color:#fff;box-shadow:0 4px 16px rgba(16,185,129,.4);}
+.section-title{font-size:15px;font-weight:700;color:var(--text-primary);}
+.section-desc{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.field-group{margin-bottom:18px;}
+.field-group:last-child{margin-bottom:0;}
+.field-label{display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:7px;letter-spacing:.03em;text-transform:uppercase;}
+.field-label .req{color:var(--cyan);margin-left:3px;}
+input[type="text"],input[type="date"],textarea,select{width:100%;padding:11px 14px;background:var(--bg-input);border:1.5px solid rgba(6,182,212,.12);border-radius:var(--radius-sm);font-size:14px;color:var(--text-primary);font-family:inherit;outline:none;transition:border-color .25s,box-shadow .25s;}
+input:focus,textarea:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(6,182,212,.1);}
+select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2306B6D4' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px;-webkit-appearance:none;}
+select option{background:#0A1628;}
+textarea{resize:vertical;min-height:80px;line-height:1.6;}
+.field-hint{font-size:11.5px;color:var(--text-muted);margin-top:5px;}
+
+/* SUMMARY PREVIEW */
+.summary-preview{background:rgba(6,15,35,.8);border:1.5px solid rgba(124,58,237,.2);border-radius:12px;padding:20px 24px;margin-top:6px;}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.summary-row:last-child{border-bottom:none;}
+.summary-key{font-size:12px;color:var(--text-muted);}
+.summary-val{font-size:14px;font-weight:700;color:var(--text-primary);}
+.summary-val.highlight{color:#34D399;font-size:16px;}
+.summary-val.orange{color:#FDBA74;}
+
+/* FIDELIDADE TOGGLE */
+.fidelidade-group{display:flex;gap:10px;}
+.fid-btn{flex:1;padding:12px 16px;border:2px solid rgba(6,182,212,.15);border-radius:10px;background:transparent;color:var(--text-secondary);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;text-align:center;}
+.fid-btn.active{background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.4);color:var(--cyan-light);}
+.fid-btn.active.orange{background:rgba(249,115,22,.1);border-color:rgba(249,115,22,.4);color:#FDBA74;}
+.acrescimo-note{display:none;background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.2);border-radius:8px;padding:10px 14px;font-size:12.5px;color:#FDBA74;margin-top:10px;}
+.acrescimo-note.show{display:block;}
+
+.submit-area{text-align:center;padding:8px 0;}
+.btn-generate{position:relative;display:inline-flex;align-items:center;gap:12px;background:linear-gradient(135deg,#5B21B6,#7C3AED,#8B5CF6);color:#fff;border:none;border-radius:14px;padding:18px 52px;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:.02em;overflow:hidden;transition:transform .2s,box-shadow .2s;box-shadow:0 0 40px rgba(124,58,237,.4),0 4px 20px rgba(0,0,0,.3);}
+.btn-generate::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transition:left .5s;}
+.btn-generate:hover::before{left:100%;}
+.btn-generate:hover{transform:translateY(-3px);box-shadow:0 0 60px rgba(124,58,237,.55),0 8px 32px rgba(0,0,0,.35);}
+.submit-hint{font-size:12px;color:var(--text-muted);margin-top:10px;}
+
+.pdf-preview-area{display:none;position:relative;z-index:10;max-width:860px;margin:0 auto 40px;padding:0 20px;}
+.pdf-preview-area.visible{display:block;}
+.pdf-actions{display:flex;gap:12px;justify-content:center;margin-bottom:20px;flex-wrap:wrap;}
+.btn-print{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:linear-gradient(135deg,#5B21B6,#7C3AED);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-print:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.35);}
+.btn-novo{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:rgba(6,182,212,.08);color:var(--cyan);border:1.5px solid rgba(6,182,212,.25);border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-novo:hover{background:rgba(6,182,212,.15);}
+
+@media(max-width:640px){.two-col,.three-col{grid-template-columns:1fr;}.fidelidade-group{flex-direction:column;}}
+</style>
+</head>
+<body>
+<div class="aurora-bg"></div>
+<div class="grid-overlay"></div>
+
+<header class="header">
+  <div class="logo-wrap">
+    <div class="logo-dot"></div>
+    <div class="logo-text">R.E.C. · Hub de Negócios</div>
+  </div>
+  <div class="header-right"></div>
+</header>
+
+<section class="hero">
+  <div class="hero-eyebrow">📄 Contrato</div>
+  <h1 class="hero-title">Gerador de Contrato</h1>
+  <p class="hero-sub">Preencha os dados e gere o contrato de prestação de serviços em PDF para assinar com o cliente.</p>
+</section>
+
+<div class="container">
+
+  <!-- SEÇÃO 1: CONTRATANTE -->
+  <div class="form-section" id="s1">
+    <div class="section-header">
+      <div class="section-num purple">1</div>
+      <div><div class="section-title">Dados do contratante</div><div class="section-desc">Empresa ou pessoa física que vai contratar os serviços</div></div>
+    </div>
+    <div class="two-col">
+      <div class="field-group">
+        <label class="field-label">Nome / Razão social <span class="req">*</span></label>
+        <input type="text" id="c_nome" placeholder="Ex: Studio Lotus Mulher LTDA">
+      </div>
+      <div class="field-group">
+        <label class="field-label">CPF ou CNPJ</label>
+        <input type="text" id="c_doc" placeholder="000.000.000-00">
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="field-group">
+        <label class="field-label">Responsável / Representante</label>
+        <input type="text" id="c_responsavel" placeholder="Nome do responsável">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Cidade / Estado</label>
+        <input type="text" id="c_cidade" placeholder="Ex: Porto Alegre, RS">
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="field-group">
+        <label class="field-label">E-mail</label>
+        <input type="text" id="c_email" placeholder="email@cliente.com">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Telefone / WhatsApp</label>
+        <input type="text" id="c_tel" placeholder="(51) 99999-9999">
+      </div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 2: SERVIÇOS -->
+  <div class="form-section" id="s2">
+    <div class="section-header">
+      <div class="section-num cyan">2</div>
+      <div><div class="section-title">Serviços contratados</div><div class="section-desc">Plano e escopo do que será entregue</div></div>
+    </div>
+    <div class="two-col">
+      <div class="field-group">
+        <label class="field-label">Plano / Pacote <span class="req">*</span></label>
+        <select id="s_plano" onchange="atualizarResumo()">
+          <option value="">— Selecione —</option>
+          <option value="Plano 1 — Social Media + Captação de Conteúdo" data-valor="1500">Plano 1 — R$ 1.500 · Social Media + Captação</option>
+          <option value="Plano 2 — Social Media + Captação + Tráfego Pago Meta" data-valor="2500">Plano 2 — R$ 2.500 · Social + Meta Ads</option>
+          <option value="Plano 3 — Social Media + Captação + Tráfego Meta + Google" data-valor="2900">Plano 3 — R$ 2.900 · Social + Meta + Google</option>
+          <option value="Plano 4 — Plano Completo + Suporte Comercial" data-valor="3800">Plano 4 — R$ 3.800 · Plano Completo</option>
+          <option value="Personalizado" data-valor="0">Personalizado</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Valor mensal base (R$) <span class="req">*</span></label>
+        <input type="text" id="s_valor" placeholder="Ex: 2500" oninput="atualizarResumo()">
+        <div class="field-hint">Preenchido automaticamente ao selecionar o plano</div>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Prazo de fidelidade <span class="req">*</span></label>
+      <div class="fidelidade-group">
+        <button class="fid-btn active" id="fid_12" onclick="setFidelidade(12, this)">12 meses (padrão)</button>
+        <button class="fid-btn orange" id="fid_6" onclick="setFidelidade(6, this)">6 meses (+20%)</button>
+      </div>
+      <div class="acrescimo-note" id="acrescimo_note">
+        ⚠ Fidelidade de 6 meses tem acréscimo de 20% sobre o valor mensal.
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Dia de vencimento (mensal)</label>
+      <select id="s_vencimento">
+        <option value="5">Dia 5</option>
+        <option value="10" selected>Dia 10</option>
+        <option value="15">Dia 15</option>
+        <option value="20">Dia 20</option>
+        <option value="25">Dia 25</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Serviços incluídos (descrição livre)</label>
+      <textarea id="s_descricao" rows="3" placeholder="Ex: Gestão do Instagram (até 3 posts/semana), captação mensal de fotos e vídeos, calendário editorial mensal..."></textarea>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 3: VIGÊNCIA -->
+  <div class="form-section" id="s3">
+    <div class="section-header">
+      <div class="section-num green">3</div>
+      <div><div class="section-title">Vigência e início</div><div class="section-desc">Datas do contrato</div></div>
+    </div>
+    <div class="two-col">
+      <div class="field-group">
+        <label class="field-label">Data de início <span class="req">*</span></label>
+        <input type="date" id="v_inicio" oninput="atualizarResumo()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Responsável REC</label>
+        <select id="v_resp">
+          <option value="Paola">Paola</option>
+          <option value="Fran">Fran</option>
+          <option value="Jaque">Jaque</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- RESUMO DINÂMICO -->
+    <div class="summary-preview" id="resumo_preview">
+      <div class="summary-row"><span class="summary-key">Plano</span><span class="summary-val" id="res_plano">—</span></div>
+      <div class="summary-row"><span class="summary-key">Fidelidade</span><span class="summary-val" id="res_fidelidade">12 meses</span></div>
+      <div class="summary-row"><span class="summary-key">Valor mensal</span><span class="summary-val highlight" id="res_valor">—</span></div>
+      <div class="summary-row"><span class="summary-key">Valor total (período)</span><span class="summary-val orange" id="res_total">—</span></div>
+      <div class="summary-row"><span class="summary-key">Vigência</span><span class="summary-val" id="res_vigencia">—</span></div>
+    </div>
+  </div>
+
+  <div class="submit-area">
+    <button class="btn-generate" onclick="gerarContrato()">📄 Gerar Contrato PDF</button>
+    <div class="submit-hint">Clique para montar o contrato — depois imprima ou salve como PDF</div>
+  </div>
+</div>
+
+<!-- PDF PREVIEW -->
+<div class="pdf-preview-area" id="pdf_area">
+  <div class="pdf-actions">
+    <button class="btn-print" onclick="imprimirContrato()">🖨 Imprimir / Salvar PDF</button>
+    <button class="btn-novo" onclick="novoContrato()">+ Novo Contrato</button>
+  </div>
+  <iframe id="pdf_frame" style="width:100%;height:1600px;border:none;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.4);"></iframe>
+</div>
+
+<script src="_hub.js"></script>
+<script>
+hubInit('contrato');
+
+var fidelidadeMeses = 12;
+
+var obs = new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:.1});
+document.querySelectorAll('.form-section').forEach(function(el){obs.observe(el);});
+
+// Auto-fill valor ao selecionar plano
+document.getElementById('s_plano').addEventListener('change', function(){
+  var sel = this.options[this.selectedIndex];
+  var val = sel.getAttribute('data-valor');
+  if (val && val !== '0') document.getElementById('s_valor').value = val;
+  atualizarResumo();
+});
+
+// Set data início para hoje
+(function(){
+  var d = new Date();
+  var pad = function(n){ return n < 10 ? '0' + n : n; };
+  document.getElementById('v_inicio').value = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+  atualizarResumo();
+})();
+
+function setFidelidade(meses, btn) {
+  fidelidadeMeses = meses;
+  document.getElementById('fid_12').classList.remove('active');
+  document.getElementById('fid_6').classList.remove('active');
+  btn.classList.add('active');
+  document.getElementById('acrescimo_note').classList.toggle('show', meses === 6);
+  atualizarResumo();
+}
+
+function atualizarResumo() {
+  var plano = document.getElementById('s_plano').value;
+  var valorBase = parseFloat((document.getElementById('s_valor').value || '0').replace(',','.')) || 0;
+  var valorMensal = fidelidadeMeses === 6 ? Math.round(valorBase * 1.2) : valorBase;
+  var total = valorMensal * fidelidadeMeses;
+  var inicio = document.getElementById('v_inicio').value;
+
+  document.getElementById('res_plano').textContent = plano || '—';
+  document.getElementById('res_fidelidade').textContent = fidelidadeMeses + ' meses' + (fidelidadeMeses === 6 ? ' (+20%)' : ' (padrão)');
+  document.getElementById('res_valor').textContent = valorMensal ? 'R$ ' + valorMensal.toLocaleString('pt-BR') : '—';
+  document.getElementById('res_total').textContent = total ? 'R$ ' + total.toLocaleString('pt-BR') : '—';
+
+  if (inicio) {
+    var d = new Date(inicio + 'T12:00:00');
+    var fim = new Date(d);
+    fim.setMonth(fim.getMonth() + fidelidadeMeses);
+    var fmt = function(dt){ return dt.toLocaleDateString('pt-BR'); };
+    document.getElementById('res_vigencia').textContent = fmt(d) + ' a ' + fmt(fim);
+  } else {
+    document.getElementById('res_vigencia').textContent = '—';
+  }
+}
+
+function v(id){ return (document.getElementById(id)||{}).value || ''; }
+function esc(s){ return String(s||'').replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+function buildContratoHtml() {
+  var nome     = v('c_nome');
+  var doc      = v('c_doc');
+  var resp     = v('c_responsavel');
+  var cidade   = v('c_cidade');
+  var email    = v('c_email');
+  var tel      = v('c_tel');
+  var plano    = v('s_plano');
+  var valorBase = parseFloat((v('s_valor')||'0').replace(',','.')) || 0;
+  var valorMensal = fidelidadeMeses === 6 ? Math.round(valorBase * 1.2) : valorBase;
+  var total    = valorMensal * fidelidadeMeses;
+  var venc     = v('s_vencimento');
+  var desc     = v('s_descricao');
+  var inicio   = v('v_inicio');
+  var recResp  = v('v_resp');
+  var now      = new Date().toLocaleDateString('pt-BR');
+
+  var dInicio = new Date(inicio + 'T12:00:00');
+  var dFim = new Date(dInicio);
+  dFim.setMonth(dFim.getMonth() + fidelidadeMeses);
+  var fmt = function(dt){ return dt.toLocaleDateString('pt-BR'); };
+  var inicioFmt = fmt(dInicio);
+  var fimFmt = fmt(dFim);
+
+  var descServicos = desc || 'Serviços de marketing digital conforme plano selecionado.';
+  var acrescimoTexto = fidelidadeMeses === 6
+    ? '<p>O presente contrato tem fidelidade de <strong>6 (seis) meses</strong> com acréscimo de 20% aplicado sobre o valor mensal em razão do prazo reduzido, totalizando <strong>R$ ' + valorMensal.toLocaleString('pt-BR') + '/mês</strong>.</p>'
+    : '<p>O presente contrato tem fidelidade mínima de <strong>12 (doze) meses</strong>, conforme política padrão R.E.C. HUB.</p>';
+
+  return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Times New Roman',Georgia,serif;background:#D1D5DB;color:#111827;-webkit-font-smoothing:antialiased;font-size:13px;line-height:1.7;}
+.page{width:794px;min-height:1123px;margin:20px auto;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,.18);padding:56px 64px;display:flex;flex-direction:column;}
+.header-doc{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #111827;padding-bottom:16px;margin-bottom:28px;}
+.header-logo{font-family:-apple-system,sans-serif;font-size:15px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#0E7490;}
+.header-doc-title{font-size:12px;color:#6B7280;text-align:right;line-height:1.4;}
+h1{font-size:18px;font-weight:900;text-align:center;margin-bottom:8px;font-family:-apple-system,sans-serif;}
+.sub-title{font-size:12px;color:#6B7280;text-align:center;margin-bottom:32px;}
+.section-title-doc{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#111827;border-bottom:1px solid #E5E7EB;padding-bottom:6px;margin:24px 0 14px;}
+p{margin-bottom:10px;text-align:justify;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:16px;margin-bottom:18px;}
+.info-item label{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6B7280;margin-bottom:2px;font-family:-apple-system,sans-serif;}
+.info-item span{font-size:13px;color:#111827;font-weight:600;}
+.highlight-box{background:#F0FDF4;border-left:4px solid #10B981;border-radius:0 8px 8px 0;padding:14px 18px;margin:16px 0;}
+.highlight-box.orange{background:#FFF7ED;border-left-color:#F97316;}
+.highlight-box strong{color:#065F46;}
+.highlight-box.orange strong{color:#C2410C;}
+.value-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F3F4F6;}
+.value-row:last-child{border-bottom:none;font-weight:700;font-size:15px;color:#065F46;}
+.sign-area{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:56px;}
+.sign-block{text-align:center;}
+.sign-line{border-bottom:1px solid #374151;margin-bottom:8px;height:40px;}
+.sign-name{font-size:12px;color:#374151;font-weight:600;}
+.sign-role{font-size:11px;color:#6B7280;}
+.footer-doc{margin-top:auto;border-top:1px solid #E5E7EB;padding-top:14px;text-align:center;font-size:10.5px;color:#9CA3AF;font-family:-apple-system,sans-serif;}
+@page{size:210mm 297mm;margin:0;}
+@media print{body{background:#fff;}.page{width:210mm;min-height:unset;margin:0;box-shadow:none;padding:20mm 22mm;}}
+</style></head><body>
+<div class="page">
+  <div class="header-doc">
+    <div class="header-logo">R.E.C. · HUB de Negócios</div>
+    <div class="header-doc-title">Contrato de Prestação de Serviços<br>Emitido em: ${now}</div>
+  </div>
+
+  <h1>CONTRATO DE PRESTAÇÃO DE SERVIÇOS</h1>
+  <p class="sub-title">Marketing Digital e Gestão de Mídias Sociais</p>
+
+  <div class="section-title-doc">1. Das Partes</div>
+  <p><strong>CONTRATADA:</strong> R.E.C. HUB DE NEGÓCIOS — Ecossistema de Conexões e Soluções Empresariais, representado neste ato por <strong>${esc(recResp)}</strong>.</p>
+  <p><strong>CONTRATANTE:</strong></p>
+  <div class="info-grid">
+    <div class="info-item"><label>Nome / Razão Social</label><span>${esc(nome)}</span></div>
+    ${doc?'<div class="info-item"><label>CPF / CNPJ</label><span>'+esc(doc)+'</span></div>':''}
+    ${resp?'<div class="info-item"><label>Responsável</label><span>'+esc(resp)+'</span></div>':''}
+    ${cidade?'<div class="info-item"><label>Cidade / Estado</label><span>'+esc(cidade)+'</span></div>':''}
+    ${email?'<div class="info-item"><label>E-mail</label><span>'+esc(email)+'</span></div>':''}
+    ${tel?'<div class="info-item"><label>Telefone / WhatsApp</label><span>'+esc(tel)+'</span></div>':''}
+  </div>
+
+  <div class="section-title-doc">2. Do Objeto</div>
+  <p>A CONTRATADA se compromete a prestar serviços de marketing digital, gestão de mídias sociais e demais serviços descritos abaixo, conforme pacote contratado:</p>
+  <div class="highlight-box">
+    <strong>Plano: ${esc(plano || 'Serviços personalizados')}</strong><br>
+    <span style="font-size:12px;color:#166534;">${esc(descServicos)}</span>
+  </div>
+
+  <div class="section-title-doc">3. Do Prazo e Vigência</div>
+  <p>O presente contrato vigorará por <strong>${fidelidadeMeses} (${fidelidadeMeses === 12 ? 'doze' : 'seis'}) meses</strong>, com início em <strong>${inicioFmt}</strong> e término previsto em <strong>${fimFmt}</strong>.</p>
+  ${acrescimoTexto}
+  <p>A rescisão antecipada por parte do CONTRATANTE implicará multa proporcional aos meses restantes do contrato.</p>
+
+  <div class="section-title-doc">4. Da Remuneração</div>
+  <div class="value-row"><span>Valor mensal base</span><span>R$ ${valorBase.toLocaleString('pt-BR')}</span></div>
+  ${fidelidadeMeses===6?'<div class="value-row"><span>Acréscimo de fidelidade reduzida (20%)</span><span>+ R$ '+Math.round(valorBase*0.2).toLocaleString('pt-BR')+'</span></div>':''}
+  <div class="value-row"><span><strong>Valor mensal a pagar</strong></span><strong>R$ ${valorMensal.toLocaleString('pt-BR')}</strong></div>
+  <div class="value-row"><span><strong>Total do contrato (${fidelidadeMeses} meses)</strong></span><strong style="color:#065F46;">R$ ${total.toLocaleString('pt-BR')}</strong></div>
+
+  <div class="highlight-box${fidelidadeMeses===6?' orange':''}">
+    O pagamento deverá ser efetuado até o <strong>dia ${esc(venc)}</strong> de cada mês.
+    ${fidelidadeMeses===6?'<br><span style="color:#C2410C;font-size:12px;">Contrato com fidelidade de 6 meses — acréscimo de 20% já aplicado.</span>':''}
+  </div>
+
+  <div class="section-title-doc">5. Das Obrigações</div>
+  <p><strong>Da CONTRATADA:</strong> Executar os serviços contratados com qualidade, profissionalismo e dentro dos prazos acordados; manter sigilo sobre informações do CONTRATANTE; apresentar relatório mensal de resultados.</p>
+  <p><strong>Do CONTRATANTE:</strong> Efetuar o pagamento na data acordada; fornecer os acessos e materiais necessários para execução dos serviços; aprovar os conteúdos dentro do prazo estabelecido.</p>
+
+  <div class="section-title-doc">6. Disposições Gerais</div>
+  <p>O presente contrato é regido pelas leis brasileiras e qualquer divergência será resolvida no foro da comarca de ${esc(cidade || 'Porto Alegre, RS')}.</p>
+
+  <div class="sign-area">
+    <div class="sign-block">
+      <div class="sign-line"></div>
+      <div class="sign-name">R.E.C. HUB DE NEGÓCIOS</div>
+      <div class="sign-role">CONTRATADA · ${esc(recResp)}</div>
+    </div>
+    <div class="sign-block">
+      <div class="sign-line"></div>
+      <div class="sign-name">${esc(nome)}</div>
+      <div class="sign-role">CONTRATANTE${resp?' · '+esc(resp):''}</div>
+    </div>
+  </div>
+
+  <div class="footer-doc">
+    R.E.C. HUB DE NEGÓCIOS · recolaborativo.com.br · @somosrecoficial<br>
+    Contrato gerado em ${now} via Hub Interno REC
+  </div>
+</div>
+</body></html>`;
+}
+
+function gerarContrato() {
+  var nome = v('c_nome'), plano = v('s_plano'), valor = v('s_valor'), inicio = v('v_inicio');
+  if (!nome.trim()) { alert('Preencha o nome do contratante.'); return; }
+  if (!plano) { alert('Selecione o plano.'); return; }
+  if (!valor) { alert('Preencha o valor mensal.'); return; }
+  if (!inicio) { alert('Informe a data de início.'); return; }
+
+  var html = buildContratoHtml();
+  var blob = new Blob([html], {type:'text/html'});
+  var url = URL.createObjectURL(blob);
+  document.getElementById('pdf_frame').src = url;
+  document.getElementById('pdf_area').classList.add('visible');
+  document.getElementById('pdf_area').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function imprimirContrato() {
+  var frame = document.getElementById('pdf_frame');
+  if (frame.contentWindow) { frame.contentWindow.print(); }
+  else { window.open(frame.src, '_blank'); }
+}
+
+function novoContrato() {
+  document.getElementById('pdf_area').classList.remove('visible');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
