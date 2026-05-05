@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geração de Conteúdo · Hub R.E.C.</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --cyan:#06B6D4;--cyan-light:#22D3EE;--cyan-dark:#0E7490;--cyan-glow:rgba(6,182,212,0.35);
+  --blue-deep:#0284C7;--purple:#7C3AED;--purple-soft:#8B5CF6;
+  --green:#10B981;--green-dark:#065F46;--orange:#F97316;--red:#EF4444;
+  --bg-base:#050B18;--bg-card:rgba(8,18,38,0.75);--bg-input:rgba(6,15,35,0.8);
+  --border:rgba(6,182,212,0.15);--border-hover:rgba(6,182,212,0.4);
+  --text-primary:#F0F6FF;--text-secondary:#94A3B8;--text-muted:#4A5A72;
+  --shadow-glow:0 0 40px rgba(6,182,212,0.12);--radius:16px;--radius-sm:10px;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg-base);color:var(--text-primary);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden;}
+.aurora-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.aurora-bg::before,.aurora-bg::after{content:'';position:absolute;border-radius:50%;filter:blur(80px);opacity:.18;animation:aurora-drift 18s ease-in-out infinite alternate;}
+.aurora-bg::before{width:700px;height:500px;background:radial-gradient(ellipse,#5B21B6,#7C3AED,transparent);top:-150px;left:-200px;}
+.aurora-bg::after{width:600px;height:450px;background:radial-gradient(ellipse,#0284C7,#06B6D4,transparent);bottom:-100px;right:-150px;animation-delay:-9s;animation-direction:alternate-reverse;}
+.aurora-mid{position:fixed;width:500px;height:400px;background:radial-gradient(ellipse,rgba(124,58,237,.08),transparent 70%);border-radius:50%;top:40%;left:50%;transform:translate(-50%,-50%);filter:blur(60px);animation:aurora-pulse 12s ease-in-out infinite;pointer-events:none;z-index:0;}
+.grid-overlay{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(124,58,237,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,.03) 1px,transparent 1px);background-size:60px 60px;}
+@keyframes aurora-drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(80px,40px) scale(1.1)}100%{transform:translate(-40px,80px) scale(.95)}}
+@keyframes aurora-pulse{0%,100%{opacity:.06;transform:translate(-50%,-50%) scale(1)}50%{opacity:.14;transform:translate(-50%,-50%) scale(1.15)}}
+
+.progress-bar-track{position:fixed;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.05);z-index:1000;}
+.progress-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#5B21B6,#7C3AED,#A78BFA,#06B6D4);background-size:200% 100%;transition:width .4s cubic-bezier(.4,0,.2,1);animation:shimmer-bg 3s linear infinite;box-shadow:0 0 10px rgba(124,58,237,.6);}
+@keyframes shimmer-bg{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+
+.header{position:relative;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 32px;background:rgba(5,11,24,.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(124,58,237,.12);gap:12px;flex-wrap:wrap;}
+.logo-wrap{display:flex;align-items:center;gap:10px;}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--purple-soft);box-shadow:0 0 10px var(--purple-soft),0 0 20px rgba(124,58,237,.5);animation:pulse-dot 2s ease-in-out infinite;}
+.logo-text{font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;background:linear-gradient(135deg,#A78BFA,#7C3AED);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
+.header-right{display:flex;align-items:center;gap:10px;}
+.header-badge{font-size:11px;font-weight:600;color:var(--text-muted);background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.15);padding:5px 14px;border-radius:20px;}
+
+.hero{position:relative;z-index:10;padding:64px 32px 52px;text-align:center;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(124,58,237,.07),transparent);pointer-events:none;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.3);color:#A78BFA;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:7px 18px;border-radius:50px;margin-bottom:24px;animation:fade-up .6s ease-out both;}
+.hero-eyebrow .dot-pulse{width:6px;height:6px;border-radius:50%;background:var(--purple-soft);animation:pulse-dot 1.5s ease-in-out infinite;}
+.hero-title{font-size:clamp(28px,5vw,48px);font-weight:900;line-height:1.15;letter-spacing:-.02em;margin-bottom:14px;animation:fade-up .6s ease-out .1s both;}
+.hero-title .white{color:var(--text-primary);}
+.hero-title .gradient{background:linear-gradient(135deg,#7C3AED 0%,#A78BFA 50%,#06B6D4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:16px;color:var(--text-secondary);max-width:540px;margin:0 auto;line-height:1.7;animation:fade-up .6s ease-out .2s both;}
+@keyframes fade-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.container{position:relative;z-index:10;max-width:800px;margin:0 auto;padding:0 20px 80px;}
+.form-section{background:var(--bg-card);backdrop-filter:blur(24px);border:1px solid var(--border);border-radius:var(--radius);padding:32px;margin-bottom:20px;transition:border-color .3s,box-shadow .3s;opacity:0;transform:translateY(24px);position:relative;overflow:hidden;}
+.form-section::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(124,58,237,.5),transparent);opacity:0;transition:opacity .3s;}
+.form-section:hover::before{opacity:1;}
+.form-section:hover{border-color:rgba(124,58,237,.25);box-shadow:0 0 40px rgba(124,58,237,.1),0 20px 60px rgba(0,0,0,.3);}
+.form-section.visible{opacity:1;transform:translateY(0);transition:opacity .5s,transform .5s cubic-bezier(.23,1,.32,1);}
+.section-header{display:flex;align-items:center;gap:14px;margin-bottom:26px;padding-bottom:18px;border-bottom:1px solid rgba(124,58,237,.1);}
+.section-num{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;}
+.section-num.purple{background:linear-gradient(135deg,#5B21B6,#7C3AED);color:#fff;box-shadow:0 4px 16px rgba(124,58,237,.4);}
+.section-num.cyan{background:linear-gradient(135deg,#0E7490,#06B6D4);color:#fff;box-shadow:0 4px 16px rgba(6,182,212,.4);}
+.section-num.orange{background:linear-gradient(135deg,#C2410C,#F97316);color:#fff;box-shadow:0 4px 16px rgba(249,115,22,.4);}
+.section-num.green{background:linear-gradient(135deg,#065F46,#10B981);color:#fff;box-shadow:0 4px 16px rgba(16,185,129,.4);}
+.section-title{font-size:16px;font-weight:700;color:var(--text-primary);}
+.section-desc{font-size:12px;color:var(--text-muted);margin-top:3px;}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.field-group{margin-bottom:20px;}
+.field-group:last-child{margin-bottom:0;}
+.field-label{display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;letter-spacing:.03em;text-transform:uppercase;}
+.field-label .req{color:var(--purple-soft);margin-left:3px;}
+input[type="text"],input[type="number"],textarea,select{width:100%;padding:12px 16px;background:var(--bg-input);border:1.5px solid rgba(124,58,237,.12);border-radius:var(--radius-sm);font-size:14px;color:var(--text-primary);font-family:inherit;outline:none;transition:border-color .25s,box-shadow .25s;-webkit-appearance:none;}
+input::placeholder,textarea::placeholder{color:var(--text-muted);}
+input:focus,textarea:focus,select:focus{border-color:var(--purple-soft);box-shadow:0 0 0 3px rgba(124,58,237,.12);}
+select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237C3AED' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px;}
+select option{background:#0A1628;color:var(--text-primary);}
+textarea{resize:vertical;min-height:90px;line-height:1.6;}
+.field-hint{font-size:11.5px;color:var(--text-muted);margin-top:6px;line-height:1.5;}
+
+.choice-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.choice-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.choice-item{display:flex;align-items:flex-start;gap:12px;background:rgba(6,15,35,.6);border:1.5px solid rgba(124,58,237,.1);border-radius:var(--radius-sm);padding:12px 15px;cursor:pointer;transition:all .2s;user-select:none;position:relative;overflow:hidden;}
+.choice-item:hover{border-color:rgba(124,58,237,.35);transform:translateY(-1px);}
+.choice-item input{width:auto;padding:0;border:none;background:transparent;flex-shrink:0;margin-top:2px;cursor:pointer;accent-color:var(--purple-soft);}
+.choice-label{font-size:13px;font-weight:600;color:var(--text-primary);line-height:1.3;}
+.choice-sub{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
+
+.submit-area{text-align:center;padding:10px 0 20px;}
+.btn-generate{position:relative;display:inline-flex;align-items:center;gap:12px;background:linear-gradient(135deg,#5B21B6 0%,#7C3AED 50%,#8B5CF6 100%);color:#fff;border:none;border-radius:14px;padding:18px 52px;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:.02em;overflow:hidden;transition:transform .2s,box-shadow .2s;box-shadow:0 0 40px rgba(124,58,237,.4),0 4px 20px rgba(0,0,0,.3);}
+.btn-generate::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transition:left .5s;}
+.btn-generate:hover::before{left:100%;}
+.btn-generate:hover{transform:translateY(-3px);box-shadow:0 0 60px rgba(124,58,237,.55),0 8px 32px rgba(0,0,0,.35);}
+.btn-generate:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.submit-hint{font-size:13px;color:var(--text-muted);margin-top:12px;}
+.status-bar{margin-top:16px;font-size:13px;color:var(--text-secondary);min-height:20px;}
+
+.output-wrap{background:var(--bg-card);border:1px solid rgba(124,58,237,.2);border-radius:var(--radius);padding:28px;margin-top:20px;display:none;}
+.output-wrap.show{display:block;animation:fade-up .4s ease-out;}
+.output-title{font-size:13px;font-weight:700;color:#A78BFA;text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;}
+.output-content{font-size:14px;color:var(--text-primary);line-height:1.75;white-space:pre-wrap;}
+.output-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+.btn-copy,.btn-nova{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:9px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-copy{background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:#A78BFA;}
+.btn-copy:hover{background:rgba(124,58,237,.22);}
+.btn-nova{background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.25);color:var(--cyan-light);}
+.btn-nova:hover{background:rgba(6,182,212,.2);}
+.copied-msg{font-size:12px;color:#6EE7B7;margin-top:6px;display:none;}
+</style>
+</head>
+<body>
+<div class="aurora-bg"></div>
+<div class="aurora-mid"></div>
+<div class="grid-overlay"></div>
+<div class="progress-bar-track"><div class="progress-bar-fill" id="progress_fill"></div></div>
+
+<header class="header">
+  <div class="logo-wrap">
+    <div class="logo-dot"></div>
+    <div class="logo-text">R.E.C. · Hub de Negócios</div>
+  </div>
+  <div class="header-right">
+    <div class="header-badge">✍️ Geração de Conteúdo</div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-eyebrow"><span class="dot-pulse"></span>Criador de Conteúdo</div>
+  <h1 class="hero-title"><span class="white">Conteúdo que</span><br><span class="gradient">conecta e converte</span></h1>
+  <p class="hero-sub">Preencha as informações do cliente e gere pautas, legendas, roteiros e copies personalizados com IA.</p>
+</section>
+
+<div class="container">
+
+  <!-- BLOCO 1 -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num purple">1</div>
+      <div><div class="section-title">Identificação do Cliente</div><div class="section-desc">Dados básicos para personalizar o conteúdo</div></div>
+    </div>
+    <div class="two-col">
+      <div class="field-group">
+        <label class="field-label" for="ctd_nome">Nome da empresa <span class="req">*</span></label>
+        <input type="text" id="ctd_nome" placeholder="Ex: Studio Bella Estética">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="ctd_instagram">@ do Instagram</label>
+        <input type="text" id="ctd_instagram" placeholder="Ex: @studiobella">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="ctd_descricao">Breve descrição da empresa <span class="req">*</span></label>
+      <textarea id="ctd_descricao" placeholder="Ex: Clínica de estética em Canoas com foco em tratamentos faciais e corporais. Atende principalmente mulheres de 28 a 50 anos. Ambiente aconchegante, profissionais especializadas."></textarea>
+    </div>
+    <div class="two-col">
+      <div class="field-group">
+        <label class="field-label" for="ctd_segmento">Segmento / Nicho <span class="req">*</span></label>
+        <select id="ctd_segmento">
+          <option value="">Selecione...</option>
+          <option>Saúde — Clínica médica / Odontologia</option>
+          <option>Saúde — Dermatologia / Estética</option>
+          <option>Saúde — Psicologia / Terapia</option>
+          <option>Fitness &amp; Bem-estar — Academia / Pilates</option>
+          <option>Fitness &amp; Bem-estar — Nutrição / Yoga</option>
+          <option>Pet — Veterinária / Pet Shop</option>
+          <option>Beleza — Salão / Barbearia</option>
+          <option>Beleza — Estética / Spa</option>
+          <option>Móveis &amp; Decoração</option>
+          <option>Imóveis — Imobiliária / Corretor</option>
+          <option>Alimentação — Restaurante / Delivery</option>
+          <option>Educação — Curso / Escola</option>
+          <option>Varejo — Loja física / E-commerce</option>
+          <option>Serviços — Contabilidade / Advocacia</option>
+          <option>Serviços — Construção / Reforma</option>
+          <option>Energia Solar / Tecnologia</option>
+          <option>Outro</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="ctd_cidade">Cidade / Região</label>
+        <input type="text" id="ctd_cidade" placeholder="Ex: Canoas, RS">
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOCO 2 -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num cyan">2</div>
+      <div><div class="section-title">Objetivo do Conteúdo <span style="color:var(--purple-soft)">*</span></div><div class="section-desc">Pode selecionar mais de um</div></div>
+    </div>
+    <div class="choice-grid-2">
+      <label class="choice-item"><input type="checkbox" name="ctd_objetivo" value="Captar clientes e agendamentos"><div><div class="choice-label">🎯 Captar clientes</div><div class="choice-sub">Gerar agendamentos, consultas e vendas</div></div></label>
+      <label class="choice-item"><input type="checkbox" name="ctd_objetivo" value="Conteúdo informativo / educativo"><div><div class="choice-label">📚 Conteúdo informativo</div><div class="choice-sub">Educar a audiência sobre o nicho</div></div></label>
+      <label class="choice-item"><input type="checkbox" name="ctd_objetivo" value="Gerar engajamento e comunidade"><div><div class="choice-label">💬 Engajamento</div><div class="choice-sub">Curtidas, comentários, compartilhamentos</div></div></label>
+      <label class="choice-item"><input type="checkbox" name="ctd_objetivo" value="Autoridade e posicionamento de marca"><div><div class="choice-label">👑 Autoridade</div><div class="choice-sub">Ser referência no segmento</div></div></label>
+      <label class="choice-item"><input type="checkbox" name="ctd_objetivo" value="Vendas diretas de produtos ou serviços"><div><div class="choice-label">🛒 Vendas diretas</div><div class="choice-sub">Impulsionar compras e contratações</div></div></label>
+      <label class="choice-item"><input type="checkbox" name="ctd_objetivo" value="Conteúdo institucional e de marca"><div><div class="choice-label">🏢 Institucional</div><div class="choice-sub">Mostrar a empresa, equipe e bastidores</div></div></label>
+      <label class="choice-item"><input type="checkbox" name="ctd_objetivo" value="Lançamento de produto ou serviço"><div><div class="choice-label">🚀 Lançamento</div><div class="choice-sub">Divulgar novidade, promoção ou estreia</div></div></label>
+      <label class="choice-item"><input type="checkbox" name="ctd_objetivo" value="Nutrição de seguidores atuais"><div><div class="choice-label">🌱 Nutrição de audiência</div><div class="choice-sub">Manter quem já segue engajado</div></div></label>
+    </div>
+  </div>
+
+  <!-- BLOCO 3 -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num orange">3</div>
+      <div><div class="section-title">Formato e Tom</div><div class="section-desc">Que tipo de conteúdo precisa ser criado</div></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Formatos desejados <span class="req">*</span></label>
+      <div class="choice-grid-3">
+        <label class="choice-item"><input type="checkbox" name="ctd_formato" value="Legenda para post estático"><div><div class="choice-label">🖼️ Post / Legenda</div></div></label>
+        <label class="choice-item"><input type="checkbox" name="ctd_formato" value="Roteiro de Reels (vídeo curto)"><div><div class="choice-label">🎬 Roteiro Reels</div></div></label>
+        <label class="choice-item"><input type="checkbox" name="ctd_formato" value="Texto de Carrossel (slides)"><div><div class="choice-label">📑 Carrossel</div></div></label>
+        <label class="choice-item"><input type="checkbox" name="ctd_formato" value="Stories (sequência)"><div><div class="choice-label">⭕ Stories</div></div></label>
+        <label class="choice-item"><input type="checkbox" name="ctd_formato" value="Copy para anúncio Meta Ads"><div><div class="choice-label">📣 Copy de anúncio</div></div></label>
+        <label class="choice-item"><input type="checkbox" name="ctd_formato" value="Pauta + calendário editorial"><div><div class="choice-label">📅 Calendário editorial</div></div></label>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Tom de voz <span class="req">*</span></label>
+      <div class="choice-grid-3">
+        <label class="choice-item"><input type="radio" name="ctd_tom" value="Acolhedor e próximo"><div><div class="choice-label">🤗 Acolhedor</div><div class="choice-sub">Empático, humano</div></div></label>
+        <label class="choice-item"><input type="radio" name="ctd_tom" value="Profissional e técnico"><div><div class="choice-label">👔 Profissional</div><div class="choice-sub">Autoridade, dados</div></div></label>
+        <label class="choice-item"><input type="radio" name="ctd_tom" value="Descontraído e divertido"><div><div class="choice-label">😄 Descontraído</div><div class="choice-sub">Leve, bem-humorado</div></div></label>
+        <label class="choice-item"><input type="radio" name="ctd_tom" value="Inspiracional e motivacional"><div><div class="choice-label">✨ Inspiracional</div><div class="choice-sub">Transformação, sonhos</div></div></label>
+        <label class="choice-item"><input type="radio" name="ctd_tom" value="Direto e vendedor"><div><div class="choice-label">⚡ Direto</div><div class="choice-sub">Persuasivo, CTA forte</div></div></label>
+        <label class="choice-item"><input type="radio" name="ctd_tom" value="Educativo e explicativo"><div><div class="choice-label">🎓 Educativo</div><div class="choice-sub">Didático, passo a passo</div></div></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOCO 4 -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num green">4</div>
+      <div><div class="section-title">Detalhes do Conteúdo</div><div class="section-desc">Quanto mais detalhe, mais preciso o resultado</div></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">CTA desejado (chamada para ação)</label>
+      <div class="choice-grid-2">
+        <label class="choice-item"><input type="radio" name="ctd_cta" value="Mandar mensagem no WhatsApp"><div><div class="choice-label">📱 WhatsApp</div><div class="choice-sub">Direcionar para o contato</div></div></label>
+        <label class="choice-item"><input type="radio" name="ctd_cta" value="Agendar horário / consulta"><div><div class="choice-label">📆 Agendamento</div><div class="choice-sub">Marcar atendimento</div></div></label>
+        <label class="choice-item"><input type="radio" name="ctd_cta" value="Mandar DM no Instagram"><div><div class="choice-label">💬 DM</div><div class="choice-sub">Contato pelo direct</div></div></label>
+        <label class="choice-item"><input type="radio" name="ctd_cta" value="Acessar link na bio"><div><div class="choice-label">🔗 Link na bio</div><div class="choice-sub">Direcionar para site ou link</div></div></label>
+        <label class="choice-item"><input type="radio" name="ctd_cta" value="Sem CTA específico"><div><div class="choice-label">— Sem CTA</div><div class="choice-sub">Conteúdo puramente informativo</div></div></label>
+        <label class="choice-item"><input type="radio" name="ctd_cta" value="Salvar / compartilhar o post"><div><div class="choice-label">🔖 Salvar/Compartilhar</div><div class="choice-sub">Engajamento passivo</div></div></label>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="field-group">
+        <label class="field-label" for="ctd_tema">Tema ou pauta específica</label>
+        <input type="text" id="ctd_tema" placeholder="Ex: Benefícios da radiofrequência facial">
+        <div class="field-hint">Deixe em branco para a IA sugerir pautas.</div>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="ctd_quantidade">Quantidade de peças</label>
+        <select id="ctd_quantidade">
+          <option value="1">1 peça</option>
+          <option value="3" selected>3 peças</option>
+          <option value="5">5 peças</option>
+          <option value="10">10 peças (calendário)</option>
+          <option value="30">30 pautas (mês completo)</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="ctd_keywords">Palavras-chave do nicho / termos importantes</label>
+      <input type="text" id="ctd_keywords" placeholder="Ex: radiofrequência, pele saudável, harmonização, Canoas">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="ctd_dores">Dores, problemas ou desejos do público que quer abordar</label>
+      <textarea id="ctd_dores" placeholder="Ex: Clientes que se sentem inseguras com a aparência, que buscam resultados sem cirurgia, que não têm tempo para tratamentos longos..."></textarea>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="ctd_obs">Observações adicionais (diferenciais, promoções, eventos)</label>
+      <textarea id="ctd_obs" placeholder="Ex: Semana especial com desconto de 20% em limpeza de pele. Inauguração de nova sala em maio." style="min-height:70px;"></textarea>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="submit-area">
+    <button class="btn-generate" id="btn_gerar" onclick="gerarConteudo()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Gerar Conteúdo com IA
+    </button>
+    <div class="submit-hint">A IA cria conteúdo personalizado com base nos dados preenchidos acima.</div>
+    <div class="status-bar" id="status_bar"></div>
+  </div>
+
+  <div class="output-wrap" id="output_wrap">
+    <div class="output-title">✍️ Conteúdo gerado</div>
+    <div class="output-content" id="output_content"></div>
+    <div class="output-actions">
+      <button class="btn-copy" onclick="copiarConteudo()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copiar tudo
+      </button>
+      <button class="btn-nova" onclick="novoConteudo()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Novo conteúdo
+      </button>
+    </div>
+    <div class="copied-msg" id="copied_msg">✓ Copiado!</div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+/* PROGRESS */
+(function(){
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var el=e.target,d=el.dataset.delay||0;
+      setTimeout(function(){el.classList.add('visible');},+d);
+      obs.unobserve(el);
+    });
+  },{threshold:.08,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.form-section').forEach(function(el,i){el.dataset.delay=i*80;obs.observe(el);});
+})();
+
+function updateProgress(){
+  var f=0,t=4;
+  if((document.getElementById('ctd_nome')||{}).value) f++;
+  if((document.getElementById('ctd_descricao')||{}).value) f++;
+  if((document.getElementById('ctd_segmento')||{}).value) f++;
+  if(document.querySelectorAll('input[name="ctd_objetivo"]:checked').length) f++;
+  document.getElementById('progress_fill').style.width=Math.round(f/t*100)+'%';
+}
+document.addEventListener('input',updateProgress);
+document.addEventListener('change',updateProgress);
+
+function buildPrompt(){
+  var nome    = document.getElementById('ctd_nome').value.trim();
+  var desc    = document.getElementById('ctd_descricao').value.trim();
+  var seg     = document.getElementById('ctd_segmento').value;
+  var cidade  = document.getElementById('ctd_cidade').value.trim();
+  var objetivos = [...document.querySelectorAll('input[name="ctd_objetivo"]:checked')].map(i=>i.value).join(', ');
+  var formatos  = [...document.querySelectorAll('input[name="ctd_formato"]:checked')].map(i=>i.value).join(', ');
+  var tom     = (document.querySelector('input[name="ctd_tom"]:checked')||{}).value||'';
+  var cta     = (document.querySelector('input[name="ctd_cta"]:checked')||{}).value||'Sem CTA específico';
+  var tema    = document.getElementById('ctd_tema').value.trim();
+  var qtd     = document.getElementById('ctd_quantidade').value;
+  var kw      = document.getElementById('ctd_keywords').value.trim();
+  var dores   = document.getElementById('ctd_dores').value.trim();
+  var obs     = document.getElementById('ctd_obs').value.trim();
+
+  return `Você é especialista em criação de conteúdo para redes sociais no Brasil.
+
+Crie ${qtd} peça(s) de conteúdo para o seguinte cliente:
+
+EMPRESA: ${nome}
+DESCRIÇÃO: ${desc}
+SEGMENTO: ${seg}
+CIDADE: ${cidade||'não informada'}
+OBJETIVOS: ${objetivos||'não informados'}
+FORMATOS SOLICITADOS: ${formatos||'definir conforme melhor julgar'}
+TOM DE VOZ: ${tom||'profissional e acolhedor'}
+CTA: ${cta}
+TEMA/PAUTA: ${tema||'livre — sugira os melhores temas para o segmento'}
+PALAVRAS-CHAVE: ${kw||'não informadas'}
+DORES DO PÚBLICO: ${dores||'não informadas'}
+OBSERVAÇÕES: ${obs||'nenhuma'}
+
+INSTRUÇÕES:
+- Escreva em português brasileiro informal mas profissional
+- Personalize cada peça para o nicho e cidade
+- Inclua emojis estrategicamente (não em excesso)
+- Para legendas: inclua hashtags relevantes ao final (entre 8 e 15)
+- Para roteiros de Reels: estruture em GANCHO / DESENVOLVIMENTO / CTA
+- Para carrosséis: numere os slides e indique o texto de cada um
+- Para calendário/pautas: apresente em formato de lista com data sugerida, tema e formato
+- Seja criativo e gere conteúdo que realmente engaja o público desse nicho
+- Ao final de cada peça, adicione uma linha: "💡 Dica de uso: [como usar essa peça]"`;
+}
+
+async function gerarConteudo(){
+  var nome = (document.getElementById('ctd_nome').value||'').trim();
+  var desc = (document.getElementById('ctd_descricao').value||'').trim();
+  var obj  = document.querySelectorAll('input[name="ctd_objetivo"]:checked').length;
+  var fmt  = document.querySelectorAll('input[name="ctd_formato"]:checked').length;
+
+  if(!nome){ setStatus('⚠️ Informe o nome da empresa.','warn'); return; }
+  if(!desc){ setStatus('⚠️ Preencha a descrição da empresa.','warn'); return; }
+  if(!obj){  setStatus('⚠️ Selecione ao menos um objetivo.','warn'); return; }
+  if(!fmt){  setStatus('⚠️ Selecione ao menos um formato.','warn'); return; }
+
+  var btn = document.getElementById('btn_gerar');
+  btn.disabled = true;
+  document.getElementById('output_wrap').classList.remove('show');
+  setStatus('🤖 Gerando conteúdo com IA…','info');
+
+  try{
+    var r = await fetch('/api/claude',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        prompt: buildPrompt(),
+        system: 'Você é especialista em marketing digital e criação de conteúdo para redes sociais no Brasil. Crie conteúdo autêntico, criativo e que gera resultados reais.',
+        max_tokens: 4000
+      })
+    });
+
+    if(!r.ok) throw new Error('Erro na API: '+r.status);
+
+    var reader = r.body.getReader();
+    var decoder = new TextDecoder();
+    var full = '';
+    var outEl = document.getElementById('output_content');
+    document.getElementById('output_wrap').classList.add('show');
+    outEl.textContent = '';
+
+    while(true){
+      var {done,value} = await reader.read();
+      if(done) break;
+      var chunk = decoder.decode(value,{stream:true});
+      var lines = chunk.split('\n');
+      for(var line of lines){
+        if(!line.startsWith('data:')) continue;
+        var txt = line.slice(5).trim();
+        if(txt==='[DONE]') break;
+        try{ var d=JSON.parse(txt); if(d.text){ full+=d.text; outEl.textContent=full; } }catch{}
+      }
+    }
+    setStatus('✓ Conteúdo gerado com sucesso!','ok');
+    btn.disabled = false;
+  }catch(e){
+    setStatus('❌ Erro: '+e.message,'err');
+    btn.disabled = false;
+  }
+}
+
+function setStatus(msg, kind){
+  var el = document.getElementById('status_bar');
+  var colors = {info:'#94A3B8',ok:'#6EE7B7',warn:'#FDE68A',err:'#FCA5A5'};
+  el.style.color = colors[kind]||'#94A3B8';
+  el.textContent = msg;
+}
+
+function copiarConteudo(){
+  var txt = (document.getElementById('output_content')||{}).textContent||'';
+  navigator.clipboard.writeText(txt).then(function(){
+    var m = document.getElementById('copied_msg');
+    m.style.display='block';
+    setTimeout(function(){m.style.display='none';},2000);
+  });
+}
+
+function novoConteudo(){
+  document.getElementById('output_wrap').classList.remove('show');
+  document.getElementById('status_bar').textContent='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+<script src="_hub.js"></script>
+<script>hubInit('conteudo');</script>
+</body>
+</html>

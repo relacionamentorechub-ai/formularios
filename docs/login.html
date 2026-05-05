@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acesso · R.E.C. HUB de Negócios</title>
+<meta name="description" content="Acesso interno ao Hub de Negócios R.E.C.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --cyan:#06B6D4;--cyan-light:#22D3EE;--cyan-dark:#0E7490;
+  --purple:#7C3AED;--purple-soft:#8B5CF6;
+  --green:#10B981;--red:#EF4444;
+  --bg-base:#050B18;--bg-card:rgba(8,18,38,0.78);--bg-input:rgba(6,15,35,0.85);
+  --border:rgba(6,182,212,0.18);--border-hover:rgba(6,182,212,0.45);
+  --text-primary:#F0F6FF;--text-secondary:#94A3B8;--text-muted:#4A5A72;
+  --shadow-glow:0 0 60px rgba(6,182,212,0.18);
+}
+html,body{height:100%;}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg-base);color:var(--text-primary);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;overflow-x:hidden;}
+
+/* AURORA */
+.aurora-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.aurora-bg::before,.aurora-bg::after{content:'';position:absolute;border-radius:50%;filter:blur(80px);opacity:.22;animation:drift 18s ease-in-out infinite alternate;}
+.aurora-bg::before{width:700px;height:500px;background:radial-gradient(ellipse,#0E7490,#06B6D4,transparent);top:-150px;left:-200px;}
+.aurora-bg::after{width:600px;height:450px;background:radial-gradient(ellipse,#7C3AED,#0284C7,transparent);bottom:-100px;right:-150px;animation-delay:-9s;animation-direction:alternate-reverse;}
+.grid-overlay{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(6,182,212,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(6,182,212,.03) 1px,transparent 1px);background-size:60px 60px;}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(80px,40px) scale(1.1)}100%{transform:translate(-40px,80px) scale(.95)}}
+
+/* CARD */
+.auth-shell{position:relative;z-index:10;width:100%;max-width:440px;animation:fade-up .6s ease-out;}
+@keyframes fade-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.brand{text-align:center;margin-bottom:28px;}
+.brand-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan),0 0 24px rgba(6,182,212,.6);animation:pulse 2s ease-in-out infinite;margin-right:10px;vertical-align:middle;}
+.brand-name{display:inline-block;font-size:14px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;background:linear-gradient(135deg,#22D3EE,#06B6D4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;vertical-align:middle;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
+
+.card{background:var(--bg-card);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid var(--border);border-radius:20px;padding:36px 32px;box-shadow:var(--shadow-glow),0 30px 80px rgba(0,0,0,.4);position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(6,182,212,.5),transparent);}
+
+.card-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.25);color:var(--cyan-light);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:6px 14px;border-radius:50px;margin-bottom:18px;}
+.card-eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--cyan);animation:pulse 1.5s infinite;}
+
+.card-title{font-size:24px;font-weight:800;line-height:1.2;letter-spacing:-.01em;margin-bottom:8px;}
+.card-title .gradient{background:linear-gradient(135deg,#06B6D4,#22D3EE,#8B5CF6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.card-sub{font-size:13.5px;color:var(--text-secondary);margin-bottom:26px;line-height:1.6;}
+
+/* TABS */
+.tabs{display:flex;background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.12);border-radius:99px;padding:4px;margin-bottom:24px;}
+.tab{flex:1;padding:10px 16px;border:none;background:transparent;border-radius:99px;font-family:inherit;font-size:13px;font-weight:700;color:var(--text-secondary);cursor:pointer;transition:all .25s;letter-spacing:.02em;}
+.tab.active{background:linear-gradient(135deg,#0E7490,#06B6D4);color:#fff;box-shadow:0 0 20px rgba(6,182,212,.3);}
+
+/* FORM */
+.field{margin-bottom:16px;}
+.label{display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:7px;letter-spacing:.02em;}
+.label .req{color:var(--cyan);}
+.input{width:100%;padding:12px 14px;background:var(--bg-input);border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:14px;color:var(--text-primary);transition:border-color .2s,box-shadow .2s;}
+.input:focus{outline:none;border-color:var(--border-hover);box-shadow:0 0 0 3px rgba(6,182,212,.1);}
+.input::placeholder{color:var(--text-muted);}
+.hint{font-size:11.5px;color:var(--text-muted);margin-top:6px;}
+
+.btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,#0E7490,#06B6D4);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:transform .15s,box-shadow .2s;margin-top:6px;}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px rgba(6,182,212,.4);}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed;}
+
+.alert{margin-top:14px;padding:11px 14px;border-radius:10px;font-size:12.5px;line-height:1.5;display:none;}
+.alert.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#FCA5A5;}
+.alert.success{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#6EE7B7;}
+.alert.show{display:block;animation:fade-up .3s ease-out;}
+
+.divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--text-muted);font-size:11px;letter-spacing:.1em;text-transform:uppercase;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(6,182,212,.12);}
+
+.signup-step-2{display:none;}
+.signup-step-2.show{display:block;}
+
+.foot{text-align:center;margin-top:22px;font-size:11.5px;color:var(--text-muted);letter-spacing:.04em;}
+.foot strong{color:var(--text-secondary);font-weight:600;}
+
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="aurora-bg"></div>
+<div class="grid-overlay"></div>
+
+<div class="auth-shell">
+  <div class="brand">
+    <span class="brand-dot"></span>
+    <span class="brand-name">R.E.C. HUB de Negócios</span>
+  </div>
+
+  <div class="card">
+    <div class="card-eyebrow"><span class="dot"></span> Acesso restrito</div>
+    <h1 class="card-title">Hub interno <span class="gradient">de soluções</span></h1>
+    <p class="card-sub">Ferramentas de diagnóstico, propostas, campanhas e geração de conteúdo. Acesso exclusivo da equipe.</p>
+
+    <div class="tabs">
+      <button class="tab active" id="tab_login" onclick="switchTab('login')">Entrar</button>
+      <button class="tab" id="tab_signup" onclick="switchTab('signup')">Criar conta</button>
+    </div>
+
+    <!-- LOGIN -->
+    <form id="form_login" onsubmit="handleLogin(event)">
+      <div class="field">
+        <label class="label" for="login_user">Usuário <span class="req">*</span></label>
+        <input class="input" type="text" id="login_user" autocomplete="username" placeholder="Seu nome de usuário" required>
+      </div>
+      <div class="field">
+        <label class="label" for="login_pass">Senha <span class="req">*</span></label>
+        <input class="input" type="password" id="login_pass" autocomplete="current-password" placeholder="••••••••" required>
+      </div>
+      <button class="btn-primary" type="submit" id="btn_login">Entrar</button>
+      <div class="alert" id="alert_login"></div>
+    </form>
+
+    <!-- SIGNUP -->
+    <form id="form_signup" onsubmit="handleSignup(event)" style="display:none;">
+
+      <div id="signup_step_1">
+        <div class="field">
+          <label class="label" for="signup_master">Senha da empresa <span class="req">*</span></label>
+          <input class="input" type="password" id="signup_master" placeholder="Senha que apenas a equipe sabe" required>
+          <div class="hint">Para criar uma conta nova você precisa primeiro confirmar que faz parte da equipe.</div>
+        </div>
+        <button class="btn-primary" type="button" onclick="validarMaster()">Continuar</button>
+        <div class="alert" id="alert_master"></div>
+      </div>
+
+      <div class="signup-step-2" id="signup_step_2">
+        <div class="alert success show" style="margin-bottom:16px;margin-top:0;">✓ Senha da empresa confirmada. Agora crie suas credenciais.</div>
+        <div class="field">
+          <label class="label" for="signup_user">Nome de usuário <span class="req">*</span></label>
+          <input class="input" type="text" id="signup_user" autocomplete="username" placeholder="ex: paola.hub" required minlength="3">
+        </div>
+        <div class="field">
+          <label class="label" for="signup_pass">Sua senha <span class="req">*</span></label>
+          <input class="input" type="password" id="signup_pass" autocomplete="new-password" placeholder="Mínimo 4 caracteres" required minlength="4">
+        </div>
+        <button class="btn-primary" type="submit" id="btn_signup">Criar conta e entrar</button>
+        <div class="alert" id="alert_signup"></div>
+      </div>
+    </form>
+
+    <div class="foot">Hub Interno · Apenas para uso da <strong>equipe REC HUB</strong></div>
+  </div>
+</div>
+
+<script>
+var REDIRECT_AFTER_LOGIN = 'index.html';
+var masterValidated = false;
+
+function switchTab(t) {
+  var isLogin = t === 'login';
+  document.getElementById('form_login').style.display  = isLogin ? '' : 'none';
+  document.getElementById('form_signup').style.display = isLogin ? 'none' : '';
+  document.getElementById('tab_login').classList.toggle('active', isLogin);
+  document.getElementById('tab_signup').classList.toggle('active', !isLogin);
+  hideAlerts();
+}
+
+function hideAlerts() {
+  ['alert_login','alert_master','alert_signup'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.classList.remove('show');
+  });
+}
+
+function showAlert(id, msg, kind) {
+  var el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'alert ' + (kind || 'error') + ' show';
+}
+
+function setLoading(btnId, loading, label) {
+  var btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  btn.innerHTML = loading ? '<span class="spinner"></span>' + label : label;
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  hideAlerts();
+  var username = document.getElementById('login_user').value.trim();
+  var password = document.getElementById('login_pass').value;
+  if (!username || !password) return;
+  setLoading('btn_login', true, 'Entrando...');
+  try {
+    var r = await fetch('/api/auth', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'login', username:username, password:password })
+    });
+    var data = await r.json();
+    if (!r.ok || !data.ok) { showAlert('alert_login', data.error || 'Falha no login'); setLoading('btn_login', false, 'Entrar'); return; }
+    localStorage.setItem('rec_hub_token', data.token);
+    localStorage.setItem('rec_hub_user', data.username);
+    window.location.href = REDIRECT_AFTER_LOGIN;
+  } catch (err) {
+    showAlert('alert_login', 'Erro de conexão. Tente novamente.');
+    setLoading('btn_login', false, 'Entrar');
+  }
+}
+
+function validarMaster() {
+  var master = document.getElementById('signup_master').value;
+  if (!master) { showAlert('alert_master', 'Digite a senha da empresa'); return; }
+  // Validação real acontece no servidor no submit final.
+  // Aqui só liberamos a tela de criação — se a senha estiver errada, falha no submit.
+  masterValidated = true;
+  document.getElementById('signup_step_1').style.display = 'none';
+  document.getElementById('signup_step_2').classList.add('show');
+  document.getElementById('signup_user').focus();
+}
+
+async function handleSignup(e) {
+  e.preventDefault();
+  hideAlerts();
+  var master = document.getElementById('signup_master').value;
+  var username = document.getElementById('signup_user').value.trim();
+  var password = document.getElementById('signup_pass').value;
+  if (!master || !username || !password) return;
+  setLoading('btn_signup', true, 'Criando...');
+  try {
+    var r = await fetch('/api/auth', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'signup', masterPassword:master, username:username, password:password })
+    });
+    var data = await r.json();
+    if (!r.ok || !data.ok) {
+      showAlert('alert_signup', data.error || 'Falha ao criar conta');
+      setLoading('btn_signup', false, 'Criar conta e entrar');
+      // Se a master foi rejeitada, volta pro passo 1
+      if ((data.error||'').toLowerCase().indexOf('mestra') > -1) {
+        document.getElementById('signup_step_1').style.display = '';
+        document.getElementById('signup_step_2').classList.remove('show');
+        showAlert('alert_master', 'Senha da empresa incorreta');
+      }
+      return;
+    }
+    localStorage.setItem('rec_hub_token', data.token);
+    localStorage.setItem('rec_hub_user', data.username);
+    window.location.href = REDIRECT_AFTER_LOGIN;
+  } catch (err) {
+    showAlert('alert_signup', 'Erro de conexão. Tente novamente.');
+    setLoading('btn_signup', false, 'Criar conta e entrar');
+  }
+}
+
+// Se já logado, redireciona
+(async function checkExisting(){
+  var token = localStorage.getItem('rec_hub_token');
+  if (!token) return;
+  try {
+    var r = await fetch('/api/auth', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'verify', token:token })
+    });
+    var data = await r.json();
+    if (r.ok && data.ok) window.location.href = REDIRECT_AFTER_LOGIN;
+    else { localStorage.removeItem('rec_hub_token'); localStorage.removeItem('rec_hub_user'); }
+  } catch {}
+})();
+</script>
+</body>
+</html>
