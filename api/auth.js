@@ -105,6 +105,12 @@ export default async function handler(req, res) {
   const action = body.action;
 
   try {
+    if (action === 'verify_master') {
+      const { masterPassword } = body;
+      if (masterPassword !== MASTER_PASSWORD) return fail(res, 401, 'Senha da empresa incorreta');
+      return ok(res, { verified: true });
+    }
+
     if (action === 'signup') {
       const { masterPassword, username, password } = body;
       if (masterPassword !== MASTER_PASSWORD) return fail(res, 401, 'Senha-mestra incorreta');

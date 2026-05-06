@@ -207,15 +207,33 @@ async function handleLogin(e) {
   }
 }
 
-function validarMaster() {
+async function validarMaster() {
   var master = document.getElementById('signup_master').value;
   if (!master) { showAlert('alert_master', 'Digite a senha da empresa'); return; }
-  // Validação real acontece no servidor no submit final.
-  // Aqui só liberamos a tela de criação — se a senha estiver errada, falha no submit.
-  masterValidated = true;
-  document.getElementById('signup_step_1').style.display = 'none';
-  document.getElementById('signup_step_2').classList.add('show');
-  document.getElementById('signup_user').focus();
+  var btn = document.querySelector('#signup_step_1 .btn-primary');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Verificando...';
+  try {
+    var r = await fetch('/api/auth', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ action: 'verify_master', masterPassword: master })
+    });
+    var data = await r.json();
+    if (!r.ok || !data.ok) {
+      showAlert('alert_master', 'Senha da empresa incorreta. Verifique com a equipe.');
+      btn.disabled = false;
+      btn.innerHTML = 'Continuar';
+      return;
+    }
+    masterValidated = true;
+    document.getElementById('signup_step_1').style.display = 'none';
+    document.getElementById('signup_step_2').classList.add('show');
+    document.getElementById('signup_user').focus();
+  } catch (err) {
+    showAlert('alert_master', 'Erro de conexão. Tente novamente.');
+    btn.disabled = false;
+    btn.innerHTML = 'Continuar';
+  }
 }
 
 async function handleSignup(e) {
@@ -235,12 +253,6 @@ async function handleSignup(e) {
     if (!r.ok || !data.ok) {
       showAlert('alert_signup', data.error || 'Falha ao criar conta');
       setLoading('btn_signup', false, 'Criar conta e entrar');
-      // Se a master foi rejeitada, volta pro passo 1
-      if ((data.error||'').toLowerCase().indexOf('mestra') > -1) {
-        document.getElementById('signup_step_1').style.display = '';
-        document.getElementById('signup_step_2').classList.remove('show');
-        showAlert('alert_master', 'Senha da empresa incorreta');
-      }
       return;
     }
     localStorage.setItem('rec_hub_token', data.token);
