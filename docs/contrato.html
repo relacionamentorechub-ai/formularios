@@ -316,17 +316,15 @@ function buildContratoHtml() {
   var nome     = v('c_nome');
   var doc      = v('c_doc');
   var resp     = v('c_responsavel');
-  var cidade   = v('c_cidade');
+  var endereco = v('c_cidade');
   var email    = v('c_email');
   var tel      = v('c_tel');
   var plano    = v('s_plano');
   var valorBase = parseFloat((v('s_valor')||'0').replace(',','.')) || 0;
   var valorMensal = fidelidadeMeses === 6 ? Math.round(valorBase * 1.2) : valorBase;
   var total    = valorMensal * fidelidadeMeses;
-  var venc     = v('s_vencimento');
   var desc     = v('s_descricao');
   var inicio   = v('v_inicio');
-  var recResp  = v('v_resp');
   var now      = new Date().toLocaleDateString('pt-BR');
 
   var dInicio = new Date(inicio + 'T12:00:00');
@@ -335,112 +333,198 @@ function buildContratoHtml() {
   var fmt = function(dt){ return dt.toLocaleDateString('pt-BR'); };
   var inicioFmt = fmt(dInicio);
   var fimFmt = fmt(dFim);
+  var mesFidelidade = fidelidadeMeses === 12 ? '12 (doze)' : '06 (seis)';
+  var valorFmt = valorMensal.toLocaleString('pt-BR');
+  var valorExtenso = 'R$ ' + valorFmt;
+  var acrescimoNota = fidelidadeMeses === 6
+    ? '<p>Em raz&atilde;o do prazo de fidelidade reduzido (6 meses), aplica-se acr&eacute;scimo de <strong>20%</strong> sobre o valor base, resultando no valor mensal de <strong>R$ ' + valorFmt + '</strong>.</p>'
+    : '';
 
-  var descServicos = desc || 'Serviços de marketing digital conforme plano selecionado.';
-  var acrescimoTexto = fidelidadeMeses === 6
-    ? '<p>O presente contrato tem fidelidade de <strong>6 (seis) meses</strong> com acréscimo de 20% aplicado sobre o valor mensal em razão do prazo reduzido, totalizando <strong>R$ ' + valorMensal.toLocaleString('pt-BR') + '/mês</strong>.</p>'
-    : '<p>O presente contrato tem fidelidade mínima de <strong>12 (doze) meses</strong>, conforme política padrão R.E.C. HUB.</p>';
+  var CSS = '<style>'
+    + '*{box-sizing:border-box;margin:0;padding:0;}'
+    + 'body{font-family:"Times New Roman",Georgia,serif;background:#D1D5DB;color:#111827;font-size:12.5px;line-height:1.75;}'
+    + '.page{width:794px;min-height:1123px;margin:20px auto;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,.18);padding:52px 60px;display:flex;flex-direction:column;}'
+    + '.page2{page-break-before:always;}'
+    + '.topbar{height:4px;background:linear-gradient(90deg,#0E7490,#06B6D4,#67E8F9);margin:-52px -60px 32px;}'
+    + '.hdoc{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #111827;padding-bottom:14px;margin-bottom:24px;}'
+    + '.hlogo{font-family:-apple-system,sans-serif;font-size:13px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#0E7490;}'
+    + '.htitle{font-size:11px;color:#6B7280;text-align:right;line-height:1.5;}'
+    + 'h1{font-size:17px;font-weight:900;text-align:center;margin-bottom:6px;font-family:-apple-system,sans-serif;letter-spacing:.02em;}'
+    + '.sub{font-size:11px;color:#6B7280;text-align:center;margin-bottom:28px;}'
+    + '.qualif{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:16px 20px;margin-bottom:20px;}'
+    + '.qualif-label{font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#0E7490;margin-bottom:8px;font-family:-apple-system,sans-serif;}'
+    + '.qualif-line{font-size:12.5px;color:#111827;margin-bottom:3px;}'
+    + '.qualif-line span{font-weight:600;}'
+    + 'h2{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#111827;border-bottom:1px solid #E5E7EB;padding-bottom:5px;margin:20px 0 11px;font-family:-apple-system,sans-serif;}'
+    + 'p{margin-bottom:9px;text-align:justify;}'
+    + 'ol,ul{margin:6px 0 10px 24px;}'
+    + 'li{margin-bottom:5px;}'
+    + '.parag-unico{background:#F8FAFC;border-left:3px solid #94A3B8;padding:8px 14px;margin:10px 0;font-size:12px;color:#374151;border-radius:0 6px 6px 0;}'
+    + '.highlight{background:#F0FDF4;border-left:4px solid #10B981;border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;}'
+    + '.highlight strong{color:#065F46;}'
+    + '.highlight.orange{background:#FFF7ED;border-left-color:#F97316;}'
+    + '.highlight.orange strong{color:#C2410C;}'
+    + '.valor-box{border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;margin:12px 0;}'
+    + '.valor-row{display:flex;justify-content:space-between;padding:9px 16px;border-bottom:1px solid #F3F4F6;font-size:12.5px;}'
+    + '.valor-row:last-child{border-bottom:none;font-weight:700;font-size:14px;background:#F0FDF4;color:#065F46;}'
+    + '.sign-area{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:48px;}'
+    + '.sign-block{text-align:center;}'
+    + '.sign-line{border-bottom:1px solid #374151;margin-bottom:7px;height:38px;}'
+    + '.sign-name{font-size:11.5px;color:#374151;font-weight:700;}'
+    + '.sign-sub{font-size:10.5px;color:#6B7280;}'
+    + '.footer-doc{margin-top:auto;border-top:1px solid #E5E7EB;padding-top:12px;text-align:center;font-size:10px;color:#9CA3AF;font-family:-apple-system,sans-serif;}'
+    + '@page{size:210mm 297mm;margin:0;}'
+    + '@media print{body{background:#fff;}.page{width:210mm;min-height:unset;margin:0;box-shadow:none;padding:18mm 20mm;}.page2{page-break-before:always;}}'
+    + '</style>';
 
-  return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
-<style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Times New Roman',Georgia,serif;background:#D1D5DB;color:#111827;-webkit-font-smoothing:antialiased;font-size:13px;line-height:1.7;}
-.page{width:794px;min-height:1123px;margin:20px auto;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,.18);padding:56px 64px;display:flex;flex-direction:column;}
-.header-doc{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #111827;padding-bottom:16px;margin-bottom:28px;}
-.header-logo{font-family:-apple-system,sans-serif;font-size:15px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#0E7490;}
-.header-doc-title{font-size:12px;color:#6B7280;text-align:right;line-height:1.4;}
-h1{font-size:18px;font-weight:900;text-align:center;margin-bottom:8px;font-family:-apple-system,sans-serif;}
-.sub-title{font-size:12px;color:#6B7280;text-align:center;margin-bottom:32px;}
-.section-title-doc{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#111827;border-bottom:1px solid #E5E7EB;padding-bottom:6px;margin:24px 0 14px;}
-p{margin-bottom:10px;text-align:justify;}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:16px;margin-bottom:18px;}
-.info-item label{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6B7280;margin-bottom:2px;font-family:-apple-system,sans-serif;}
-.info-item span{font-size:13px;color:#111827;font-weight:600;}
-.highlight-box{background:#F0FDF4;border-left:4px solid #10B981;border-radius:0 8px 8px 0;padding:14px 18px;margin:16px 0;}
-.highlight-box.orange{background:#FFF7ED;border-left-color:#F97316;}
-.highlight-box strong{color:#065F46;}
-.highlight-box.orange strong{color:#C2410C;}
-.value-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F3F4F6;}
-.value-row:last-child{border-bottom:none;font-weight:700;font-size:15px;color:#065F46;}
-.sign-area{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:56px;}
-.sign-block{text-align:center;}
-.sign-line{border-bottom:1px solid #374151;margin-bottom:8px;height:40px;}
-.sign-name{font-size:12px;color:#374151;font-weight:600;}
-.sign-role{font-size:11px;color:#6B7280;}
-.footer-doc{margin-top:auto;border-top:1px solid #E5E7EB;padding-top:14px;text-align:center;font-size:10.5px;color:#9CA3AF;font-family:-apple-system,sans-serif;}
-@page{size:210mm 297mm;margin:0;}
-@media print{body{background:#fff;}.page{width:210mm;min-height:unset;margin:0;box-shadow:none;padding:20mm 22mm;}}
-</style></head><body>
-<div class="page">
-  <div class="header-doc">
-    <div class="header-logo">R.E.C. · HUB de Negócios</div>
-    <div class="header-doc-title">Contrato de Prestação de Serviços<br>Emitido em: ${now}</div>
-  </div>
+  var PAGE1 = '<div class="page">'
+    + '<div class="topbar"></div>'
+    + '<div class="hdoc">'
+    +   '<div class="hlogo">R.E.C. &middot; HUB de Neg&oacute;cios</div>'
+    +   '<div class="htitle">Contrato de Presta&ccedil;&atilde;o de Servi&ccedil;os<br>Emitido em: ' + now + '</div>'
+    + '</div>'
+    + '<h1>CONTRATO DE PRESTA&Ccedil;&Atilde;O DE SERVI&Ccedil;OS REC HUB</h1>'
+    + '<p class="sub">Pelo presente instrumento particular, na melhor forma de direito, as partes abaixo qualificadas:</p>'
 
-  <h1>CONTRATO DE PRESTAÇÃO DE SERVIÇOS</h1>
-  <p class="sub-title">Marketing Digital e Gestão de Mídias Sociais</p>
+    // QUALIFICAÇÃO
+    + '<div class="qualif">'
+    +   '<div class="qualif-label">CONTRATADA</div>'
+    +   '<div class="qualif-line">Raz&atilde;o Social: <span>CALEFFI TREINAMENTOS E EVENTOS LTDA | REC HUB</span></div>'
+    +   '<div class="qualif-line">CNPJ: <span>37.612.639/0001-38</span></div>'
+    +   '<div class="qualif-line">Endere&ccedil;o: <span>Rua Doutor Barcelos, 2375 - Centro, Canoas</span></div>'
+    + '</div>'
+    + '<div class="qualif">'
+    +   '<div class="qualif-label">CONTRATANTE</div>'
+    +   '<div class="qualif-line">Nome / Raz&atilde;o Social: <span>' + esc(nome) + '</span></div>'
+    + (doc ? '<div class="qualif-line">CPF / CNPJ: <span>' + esc(doc) + '</span></div>' : '')
+    + (resp ? '<div class="qualif-line">Respons&aacute;vel: <span>' + esc(resp) + '</span></div>' : '')
+    + (endereco ? '<div class="qualif-line">Endere&ccedil;o: <span>' + esc(endereco) + '</span></div>' : '')
+    + (email ? '<div class="qualif-line">E-mail: <span>' + esc(email) + '</span></div>' : '')
+    + (tel ? '<div class="qualif-line">Telefone: <span>' + esc(tel) + '</span></div>' : '')
+    + '</div>'
 
-  <div class="section-title-doc">1. Das Partes</div>
-  <p><strong>CONTRATADA:</strong> R.E.C. HUB DE NEGÓCIOS — Ecossistema de Conexões e Soluções Empresariais, representado neste ato por <strong>${esc(recResp)}</strong>.</p>
-  <p><strong>CONTRATANTE:</strong></p>
-  <div class="info-grid">
-    <div class="info-item"><label>Nome / Razão Social</label><span>${esc(nome)}</span></div>
-    ${doc?'<div class="info-item"><label>CPF / CNPJ</label><span>'+esc(doc)+'</span></div>':''}
-    ${resp?'<div class="info-item"><label>Responsável</label><span>'+esc(resp)+'</span></div>':''}
-    ${cidade?'<div class="info-item"><label>Cidade / Estado</label><span>'+esc(cidade)+'</span></div>':''}
-    ${email?'<div class="info-item"><label>E-mail</label><span>'+esc(email)+'</span></div>':''}
-    ${tel?'<div class="info-item"><label>Telefone / WhatsApp</label><span>'+esc(tel)+'</span></div>':''}
-  </div>
+    // CLÁUSULA 1
+    + '<h2>CL&Aacute;USULA 1&ordf; &ndash; DO OBJETO</h2>'
+    + '<p>O presente contrato tem como objeto a presta&ccedil;&atilde;o de capta&ccedil;&atilde;o de conte&uacute;do, gerenciamento de redes sociais e tr&aacute;fego pago, conforme as condi&ccedil;&otilde;es estabelecidas neste instrumento.</p>'
+    + (plano ? '<div class="highlight"><strong>Plano contratado: ' + esc(plano) + '</strong>' + (desc ? '<br><span style="font-size:12px;color:#166534;">' + esc(desc) + '</span>' : '') + '</div>' : '')
 
-  <div class="section-title-doc">2. Do Objeto</div>
-  <p>A CONTRATADA se compromete a prestar serviços de marketing digital, gestão de mídias sociais e demais serviços descritos abaixo, conforme pacote contratado:</p>
-  <div class="highlight-box">
-    <strong>Plano: ${esc(plano || 'Serviços personalizados')}</strong><br>
-    <span style="font-size:12px;color:#166534;">${esc(descServicos)}</span>
-  </div>
+    // CLÁUSULA 2
+    + '<h2>CL&Aacute;USULA 2&ordf; &ndash; DOS SERVI&Ccedil;OS CONTRATADOS</h2>'
+    + '<p>Os servi&ccedil;os prestados pela CONTRATADA compreender&atilde;o:</p>'
+    + '<ol type="a">'
+    + '<li>Planejamento estrat&eacute;gico de marketing e posicionamento digital da marca;</li>'
+    + '<li>Gest&atilde;o, acompanhamento e otimiza&ccedil;&atilde;o das redes sociais da CONTRATANTE;</li>'
+    + '<li>Cria&ccedil;&atilde;o de conte&uacute;dos digitais, incluindo pe&ccedil;as est&aacute;ticas, v&iacute;deos e roteiros, conforme demanda mensal acordada para Instagram/Facebook;</li>'
+    + '<li>Edi&ccedil;&atilde;o de v&iacute;deos captados pela CONTRATADA;</li>'
+    + '<li>Curadoria, orienta&ccedil;&atilde;o estrat&eacute;gica e an&aacute;lise de desempenho das a&ccedil;&otilde;es de marketing;</li>'
+    + '<li>Planejamento, gest&atilde;o e otimiza&ccedil;&atilde;o de campanhas de tr&aacute;fego pago nas plataformas de an&uacute;ncios, especialmente Meta Ads.</li>'
+    + '</ol>'
+    + '<div class="parag-unico"><strong>Par&aacute;grafo &uacute;nico:</strong> Servi&ccedil;os extraordin&aacute;rios, capta&ccedil;&atilde;o presencial, produ&ccedil;&atilde;o espec&iacute;fica para eventos ou demandas n&atilde;o previstas neste contrato poder&atilde;o ser cobrados &agrave; parte, mediante pr&eacute;vio alinhamento e aprova&ccedil;&atilde;o da CONTRATANTE.</div>'
 
-  <div class="section-title-doc">3. Do Prazo e Vigência</div>
-  <p>O presente contrato vigorará por <strong>${fidelidadeMeses} (${fidelidadeMeses === 12 ? 'doze' : 'seis'}) meses</strong>, com início em <strong>${inicioFmt}</strong> e término previsto em <strong>${fimFmt}</strong>.</p>
-  ${acrescimoTexto}
-  <p>A rescisão antecipada por parte do CONTRATANTE implicará multa proporcional aos meses restantes do contrato.</p>
+    // CLÁUSULA 3
+    + '<h2>CL&Aacute;USULA 3&ordf; &ndash; DAS OBRIGA&Ccedil;&Otilde;ES DA CONTRATADA</h2>'
+    + '<p>Compete &agrave; CONTRATADA:</p>'
+    + '<ol type="a">'
+    + '<li>Executar os servi&ccedil;os com zelo, &eacute;tica e profissionalismo;</li>'
+    + '<li>Cumprir os prazos previamente alinhados;</li>'
+    + '<li>Manter comunica&ccedil;&atilde;o clara e objetiva com a CONTRATANTE;</li>'
+    + '<li>Utilizar estrat&eacute;gias compat&iacute;veis com as boas pr&aacute;ticas de marketing digital;</li>'
+    + '<li>Guardar sigilo sobre todas as informa&ccedil;&otilde;es recebidas.</li>'
+    + '</ol>'
 
-  <div class="section-title-doc">4. Da Remuneração</div>
-  <div class="value-row"><span>Valor mensal base</span><span>R$ ${valorBase.toLocaleString('pt-BR')}</span></div>
-  ${fidelidadeMeses===6?'<div class="value-row"><span>Acréscimo de fidelidade reduzida (20%)</span><span>+ R$ '+Math.round(valorBase*0.2).toLocaleString('pt-BR')+'</span></div>':''}
-  <div class="value-row"><span><strong>Valor mensal a pagar</strong></span><strong>R$ ${valorMensal.toLocaleString('pt-BR')}</strong></div>
-  <div class="value-row"><span><strong>Total do contrato (${fidelidadeMeses} meses)</strong></span><strong style="color:#065F46;">R$ ${total.toLocaleString('pt-BR')}</strong></div>
+    // CLÁUSULA 4
+    + '<h2>CL&Aacute;USULA 4&ordf; &ndash; DAS OBRIGA&Ccedil;&Otilde;ES DA CONTRATANTE</h2>'
+    + '<p>Compete &agrave; CONTRATANTE:</p>'
+    + '<ol type="a">'
+    + '<li>Fornecer informa&ccedil;&otilde;es, materiais e acessos necess&aacute;rios &agrave; execu&ccedil;&atilde;o dos servi&ccedil;os;</li>'
+    + '<li>Responder pela veracidade e legalidade das informa&ccedil;&otilde;es fornecidas;</li>'
+    + '<li>Aprovar ou solicitar ajustes nos conte&uacute;dos em at&eacute; 24 horas ap&oacute;s envio;</li>'
+    + '<li>Realizar os pagamentos nas datas ajustadas.</li>'
+    + '</ol>'
+    + '<div class="parag-unico">A aus&ecirc;ncia de manifesta&ccedil;&atilde;o dentro do prazo ser&aacute; considerada aprova&ccedil;&atilde;o t&aacute;cita.</div>'
 
-  <div class="highlight-box${fidelidadeMeses===6?' orange':''}">
-    O pagamento deverá ser efetuado até o <strong>dia ${esc(venc)}</strong> de cada mês.
-    ${fidelidadeMeses===6?'<br><span style="color:#C2410C;font-size:12px;">Contrato com fidelidade de 6 meses — acréscimo de 20% já aplicado.</span>':''}
-  </div>
+    // CLÁUSULA 5
+    + '<h2>CL&Aacute;USULA 5&ordf; &ndash; DO PRAZO DE VIG&Ecirc;NCIA</h2>'
+    + '<p>O presente contrato ter&aacute; in&iacute;cio em <strong>' + inicioFmt + '</strong>, com vig&ecirc;ncia de <strong>' + mesFidelidade + ' meses</strong>, encerrando-se em <strong>' + fimFmt + '</strong>.</p>'
+    + acrescimoNota
 
-  <div class="section-title-doc">5. Das Obrigações</div>
-  <p><strong>Da CONTRATADA:</strong> Executar os serviços contratados com qualidade, profissionalismo e dentro dos prazos acordados; manter sigilo sobre informações do CONTRATANTE; apresentar relatório mensal de resultados.</p>
-  <p><strong>Do CONTRATANTE:</strong> Efetuar o pagamento na data acordada; fornecer os acessos e materiais necessários para execução dos serviços; aprovar os conteúdos dentro do prazo estabelecido.</p>
+    + '</div>'; // fim page 1
 
-  <div class="section-title-doc">6. Disposições Gerais</div>
-  <p>O presente contrato é regido pelas leis brasileiras e qualquer divergência será resolvida no foro da comarca de ${esc(cidade || 'Porto Alegre, RS')}.</p>
+  var PAGE2 = '<div class="page page2">'
+    + '<div class="topbar"></div>'
+    + '<div class="hdoc">'
+    +   '<div class="hlogo">R.E.C. &middot; HUB de Neg&oacute;cios</div>'
+    +   '<div class="htitle">Contrato de Presta&ccedil;&atilde;o de Servi&ccedil;os<br><span style="color:#' + (fidelidadeMeses===6?'C2410C':'065F46') + ';">Fidelidade: ' + mesFidelidade + ' meses</span></div>'
+    + '</div>'
 
-  <div class="sign-area">
-    <div class="sign-block">
-      <div class="sign-line"></div>
-      <div class="sign-name">R.E.C. HUB DE NEGÓCIOS</div>
-      <div class="sign-role">CONTRATADA · ${esc(recResp)}</div>
-    </div>
-    <div class="sign-block">
-      <div class="sign-line"></div>
-      <div class="sign-name">${esc(nome)}</div>
-      <div class="sign-role">CONTRATANTE${resp?' · '+esc(resp):''}</div>
-    </div>
-  </div>
+    // CLÁUSULA 6
+    + '<h2>CL&Aacute;USULA 6&ordf; &ndash; DO VALOR E FORMA DE PAGAMENTO</h2>'
+    + '<p>Pelos servi&ccedil;os ora contratados, a CONTRATANTE pagar&aacute; &agrave; CONTRATADA o valor mensal de:</p>'
+    + '<div class="valor-box">'
+    + (fidelidadeMeses===6
+        ? '<div class="valor-row"><span>Valor base do plano</span><span>R$ ' + valorBase.toLocaleString('pt-BR') + '</span></div>'
+          + '<div class="valor-row"><span>Acr&eacute;scimo fidelidade 6 meses (+20%)</span><span>+ R$ ' + Math.round(valorBase*0.2).toLocaleString('pt-BR') + '</span></div>'
+        : '')
+    + '<div class="valor-row"><span>Valor mensal a pagar</span><span>R$ ' + valorFmt + '</span></div>'
+    + '<div class="valor-row"><span>Total do contrato (' + fidelidadeMeses + ' meses)</span><span>R$ ' + total.toLocaleString('pt-BR') + '</span></div>'
+    + '</div>'
+    + '<p>O pagamento ser&aacute; realizado por meio de chave PIX <strong>contato.rechub@gmail.com</strong>, com pagamento flex&iacute;vel nos dias <strong>10 e 20</strong> de cada m&ecirc;s.</p>'
+    + '<div class="parag-unico"><strong>Par&aacute;grafo &uacute;nico:</strong> O valor contratado refere-se exclusivamente &agrave; presta&ccedil;&atilde;o de servi&ccedil;os. Os investimentos em an&uacute;ncios pagos ser&atilde;o realizados separadamente, diretamente nas plataformas de m&iacute;dia.</div>'
 
-  <div class="footer-doc">
-    R.E.C. HUB DE NEGÓCIOS · recolaborativo.com.br · @somosrecoficial<br>
-    Contrato gerado em ${now} via Hub Interno REC
-  </div>
-</div>
-</body></html>`;
+    // CLÁUSULA 7
+    + '<h2>CL&Aacute;USULA 7&ordf; &ndash; DO HOR&Aacute;RIO DE ATENDIMENTO</h2>'
+    + '<p>Os atendimentos ocorrer&atilde;o em dias &uacute;teis, de segunda a sexta-feira, das 08h &agrave;s 18h. Materiais enviados fora desse hor&aacute;rio ser&atilde;o analisados no pr&oacute;ximo expediente &uacute;til.</p>'
+
+    // CLÁUSULA 8
+    + '<h2>CL&Aacute;USULA 8&ordf; &ndash; DA RESCIS&Atilde;O</h2>'
+    + '<p>O contrato poder&aacute; ser rescindido, ap&oacute;s o prazo de vig&ecirc;ncia estipulado, por qualquer das partes mediante aviso pr&eacute;vio m&iacute;nimo de <strong>30 (trinta) dias</strong>, sem preju&iacute;zo do cumprimento das obriga&ccedil;&otilde;es pendentes.</p>'
+
+    // CLÁUSULA 9
+    + '<h2>CL&Aacute;USULA 9&ordf; &ndash; DA MULTA POR RESCIS&Atilde;O ANTECIPADA</h2>'
+    + '<p>Em caso de rescis&atilde;o imotivada antes do t&eacute;rmino do prazo contratual, a parte que der causa dever&aacute; arcar com:</p>'
+    + '<ol type="a">'
+    + '<li>O pagamento do m&ecirc;s vigente;</li>'
+    + '<li>O cumprimento do aviso pr&eacute;vio;</li>'
+    + '<li>Multa compensat&oacute;ria equivalente a 01 (um) m&ecirc;s do valor da presta&ccedil;&atilde;o de servi&ccedil;os.</li>'
+    + '</ol>'
+
+    // CLÁUSULA 10
+    + '<h2>CL&Aacute;USULA 10&ordf; &ndash; DA INEXIST&Ecirc;NCIA DE V&Iacute;NCULO EMPREGAT&Iacute;CIO</h2>'
+    + '<p>O presente contrato n&atilde;o gera qualquer v&iacute;nculo empregat&iacute;cio entre as partes, sendo a rela&ccedil;&atilde;o de natureza exclusivamente civil.</p>'
+
+    // CLÁUSULA 11
+    + '<h2>CL&Aacute;USULA 11&ordf; &ndash; DO SIGILO E CONFIDENCIALIDADE</h2>'
+    + '<p>As partes comprometem-se a manter absoluto sigilo sobre todas as informa&ccedil;&otilde;es, dados e estrat&eacute;gias compartilhadas em raz&atilde;o deste contrato, n&atilde;o podendo divulg&aacute;-las a terceiros sem autoriza&ccedil;&atilde;o expressa.</p>'
+
+    // CLÁUSULA 12
+    + '<h2>CL&Aacute;USULA 12&ordf; &ndash; DAS DISPOSI&Ccedil;&Otilde;ES FINAIS</h2>'
+    + '<p>A CONTRATADA n&atilde;o se responsabiliza por falhas decorrentes de ataques cibern&eacute;ticos, instabilidades das plataformas digitais ou fatos alheios ao seu controle.</p>'
+    + '<p>E, por estarem justas e acordadas, firmam o presente instrumento.</p>'
+    + '<p><strong>Local e data:</strong> Canoas, ' + now + '</p>'
+
+    + '<div class="sign-area">'
+    +   '<div class="sign-block">'
+    +     '<div class="sign-line"></div>'
+    +     '<div class="sign-name">CALEFFI TREINAMENTOS E EVENTOS LTDA</div>'
+    +     '<div class="sign-sub">CONTRATADA &middot; REC HUB</div>'
+    +     '<div class="sign-sub">CNPJ 37.612.639/0001-38</div>'
+    +   '</div>'
+    +   '<div class="sign-block">'
+    +     '<div class="sign-line"></div>'
+    +     '<div class="sign-name">' + esc(nome) + '</div>'
+    +     '<div class="sign-sub">CONTRATANTE' + (resp ? ' &middot; ' + esc(resp) : '') + '</div>'
+    +     (doc ? '<div class="sign-sub">CPF/CNPJ: ' + esc(doc) + '</div>' : '')
+    +   '</div>'
+    + '</div>'
+
+    + '<div class="footer-doc">'
+    +   'CALEFFI TREINAMENTOS E EVENTOS LTDA | REC HUB &middot; CNPJ 37.612.639/0001-38<br>'
+    +   'Rua Doutor Barcelos, 2375 - Centro, Canoas &middot; contato.rechub@gmail.com<br>'
+    +   'Contrato gerado em ' + now + ' via Hub Interno REC &middot; recolaborativo.com.br'
+    + '</div>'
+    + '</div>'; // fim page 2
+
+  return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">' + CSS + '</head><body>' + PAGE1 + PAGE2 + '</body></html>';
 }
 
 function gerarContrato() {
