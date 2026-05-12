@@ -645,7 +645,7 @@ var rawResultText = '';
 ═══════════════════════════════════════════ */
 async function atualizarCreditosHeader() {
   try {
-    var resp = await fetch('/api/usage');
+    var resp = await apiFetch('/api/usage');
     if (!resp.ok) return;
     var data = await resp.json();
     var el = document.getElementById('creditos_display');
@@ -1014,7 +1014,7 @@ function buildMessages(d) {
    CLAUDE API CALL (SSE stream reader)
 ═══════════════════════════════════════════ */
 async function chamarClaude(dados) {
-  var resp = await fetch('/api/claude', {
+  var resp = await apiFetch('/api/claude', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

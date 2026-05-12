@@ -391,7 +391,7 @@ var STATUS_ORDER = ['novo','contato','reuniao','proposta','fechado','perdido'];
 
 async function loadDashboard() {
   try {
-    var r = await fetch('/api/dashboard');
+    var r = await apiFetch('/api/dashboard');
     var data = await r.json();
     if (data.ok) { _dashData = data; renderDashboard(); }
     else { showDashError(); }

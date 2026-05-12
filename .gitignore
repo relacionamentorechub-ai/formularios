@@ -6,7 +6,25 @@ EVENTOS/
 PROPOSTAS/
 SCRIPTS/
 VERCEL_SETUP.md
+SUPABASE_SETUP.md
 *.skill
 *.xlsx
 *.pptx
 *.pdf
+
+# Segredos — nunca comitar
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+credentials.json
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

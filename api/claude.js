@@ -187,10 +187,17 @@ Plano Personalizado: se o campo PLANO INDICADO contiver "Personalizado —", usa
 
 Regra de escolha: use o plano que melhor cobre os canais solicitados. Se houver plano informado no formulário, use esse.`;
 
+import { applyCors, requireAuth, rateLimit } from './_lib.js';
+
 export default async function handler(req, res) {
+  if (applyCors(req, res, 'POST,OPTIONS')) return;
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+  if (!requireAuth(req, res)) return;
+
+  const rl = rateLimit(req, 'claude', 30, 60000);
+  if (rl.blocked) { res.setHeader('Retry-After', rl.retryAfter); return res.status(429).json({ error: 'Rate limit' }); }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {

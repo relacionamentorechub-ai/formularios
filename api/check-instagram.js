@@ -1,9 +1,14 @@
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+import { applyCors, requireAuth, rateLimit } from './_lib.js';
 
-  const { username } = req.body;
+export default async function handler(req, res) {
+  if (applyCors(req, res, 'POST,OPTIONS')) return;
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!requireAuth(req, res)) return;
+
+  const rl = rateLimit(req, 'ig', 30, 60000);
+  if (rl.blocked) { res.setHeader('Retry-After', rl.retryAfter); return res.status(429).json({ error: 'Rate limit' }); }
+
+  const { username } = req.body || {};
   if (!username || typeof username !== 'string') {
     return res.status(400).json({ error: 'Username required' });
   }
@@ -26,20 +31,16 @@ export default async function handler(req, res) {
       redirect: 'follow',
     });
 
-    if (response.status === 404) {
-      return res.status(200).json({ exists: false });
-    }
+    if (response.status === 404) return res.status(200).json({ exists: false });
 
     if (response.status === 200) {
       const text = await response.text();
-      // Instagram returns 200 with "Sorry, this page isn't available" for non-existent profiles
       const notFound = text.includes("Sorry, this page isn\\'t available") ||
                        text.includes('Page Not Found') ||
                        text.includes('"error_title"');
       return res.status(200).json({ exists: !notFound });
     }
 
-    // Rate limited or login wall — can't determine
     return res.status(200).json({ exists: null });
   } catch (e) {
     return res.status(200).json({ exists: null });

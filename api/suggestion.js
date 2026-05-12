@@ -1,9 +1,9 @@
+import { applyCors, requireAuth, readBody, rateLimit, SUPABASE_URL, SUPABASE_KEY, sbHeaders } from './_lib.js';
+
 export const config = { maxDuration: 10 };
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ooufmzqdiehrxnqoqvsi.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const DESTINO = 'henrique.callefi@gmail.com';
+const DESTINO = process.env.SUGGESTION_TO || 'henrique.callefi@gmail.com';
 const FROM = process.env.RESEND_FROM || 'REC HUB <onboarding@resend.dev>';
 
 function escapeHtml(s = '') {
@@ -11,15 +11,14 @@ function escapeHtml(s = '') {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (applyCors(req, res, 'POST,OPTIONS')) return;
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Método não permitido' });
+  if (!requireAuth(req, res)) return;
 
-  let body = req.body;
-  if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
-  body = body || {};
+  const rl = rateLimit(req, 'suggestion', 10, 60000);
+  if (rl.blocked) { res.setHeader('Retry-After', rl.retryAfter); return res.status(429).json({ ok: false, error: 'Rate limit' }); }
+
+  const body = readBody(req);
 
   const username = (body.username || 'anônimo').toString().slice(0, 60);
   const pagina = (body.pagina || '—').toString().slice(0, 80);
@@ -34,12 +33,7 @@ export default async function handler(req, res) {
     try {
       const r = await fetch(`${SUPABASE_URL}/rest/v1/hub_suggestions`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-          Prefer: 'return=minimal'
-        },
+        headers: sbHeaders({ Prefer: 'return=minimal' }),
         body: JSON.stringify({ username, pagina, mensagem })
       });
       saved = r.ok;

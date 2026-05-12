@@ -905,7 +905,7 @@ atualizarStatusApi();
 ═══════════════════════════════════════════ */
 async function carregarCreditos() {
   try {
-    var resp = await fetch('/api/usage', {
+    var resp = await apiFetch('/api/usage', {
       method: 'GET'
     });
     if (!resp.ok) throw new Error('Erro ao buscar créditos');
@@ -1069,7 +1069,7 @@ function buildPrompt(d) {
    CLAUDE API CALL
 ═══════════════════════════════════════════ */
 async function chamarClaude(dados) {
-  var resp = await fetch('/api/claude', {
+  var resp = await apiFetch('/api/claude', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -1150,7 +1150,7 @@ async function abrirDiagnostico(htmlRaw, instagram) {
   var handle = (instagram || 'rec').replace('@','').replace(/[^a-zA-Z0-9_-]/g,'');
   var nomeArquivo = 'Analise-' + handle + '.pdf';
 
-  var resp = await fetch('/api/generate-pdf', {
+  var resp = await apiFetch('/api/generate-pdf', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ html: html, filename: nomeArquivo })
@@ -1195,7 +1195,7 @@ async function verificarInstagram(val, statusId) {
   lastIgCheck = null;
 
   try {
-    var res = await fetch('/api/check-instagram', {
+    var res = await apiFetch('/api/check-instagram', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: handle })

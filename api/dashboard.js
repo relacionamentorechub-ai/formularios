@@ -1,25 +1,21 @@
+import { applyCors, requireAuth, rateLimit, SUPABASE_URL, SUPABASE_KEY, sbHeaders } from './_lib.js';
+
 export const config = { maxDuration: 10 };
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ooufmzqdiehrxnqoqvsi.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
-
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (applyCors(req, res, 'GET,OPTIONS')) return;
   if (req.method !== 'GET') return res.status(405).end();
+
+  if (!requireAuth(req, res)) return;
+
+  const rl = rateLimit(req, 'dashboard', 60, 60000);
+  if (rl.blocked) { res.setHeader('Retry-After', rl.retryAfter); return res.status(429).json({ ok: false, error: 'Rate limit' }); }
 
   const empty = { ok: true, leads: [], pdfs: [], reunioes: [] };
   if (!SUPABASE_KEY) return res.status(200).json(empty);
 
-  const h = {
-    'Content-Type': 'application/json',
-    apikey: SUPABASE_KEY,
-    Authorization: `Bearer ${SUPABASE_KEY}`
-  };
-
   try {
+    const h = sbHeaders();
     const [leadsRes, pdfsRes, reunioesRes] = await Promise.all([
       fetch(`${SUPABASE_URL}/rest/v1/hub_leads?select=id,responsavel,status,valor_proposta,created_at`, { headers: h }),
       fetch(`${SUPABASE_URL}/rest/v1/hub_pdfs_gerados?select=id,tipo,responsavel,created_at`, { headers: h }),
@@ -27,9 +23,7 @@ export default async function handler(req, res) {
     ]);
 
     const [leads, pdfs, reunioes] = await Promise.all([
-      leadsRes.json(),
-      pdfsRes.json(),
-      reunioesRes.json()
+      leadsRes.json(), pdfsRes.json(), reunioesRes.json()
     ]);
 
     return res.status(200).json({

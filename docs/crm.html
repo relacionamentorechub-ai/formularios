@@ -361,7 +361,7 @@ async function loadLeads() {
   document.getElementById('crm_loading').style.display = 'flex';
   document.getElementById('pipeline').style.display = 'none';
   try {
-    var r = await fetch('/api/leads');
+    var r = await apiFetch('/api/leads');
     var data = await r.json();
     allLeads = (data.data || []);
     renderPipeline();
@@ -488,7 +488,7 @@ async function saveLead() {
   };
 
   try {
-    var r = await fetch('/api/leads', {
+    var r = await apiFetch('/api/leads', {
       method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
     });
     var data = await r.json();
@@ -559,7 +559,7 @@ async function updateLead() {
     observacoes: document.getElementById('det_obs').value
   };
   try {
-    var r = await fetch('/api/leads', {
+    var r = await apiFetch('/api/leads', {
       method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
     });
     var data = await r.json();
@@ -586,7 +586,7 @@ async function deleteLead() {
   if (!detailLeadId) return;
   if (!confirm('Remover este lead do pipeline?')) return;
   try {
-    var r = await fetch('/api/leads', {
+    var r = await apiFetch('/api/leads', {
       method: 'DELETE', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ id: detailLeadId })
     });
     var data = await r.json();

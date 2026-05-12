@@ -21,6 +21,24 @@
     window.location.href = LOGIN_URL;
   }
 
+  // Wrapper de fetch que injeta o token em todas as chamadas /api/*.
+  // Faz logout automático se o backend retornar 401.
+  window.apiFetch = async function(url, opts) {
+    opts = opts || {};
+    var token = getToken();
+    var headers = Object.assign({}, opts.headers || {});
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    if (!headers['Content-Type'] && opts.body && typeof opts.body === 'string') {
+      headers['Content-Type'] = 'application/json';
+    }
+    var r = await fetch(url, Object.assign({}, opts, { headers: headers }));
+    if (r.status === 401) {
+      logout();
+      throw new Error('Sessão expirada');
+    }
+    return r;
+  };
+
   async function verifyAndInit(paginaAtual) {
     var token = getToken();
     if (!token) { window.location.href = LOGIN_URL; return; }
@@ -33,14 +51,12 @@
       });
       var data = await r.json();
       if (!r.ok || !data.ok) { logout(); return; }
-      // Token válido — atualiza username se vier no response
       if (data.username) localStorage.setItem(USER_KEY, data.username);
       injectHubUI(paginaAtual);
     } catch (e) {
-      // Falha de rede: permite acesso offline (serverless pode estar cold)
-      console.warn('[hub] auth verify falhou (rede?):', e.message);
-      if (!token) { window.location.href = LOGIN_URL; return; }
-      injectHubUI(paginaAtual);
+      // Falha de rede genuína (offline). Não libera o app — manda pro login.
+      console.warn('[hub] auth verify falhou:', e.message);
+      logout();
     }
   }
 

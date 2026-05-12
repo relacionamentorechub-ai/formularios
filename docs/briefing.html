@@ -387,7 +387,7 @@ async function gerarBriefing(){
   setStatus('🤖 Gerando briefing com IA…','info');
 
   try{
-    var r=await fetch('/api/claude',{
+    var r=await apiFetch('/api/claude',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({

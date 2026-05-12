@@ -1,12 +1,12 @@
 import crypto from 'node:crypto';
+import { applyCors, readBody, rateLimit, SUPABASE_URL, SUPABASE_KEY, sbHeaders } from './_lib.js';
 
 export const config = { maxDuration: 10 };
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ooufmzqdiehrxnqoqvsi.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
-const MASTER_PASSWORD = process.env.MASTER_PASSWORD || 'prosperidade@';
-const AUTH_SECRET = process.env.AUTH_SECRET || 'rec-hub-dev-secret-change-me';
+const MASTER_PASSWORD = process.env.MASTER_PASSWORD;
+const AUTH_SECRET = process.env.AUTH_SECRET;
 const TOKEN_TTL_DAYS = 30;
+const PASSWORD_MIN = 8;
 
 function hashPassword(plain, salt) {
   const useSalt = salt || crypto.randomBytes(16).toString('hex');
@@ -18,7 +18,9 @@ function verifyPassword(plain, stored) {
   if (!stored || !stored.includes(':')) return false;
   const [salt, hash] = stored.split(':');
   const test = crypto.scryptSync(plain, salt, 64).toString('hex');
-  return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(test, 'hex'));
+  try {
+    return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(test, 'hex'));
+  } catch { return false; }
 }
 
 function b64url(buf) {
@@ -40,7 +42,9 @@ function verifyToken(token) {
   if (!token || !token.includes('.')) return null;
   const [body, sig] = token.split('.');
   const expectedSig = b64url(crypto.createHmac('sha256', AUTH_SECRET).update(body).digest());
-  if (sig !== expectedSig) return null;
+  const a = Buffer.from(sig);
+  const b = Buffer.from(expectedSig);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
   try {
     const payload = JSON.parse(b64urlDecode(body));
     if (payload.exp && Date.now() > payload.exp) return null;
@@ -49,9 +53,7 @@ function verifyToken(token) {
 }
 
 async function sbGet(table, query) {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
-    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
-  });
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, { headers: sbHeaders() });
   if (!r.ok) throw new Error(`Supabase GET ${table}: ${r.status}`);
   return r.json();
 }
@@ -59,12 +61,7 @@ async function sbGet(table, query) {
 async function sbInsert(table, body) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
-      Prefer: 'return=representation'
-    },
+    headers: sbHeaders({ Prefer: 'return=representation' }),
     body: JSON.stringify(body)
   });
   if (!r.ok) {
@@ -77,12 +74,7 @@ async function sbInsert(table, body) {
 async function sbPatch(table, query, body) {
   await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
-      Prefer: 'return=minimal'
-    },
+    headers: sbHeaders({ Prefer: 'return=minimal' }),
     body: JSON.stringify(body)
   });
 }
@@ -91,31 +83,45 @@ function ok(res, data) { res.status(200).json({ ok: true, ...data }); }
 function fail(res, status, msg) { res.status(status).json({ ok: false, error: msg }); }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (applyCors(req, res, 'POST,OPTIONS')) return;
   if (req.method !== 'POST') return fail(res, 405, 'Método não permitido');
 
-  if (!SUPABASE_KEY) return fail(res, 500, 'SUPABASE_KEY não configurada na Vercel');
+  if (!MASTER_PASSWORD) return fail(res, 500, 'MASTER_PASSWORD não configurada');
+  if (!AUTH_SECRET) return fail(res, 500, 'AUTH_SECRET não configurada');
+  if (!SUPABASE_KEY) return fail(res, 500, 'SUPABASE_KEY não configurada');
 
-  let body = req.body;
-  if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
-  body = body || {};
+  const body = readBody(req);
   const action = body.action;
+
+  // Rate limit por ação sensível: 10 tentativas por minuto por IP
+  if (action === 'login' || action === 'verify_master' || action === 'signup') {
+    const rl = rateLimit(req, 'auth:' + action, 10, 60000);
+    if (rl.blocked) {
+      res.setHeader('Retry-After', rl.retryAfter);
+      return fail(res, 429, `Muitas tentativas. Tente em ${rl.retryAfter}s.`);
+    }
+  }
 
   try {
     if (action === 'verify_master') {
       const { masterPassword } = body;
-      if (masterPassword !== MASTER_PASSWORD) return fail(res, 401, 'Senha da empresa incorreta');
+      if (typeof masterPassword !== 'string') return fail(res, 400, 'Senha obrigatória');
+      const a = Buffer.from(masterPassword);
+      const b = Buffer.from(MASTER_PASSWORD);
+      const matchLen = a.length === b.length && crypto.timingSafeEqual(a, b);
+      if (!matchLen) return fail(res, 401, 'Senha da empresa incorreta');
       return ok(res, { verified: true });
     }
 
     if (action === 'signup') {
       const { masterPassword, username, password } = body;
-      if (masterPassword !== MASTER_PASSWORD) return fail(res, 401, 'Senha-mestra incorreta');
-      if (!username || username.trim().length < 3) return fail(res, 400, 'Nome de usuário muito curto');
-      if (!password || password.length < 4) return fail(res, 400, 'Senha muito curta (mín. 4 caracteres)');
+      if (typeof masterPassword !== 'string') return fail(res, 400, 'Senha-mestra obrigatória');
+      const a = Buffer.from(masterPassword);
+      const b = Buffer.from(MASTER_PASSWORD);
+      if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return fail(res, 401, 'Senha-mestra incorreta');
+      if (!username || typeof username !== 'string' || username.trim().length < 3) return fail(res, 400, 'Nome de usuário muito curto');
+      if (!/^[a-zA-Z0-9._-]{3,40}$/.test(username.trim())) return fail(res, 400, 'Nome de usuário inválido (use letras, números, . _ -)');
+      if (!password || typeof password !== 'string' || password.length < PASSWORD_MIN) return fail(res, 400, `Senha muito curta (mín. ${PASSWORD_MIN} caracteres)`);
 
       const u = username.trim();
       const exists = await sbGet('hub_users', `username=eq.${encodeURIComponent(u)}&select=id`);
@@ -124,20 +130,22 @@ export default async function handler(req, res) {
       const password_hash = hashPassword(password);
       await sbInsert('hub_users', { username: u, password_hash });
 
-      const token = signToken({ u, exp: Date.now() + TOKEN_TTL_DAYS * 86400000 });
+      const token = signToken({ u, iat: Date.now(), exp: Date.now() + TOKEN_TTL_DAYS * 86400000 });
       return ok(res, { token, username: u });
     }
 
     if (action === 'login') {
       const { username, password } = body;
       if (!username || !password) return fail(res, 400, 'Usuário e senha obrigatórios');
-      const u = username.trim();
+      const u = String(username).trim();
+      if (!/^[a-zA-Z0-9._-]{3,40}$/.test(u)) return fail(res, 401, 'Usuário ou senha inválidos');
+
       const rows = await sbGet('hub_users', `username=eq.${encodeURIComponent(u)}&select=id,password_hash`);
       if (!rows.length) return fail(res, 401, 'Usuário ou senha inválidos');
-      if (!verifyPassword(password, rows[0].password_hash)) return fail(res, 401, 'Usuário ou senha inválidos');
+      if (!verifyPassword(String(password), rows[0].password_hash)) return fail(res, 401, 'Usuário ou senha inválidos');
 
       await sbPatch('hub_users', `id=eq.${rows[0].id}`, { last_login: new Date().toISOString() });
-      const token = signToken({ u, exp: Date.now() + TOKEN_TTL_DAYS * 86400000 });
+      const token = signToken({ u, iat: Date.now(), exp: Date.now() + TOKEN_TTL_DAYS * 86400000 });
       return ok(res, { token, username: u });
     }
 
@@ -151,6 +159,6 @@ export default async function handler(req, res) {
     return fail(res, 400, 'Ação inválida');
   } catch (e) {
     console.error('auth error', e);
-    return fail(res, 500, e.message || 'Erro interno');
+    return fail(res, 500, 'Erro interno');
   }
 }

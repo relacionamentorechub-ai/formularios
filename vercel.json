@@ -9,17 +9,29 @@
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "X-XSS-Protection", "value": "1; mode=block" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
-        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" }
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=()" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self'; frame-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, max-age=0" },
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
       ]
     }
   ],
   "functions": {
-    "api/claude.js": { "maxDuration": 60 },
-    "api/generate-pdf.js": { "maxDuration": 30 },
-    "api/auth.js": { "maxDuration": 10 },
-    "api/suggestion.js": { "maxDuration": 10 },
-    "api/leads.js": { "maxDuration": 10 },
-    "api/dashboard.js": { "maxDuration": 10 }
+    "api/claude.js":          { "maxDuration": 60 },
+    "api/generate-pdf.js":    { "maxDuration": 30 },
+    "api/auth.js":            { "maxDuration": 10 },
+    "api/suggestion.js":      { "maxDuration": 10 },
+    "api/leads.js":           { "maxDuration": 10 },
+    "api/dashboard.js":       { "maxDuration": 10 },
+    "api/check-instagram.js": { "maxDuration": 10 },
+    "api/usage.js":           { "maxDuration": 10 }
   }
 }

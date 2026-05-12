@@ -405,7 +405,7 @@ function gerarRelatorio() {
   document.getElementById('pdf_area').scrollIntoView({behavior:'smooth',block:'start'});
 
   // log PDF
-  fetch('/api/leads', {
+  apiFetch('/api/leads', {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ action:'pdf', tipo:'relatorio', responsavel: v('r_resp') || localStorage.getItem('rec_hub_user'), cliente: nome, instagram: v('r_ig') })
   }).catch(function(){});
