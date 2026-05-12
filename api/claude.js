@@ -125,10 +125,12 @@ Página 1: dark — topbar + header + hero com KPIs (3 KPIs baseados nos dados i
 Página 2: white — "Parte 1 · Pontos identificados" + problem cards (grid 2x2)
 Página 3 (se necessário): white — continuação dos pontos com 4 cards
 Página seguinte: gray — "Parte 2 · Análise de mercado" + 4 bench-cards (grid 2x2) + opportunity-strip
-Página seguinte: white — "Parte 3 · O que solucionamos" + del-cards (grid 2x2) [+ plan-box SOMENTE se com_proposta = "Sim"]
+Páginas "Parte 3":
+  - com_proposta="Não" OU 1-2 planos: UMA página white com "Parte 3 · O que solucionamos" + (plan-boxes se houver) + cláusula contratual + del-cards (grid 2x2)
+  - com 3+ planos (inclui personalizado): DUAS páginas white — primeiro a página de Investimento (plan-boxes empilhados + cláusula contratual) e depois a página "O que solucionamos" (apenas del-cards 2x2)
 ÚLTIMA PÁGINA OBRIGATÓRIA: sempre usar class="pdf-page dark" — hub-why + footer
 
-PROIBIDO gerar qualquer página fora deste plano. NUNCA crie páginas de: "Cronograma", "Implementação", "Como Começar", "Próximos Passos", "Investimento" ou qualquer outra seção não listada acima. O plano de páginas é fixo e não pode ser expandido com seções improvisadas.
+PROIBIDO gerar qualquer página fora deste plano. NUNCA crie páginas de: "Cronograma", "Implementação", "Como Começar", "Próximos Passos" ou qualquer outra seção não listada acima. O plano de páginas é fixo e não pode ser expandido com seções improvisadas.
 
 REGRA PARA QUANTIDADE DE PROBLEMAS:
 - Com 1-2 canais: gere EXATAMENTE 6 pontos, todos na página 2 (grid 3x2), SEM página 3 de problemas
@@ -138,7 +140,13 @@ REGRA PARA QUANTIDADE DE PROBLEMAS:
 
 REGRA DE PROPOSTA — CRÍTICA:
 - Se com_proposta = "Não": NÃO gere plan-box, NÃO mencione valores, NÃO crie páginas de plano ou investimento. A página "Parte 3" mostra SOMENTE del-cards (grid 2x2).
-- Se com_proposta = "Sim": inserir plan-box ANTES do deliverable-grid, na mesma página "Parte 3". Usar 1 plan-box (ou 2 lado a lado com display:flex;gap:16px se 2 planos). Os planos chegam separados por " | " no campo PLANO INDICADO.
+- Se com_proposta = "Sim": os planos chegam separados por " | " no campo PLANO INDICADO. CONTE quantos planos foram passados (inclui "Personalizado —" como 1 plano).
+  - Com 1 OU 2 planos: criar UMA página "Parte 3" contendo plan-boxes (1 sozinho OU 2 lado a lado com display:flex;gap:16px) + cláusula contratual + del-cards (grid 2x2) na mesma página.
+  - Com 3 OU MAIS planos (incluindo personalizado): criar DUAS páginas separadas:
+      Página A "Parte 3 · Investimento" (white): apenas o section-header + TODOS os plan-boxes empilhados verticalmente (1 por linha, com margin-bottom:14px) + cláusula contratual. NUNCA omita planos. NUNCA pule o personalizado.
+      Página B "Parte 3 · O que solucionamos" (white): section-header + del-cards (grid 2x2). Nesta página NÃO repita plan-boxes nem cláusula.
+- Plan-box deve ser RENDERIZADO COMPLETO: badge + name + price + lista de itens + nota de mídia (se aplicável). Personalizado usa badge "PERSONALIZADO" e o nome/valor/itens informados no campo PLANO INDICADO.
+- NUNCA descarte um plano por falta de espaço. Se não cabe, pagine.
 
 CANAIS — TAGS HTML para uso na section de channels da página 1:
 - Instagram: <span class="ch-tag ch-instagram">Instagram</span>
@@ -164,10 +172,10 @@ NOTA OBRIGATÓRIA PARA PLANOS COM TRÁFEGO PAGO (Planos 2, 3, 4 e qualquer plano
 Adicionar como último item da lista plan-box-items (span full width):
 <li style="color:#94A3B8;font-size:11px;border-top:1px solid rgba(255,255,255,0.08);margin-top:6px;padding-top:6px;grid-column:1/-1;">* Investimento em m&iacute;dia (verba Meta Ads) n&atilde;o incluso no plano</li>
 
-CLÁUSULA CONTRATUAL (OBRIGATÓRIO em toda análise com plan-box — SEMPRE ao final da página de planos, após todos os plan-boxes, antes do fechamento do div.inner):
-<div style="margin-top:18px;background:rgba(6,15,35,.6);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px 18px;">
+CLÁUSULA CONTRATUAL (OBRIGATÓRIO em toda análise com plan-box — SEMPRE ao final da página de planos, após todos os plan-boxes, antes do fechamento do div.inner). A página é branca, use fundo CLARO para o texto ficar legível:
+<div style="margin-top:18px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px 18px;">
 <div style="font-size:10px;font-weight:700;color:#64748B;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;">&#128203; Condi&ccedil;&otilde;es de contrato</div>
-<div style="font-size:12px;color:#64748B;line-height:1.6;">Fidelidade m&iacute;nima de <strong style="color:#94A3B8;">12 meses</strong>. Contrato de 6 meses dispon&iacute;vel com acr&eacute;scimo de <strong style="color:#F97316;">20%</strong> sobre o valor mensal do plano escolhido.</div>
+<div style="font-size:12px;color:#374151;line-height:1.6;">Fidelidade m&iacute;nima de <strong style="color:#111827;">12 meses</strong>. Contrato de 6 meses dispon&iacute;vel com acr&eacute;scimo de <strong style="color:#D97706;">20%</strong> sobre o valor mensal do plano escolhido.</div>
 </div>
 
 PLANOS (usar apenas se com_proposta = "Sim"):
