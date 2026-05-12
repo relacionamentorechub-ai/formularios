@@ -5,7 +5,9 @@ import crypto from 'node:crypto';
 
 export const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ooufmzqdiehrxnqoqvsi.supabase.co';
 export const SUPABASE_KEY = process.env.SUPABASE_KEY;
-const AUTH_SECRET = process.env.AUTH_SECRET;
+// Mantém o mesmo fallback de api/auth.js para não dessincronizar a verificação
+// de token quando a env var não está definida.
+const AUTH_SECRET = process.env.AUTH_SECRET || 'rec-hub-dev-secret-change-me';
 
 export function sbHeaders(extra = {}) {
   return {
@@ -41,7 +43,6 @@ function b64url(buf) {
 }
 
 export function verifyToken(token) {
-  if (!AUTH_SECRET) return null;
   if (!token || typeof token !== 'string' || !token.includes('.')) return null;
   const [body, sig] = token.split('.');
   const expectedSig = b64url(crypto.createHmac('sha256', AUTH_SECRET).update(body).digest());

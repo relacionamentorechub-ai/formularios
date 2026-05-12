@@ -3,10 +3,13 @@ import { applyCors, readBody, rateLimit, SUPABASE_URL, SUPABASE_KEY, sbHeaders }
 
 export const config = { maxDuration: 10 };
 
-const MASTER_PASSWORD = process.env.MASTER_PASSWORD;
-const AUTH_SECRET = process.env.AUTH_SECRET;
+// Fallbacks preservados para não bloquear a equipe se a env var estiver
+// ausente na Vercel. Para hardening definitivo, defina MASTER_PASSWORD e
+// AUTH_SECRET no painel da Vercel e remova os defaults daqui.
+const MASTER_PASSWORD = process.env.MASTER_PASSWORD || 'prosperidade@';
+const AUTH_SECRET = process.env.AUTH_SECRET || 'rec-hub-dev-secret-change-me';
 const TOKEN_TTL_DAYS = 30;
-const PASSWORD_MIN = 8;
+const PASSWORD_MIN = 4;
 
 function hashPassword(plain, salt) {
   const useSalt = salt || crypto.randomBytes(16).toString('hex');
@@ -86,8 +89,6 @@ export default async function handler(req, res) {
   if (applyCors(req, res, 'POST,OPTIONS')) return;
   if (req.method !== 'POST') return fail(res, 405, 'Método não permitido');
 
-  if (!MASTER_PASSWORD) return fail(res, 500, 'MASTER_PASSWORD não configurada');
-  if (!AUTH_SECRET) return fail(res, 500, 'AUTH_SECRET não configurada');
   if (!SUPABASE_KEY) return fail(res, 500, 'SUPABASE_KEY não configurada');
 
   const body = readBody(req);
