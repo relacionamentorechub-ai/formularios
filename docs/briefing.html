@@ -391,7 +391,7 @@ async function gerarBriefing(){
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        prompt:buildPrompt(),
+        messages:[{role:'user',content:buildPrompt()}],
         system:'Você é consultora estratégica especialista em vendas consultivas para agências de marketing digital no Brasil. Gere briefings objetivos, práticos e que realmente preparam a equipe para fechar negócio.',
         max_tokens:3000
       })
@@ -412,8 +412,13 @@ async function gerarBriefing(){
       for(var line of chunk.split('\n')){
         if(!line.startsWith('data:')) continue;
         var txt=line.slice(5).trim();
-        if(txt==='[DONE]') break;
-        try{var d=JSON.parse(txt);if(d.text){full+=d.text;outEl.textContent=full;}}catch{}
+        if(txt==='[DONE]') continue;
+        try{
+          var ev=JSON.parse(txt);
+          if(ev.type==='content_block_delta'&&ev.delta&&ev.delta.type==='text_delta'){
+            full+=ev.delta.text;outEl.textContent=full;
+          }
+        }catch{}
       }
     }
     setStatus('✓ Briefing gerado! Boa reunião 🚀','ok');
