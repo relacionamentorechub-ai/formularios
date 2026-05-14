@@ -373,8 +373,9 @@ function buildContratoHtml() {
     + '.sign-name{font-size:11.5px;color:#374151;font-weight:700;}'
     + '.sign-sub{font-size:10.5px;color:#6B7280;}'
     + '.footer-doc{margin-top:32px;border-top:1px solid #E5E7EB;padding-top:12px;text-align:center;font-size:10px;color:#9CA3AF;font-family:-apple-system,sans-serif;break-inside:avoid;page-break-inside:avoid;}'
+    + '.clause{break-inside:avoid;page-break-inside:avoid;}'
     + '@page{size:210mm 297mm;margin:0;}'
-    + '@media print{body{background:#fff;}.doc{width:210mm;margin:0;box-shadow:none;}}'
+    + '@media print{body{background:#fff;}.doc{width:210mm;margin:0;box-shadow:none;}.valor-box{overflow:visible;}}'
     + '</style>';
 
   var CONTENT = '<div class="doc">'
@@ -404,10 +405,13 @@ function buildContratoHtml() {
     + (tel ? '<div class="qualif-line">Telefone: <span>' + esc(tel) + '</span></div>' : '')
     + '</div>'
 
+    + '<div class="clause">'
     + '<h2>CL&Aacute;USULA 1&ordf; &ndash; DO OBJETO</h2>'
     + '<p>O presente contrato tem como objeto a presta&ccedil;&atilde;o de capta&ccedil;&atilde;o de conte&uacute;do, gerenciamento de redes sociais e tr&aacute;fego pago, conforme as condi&ccedil;&otilde;es estabelecidas neste instrumento.</p>'
     + (plano ? '<div class="highlight"><strong>Plano contratado: ' + esc(plano) + '</strong>' + (desc ? '<br><span style="font-size:12px;color:#166534;">' + esc(desc) + '</span>' : '') + '</div>' : '')
+    + '</div>'
 
+    + '<div class="clause">'
     + '<h2>CL&Aacute;USULA 2&ordf; &ndash; DOS SERVI&Ccedil;OS CONTRATADOS</h2>'
     + '<p>Os servi&ccedil;os prestados pela CONTRATADA compreender&atilde;o:</p>'
     + '<ol type="a">'
@@ -419,7 +423,9 @@ function buildContratoHtml() {
     + '<li>Planejamento, gest&atilde;o e otimiza&ccedil;&atilde;o de campanhas de tr&aacute;fego pago nas plataformas de an&uacute;ncios, especialmente Meta Ads.</li>'
     + '</ol>'
     + '<div class="parag-unico"><strong>Par&aacute;grafo &uacute;nico:</strong> Servi&ccedil;os extraordin&aacute;rios, capta&ccedil;&atilde;o presencial, produ&ccedil;&atilde;o espec&iacute;fica para eventos ou demandas n&atilde;o previstas neste contrato poder&atilde;o ser cobrados &agrave; parte, mediante pr&eacute;vio alinhamento e aprova&ccedil;&atilde;o da CONTRATANTE.</div>'
+    + '</div>'
 
+    + '<div class="clause">'
     + '<h2>CL&Aacute;USULA 3&ordf; &ndash; DAS OBRIGA&Ccedil;&Otilde;ES DA CONTRATADA</h2>'
     + '<p>Compete &agrave; CONTRATADA:</p>'
     + '<ol type="a">'
@@ -429,7 +435,9 @@ function buildContratoHtml() {
     + '<li>Utilizar estrat&eacute;gias compat&iacute;veis com as boas pr&aacute;ticas de marketing digital;</li>'
     + '<li>Guardar sigilo sobre todas as informa&ccedil;&otilde;es recebidas.</li>'
     + '</ol>'
+    + '</div>'
 
+    + '<div class="clause">'
     + '<h2>CL&Aacute;USULA 4&ordf; &ndash; DAS OBRIGA&Ccedil;&Otilde;ES DA CONTRATANTE</h2>'
     + '<p>Compete &agrave; CONTRATANTE:</p>'
     + '<ol type="a">'
@@ -439,11 +447,15 @@ function buildContratoHtml() {
     + '<li>Realizar os pagamentos nas datas ajustadas.</li>'
     + '</ol>'
     + '<div class="parag-unico">A aus&ecirc;ncia de manifesta&ccedil;&atilde;o dentro do prazo ser&aacute; considerada aprova&ccedil;&atilde;o t&aacute;cita.</div>'
+    + '</div>'
 
+    + '<div class="clause">'
     + '<h2>CL&Aacute;USULA 5&ordf; &ndash; DO PRAZO DE VIG&Ecirc;NCIA</h2>'
     + '<p>O presente contrato ter&aacute; in&iacute;cio em <strong>' + inicioFmt + '</strong>, com vig&ecirc;ncia de <strong>' + mesFidelidade + ' meses</strong>, encerrando-se em <strong>' + fimFmt + '</strong>.</p>'
     + acrescimoNota
+    + '</div>'
 
+    + '<div class="clause">'
     + '<h2>CL&Aacute;USULA 6&ordf; &ndash; DO VALOR E FORMA DE PAGAMENTO</h2>'
     + '<p>Pelos servi&ccedil;os ora contratados, a CONTRATANTE pagar&aacute; &agrave; CONTRATADA o valor mensal de:</p>'
     + '<div class="valor-box">'
@@ -456,13 +468,19 @@ function buildContratoHtml() {
     + '</div>'
     + '<p>O pagamento ser&aacute; realizado por meio de chave PIX <strong>contato.rechub@gmail.com</strong>, com pagamento flex&iacute;vel nos dias <strong>10 e 20</strong> de cada m&ecirc;s.</p>'
     + '<div class="parag-unico"><strong>Par&aacute;grafo &uacute;nico:</strong> O valor contratado refere-se exclusivamente &agrave; presta&ccedil;&atilde;o de servi&ccedil;os. Os investimentos em an&uacute;ncios pagos ser&atilde;o realizados separadamente, diretamente nas plataformas de m&iacute;dia.</div>'
+    + '</div>'
 
+    + '<div class="clause">'
     + '<h2>CL&Aacute;USULA 7&ordf; &ndash; DO HOR&Aacute;RIO DE ATENDIMENTO</h2>'
     + '<p>Os atendimentos ocorrer&atilde;o em dias &uacute;teis, de segunda a sexta-feira, das 08h &agrave;s 18h. Materiais enviados fora desse hor&aacute;rio ser&atilde;o analisados no pr&oacute;ximo expediente &uacute;til.</p>'
+    + '</div>'
 
+    + '<div class="clause">'
     + '<h2>CL&Aacute;USULA 8&ordf; &ndash; DA RESCIS&Atilde;O</h2>'
     + '<p>O contrato poder&aacute; ser rescindido, ap&oacute;s o prazo de vig&ecirc;ncia estipulado, por qualquer das partes mediante aviso pr&eacute;vio m&iacute;nimo de <strong>30 (trinta) dias</strong>, sem preju&iacute;zo do cumprimento das obriga&ccedil;&otilde;es pendentes.</p>'
+    + '</div>'
 
+    + '<div class="clause">'
     + '<h2>CL&Aacute;USULA 9&ordf; &ndash; DA MULTA POR RESCIS&Atilde;O ANTECIPADA</h2>'
     + '<p>Em caso de rescis&atilde;o imotivada antes do t&eacute;rmino do prazo contratual, a parte que der causa dever&aacute; arcar com:</p>'
     + '<ol type="a">'
@@ -470,17 +488,24 @@ function buildContratoHtml() {
     + '<li>O cumprimento do aviso pr&eacute;vio;</li>'
     + '<li>Multa compensat&oacute;ria equivalente a 01 (um) m&ecirc;s do valor da presta&ccedil;&atilde;o de servi&ccedil;os.</li>'
     + '</ol>'
+    + '</div>'
 
+    + '<div class="clause">'
     + '<h2>CL&Aacute;USULA 10&ordf; &ndash; DA INEXIST&Ecirc;NCIA DE V&Iacute;NCULO EMPREGAT&Iacute;CIO</h2>'
     + '<p>O presente contrato n&atilde;o gera qualquer v&iacute;nculo empregat&iacute;cio entre as partes, sendo a rela&ccedil;&atilde;o de natureza exclusivamente civil.</p>'
+    + '</div>'
 
+    + '<div class="clause">'
     + '<h2>CL&Aacute;USULA 11&ordf; &ndash; DO SIGILO E CONFIDENCIALIDADE</h2>'
     + '<p>As partes comprometem-se a manter absoluto sigilo sobre todas as informa&ccedil;&otilde;es, dados e estrat&eacute;gias compartilhadas em raz&atilde;o deste contrato, n&atilde;o podendo divulg&aacute;-las a terceiros sem autoriza&ccedil;&atilde;o expressa.</p>'
+    + '</div>'
 
+    + '<div class="clause">'
     + '<h2>CL&Aacute;USULA 12&ordf; &ndash; DAS DISPOSI&Ccedil;&Otilde;ES FINAIS</h2>'
     + '<p>A CONTRATADA n&atilde;o se responsabiliza por falhas decorrentes de ataques cibern&eacute;ticos, instabilidades das plataformas digitais ou fatos alheios ao seu controle.</p>'
     + '<p>E, por estarem justas e acordadas, firmam o presente instrumento.</p>'
     + '<p><strong>Local e data:</strong> Canoas, ' + now + '</p>'
+    + '</div>'
 
     + '<div class="sign-area">'
     +   '<div class="sign-block">'
