@@ -95,6 +95,17 @@ textarea{resize:vertical;min-height:80px;line-height:1.6;}
 .btn-novo{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:rgba(6,182,212,.08);color:var(--cyan);border:1.5px solid rgba(6,182,212,.25);border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
 .btn-novo:hover{background:rgba(6,182,212,.15);}
 
+/* ASSINATURAS */
+.sig-label{font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+.sig-canvas{width:100%;height:130px;background:#fff;border-radius:8px;cursor:crosshair;touch-action:none;display:block;border:1.5px solid rgba(6,182,212,.2);}
+.sig-canvas:hover{border-color:rgba(6,182,212,.45);}
+.sig-actions{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;}
+.btn-clear-sig{padding:5px 12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);color:#FCA5A5;border-radius:7px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-clear-sig:hover{background:rgba(239,68,68,.2);}
+.sig-hint{font-size:11px;color:var(--text-muted);}
+.sig-status{font-size:11px;font-weight:600;color:#34D399;display:none;}
+.sig-status.show{display:inline;}
+
 @media(max-width:640px){.two-col,.three-col{grid-template-columns:1fr;}.fidelidade-group{flex-direction:column;}}
 </style>
 </head>
@@ -237,6 +248,37 @@ textarea{resize:vertical;min-height:80px;line-height:1.6;}
     </div>
   </div>
 
+  <!-- SEÇÃO 4: ASSINATURAS -->
+  <div class="form-section" id="s4">
+    <div class="section-header">
+      <div class="section-num purple">4</div>
+      <div><div class="section-title">Assinaturas digitais</div><div class="section-desc">Assine antes de gerar — serão incorporadas ao PDF</div></div>
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="sig-label">✍️ Assinatura REC HUB (Contratada)</div>
+        <canvas id="sig_rec" class="sig-canvas"></canvas>
+        <div class="sig-actions">
+          <button class="btn-clear-sig" type="button" onclick="sigRec.clear()">🗑 Limpar</button>
+          <span class="sig-hint">Mouse ou dedo (touch)</span>
+          <span class="sig-status" id="sig_rec_ok">✓ Assinado</span>
+        </div>
+      </div>
+      <div>
+        <div class="sig-label">✍️ Assinatura do Contratante</div>
+        <canvas id="sig_cliente" class="sig-canvas"></canvas>
+        <div class="sig-actions">
+          <button class="btn-clear-sig" type="button" onclick="sigCliente.clear()">🗑 Limpar</button>
+          <span class="sig-hint">Mouse ou dedo (touch)</span>
+          <span class="sig-status" id="sig_cliente_ok">✓ Assinado</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:14px;background:rgba(6,182,212,.05);border:1px solid rgba(6,182,212,.12);border-radius:8px;padding:11px 15px;font-size:12px;color:var(--text-muted);">
+      💡 Se preferir assinar depois no papel, deixe em branco — o espaço de assinatura aparece normalmente no PDF.
+    </div>
+  </div>
+
   <div class="submit-area">
     <button class="btn-generate" onclick="gerarContrato()">📄 Gerar Contrato PDF</button>
     <div class="submit-hint">Clique para montar o contrato — depois imprima ou salve como PDF</div>
@@ -254,6 +296,55 @@ textarea{resize:vertical;min-height:80px;line-height:1.6;}
 
 <script src="_hub.js"></script>
 <script>
+/* ── SIGNATURE PAD ── */
+function SigPad(canvasId, statusId) {
+  var canvas = document.getElementById(canvasId);
+  var ctx = canvas.getContext('2d');
+  var drawing = false, has = false;
+  var statusEl = statusId ? document.getElementById(statusId) : null;
+
+  function setup() {
+    var r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(r.width * dpr);
+    canvas.height = Math.round(r.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.strokeStyle = '#0F172A';
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+  }
+
+  function pt(e) {
+    var r = canvas.getBoundingClientRect();
+    var s = e.touches ? e.touches[0] : e;
+    return { x: s.clientX - r.left, y: s.clientY - r.top };
+  }
+
+  canvas.addEventListener('mousedown', function(e) { drawing = true; var p = pt(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+  canvas.addEventListener('mousemove', function(e) { if (!drawing) return; var p = pt(e); ctx.lineTo(p.x, p.y); ctx.stroke(); has = true; if (statusEl) statusEl.classList.add('show'); });
+  canvas.addEventListener('mouseup', function() { drawing = false; });
+  canvas.addEventListener('mouseleave', function() { drawing = false; });
+  canvas.addEventListener('touchstart', function(e) { e.preventDefault(); drawing = true; var p = pt(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, { passive: false });
+  canvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (!drawing) return; var p = pt(e); ctx.lineTo(p.x, p.y); ctx.stroke(); has = true; if (statusEl) statusEl.classList.add('show'); }, { passive: false });
+  canvas.addEventListener('touchend', function() { drawing = false; });
+
+  setup();
+  window.addEventListener('resize', setup);
+
+  return {
+    clear: function() {
+      var r = canvas.getBoundingClientRect();
+      ctx.clearRect(0, 0, r.width, r.height);
+      has = false;
+      if (statusEl) statusEl.classList.remove('show');
+    },
+    toDataURL: function() { return has ? canvas.toDataURL('image/png') : null; }
+  };
+}
+
+var sigRec = SigPad('sig_rec', 'sig_rec_ok');
+var sigCliente = SigPad('sig_cliente', 'sig_cliente_ok');
+
 hubInit('contrato');
 
 var fidelidadeMeses = 12;
@@ -369,7 +460,8 @@ function buildContratoHtml() {
     + '.valor-row:last-child{border-bottom:none;font-weight:700;font-size:14px;background:#F0FDF4;color:#065F46;}'
     + '.sign-area{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:48px;}'
     + '.sign-block{text-align:center;}'
-    + '.sign-line{border-bottom:1px solid #374151;margin-bottom:7px;height:38px;}'
+    + '.sign-line{border-bottom:1px solid #374151;margin-bottom:7px;height:60px;display:flex;align-items:center;justify-content:center;overflow:hidden;}'
+    + '.sign-line img{max-height:56px;max-width:95%;object-fit:contain;}'
     + '.sign-name{font-size:11.5px;color:#374151;font-weight:700;}'
     + '.sign-sub{font-size:10.5px;color:#6B7280;}'
     + '.footer-doc{margin-top:auto;border-top:1px solid #E5E7EB;padding-top:12px;text-align:center;font-size:10px;color:#9CA3AF;font-family:-apple-system,sans-serif;}'
@@ -504,13 +596,13 @@ function buildContratoHtml() {
 
     + '<div class="sign-area">'
     +   '<div class="sign-block">'
-    +     '<div class="sign-line"></div>'
+    +     (sigRec && sigRec.toDataURL() ? '<div class="sign-line"><img src="' + sigRec.toDataURL() + '"></div>' : '<div class="sign-line"></div>')
     +     '<div class="sign-name">CALEFFI TREINAMENTOS E EVENTOS LTDA</div>'
     +     '<div class="sign-sub">CONTRATADA &middot; REC HUB</div>'
     +     '<div class="sign-sub">CNPJ 37.612.639/0001-38</div>'
     +   '</div>'
     +   '<div class="sign-block">'
-    +     '<div class="sign-line"></div>'
+    +     (sigCliente && sigCliente.toDataURL() ? '<div class="sign-line"><img src="' + sigCliente.toDataURL() + '"></div>' : '<div class="sign-line"></div>')
     +     '<div class="sign-name">' + esc(nome) + '</div>'
     +     '<div class="sign-sub">CONTRATANTE' + (resp ? ' &middot; ' + esc(resp) : '') + '</div>'
     +     (doc ? '<div class="sign-sub">CPF/CNPJ: ' + esc(doc) + '</div>' : '')
