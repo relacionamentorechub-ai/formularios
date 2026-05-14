@@ -246,7 +246,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.6;}
 <!-- PDF PREVIEW -->
 <div class="pdf-preview-area" id="pdf_area">
   <div class="pdf-actions">
-    <button class="btn-print" onclick="imprimirContrato()">🖨 Imprimir / Salvar PDF</button>
+    <button class="btn-print" id="btn_print" onclick="imprimirContrato()">⬇ Baixar PDF</button>
     <button class="btn-novo" onclick="novoContrato()">+ Novo Contrato</button>
   </div>
   <iframe id="pdf_frame" style="width:100%;height:1600px;border:none;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.4);margin-top:16px;"></iframe>
@@ -346,8 +346,9 @@ function buildContratoHtml() {
     + '.doc{width:794px;margin:20px auto;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,.18);padding:52px 60px;}'
     + '.topbar{height:4px;background:linear-gradient(90deg,#0E7490,#06B6D4,#67E8F9);margin:-52px -60px 32px;}'
     + '.hdoc{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #111827;padding-bottom:14px;margin-bottom:24px;break-inside:avoid;page-break-inside:avoid;}'
-    + '.hlogo{font-family:-apple-system,sans-serif;font-size:13px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#0E7490;}'
-    + '.htitle{font-size:11px;color:#6B7280;text-align:right;line-height:1.5;}'
+    + '.htitle{font-size:11px;color:#6B7280;line-height:1.6;}'
+    + '.rec-logo-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;}'
+    + '.rec-logo-sub{font-family:-apple-system,sans-serif;font-size:8px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#0E7490;}'
     + 'h1{font-size:17px;font-weight:900;text-align:center;margin-bottom:6px;font-family:-apple-system,sans-serif;letter-spacing:.02em;break-after:avoid;page-break-after:avoid;}'
     + '.sub{font-size:11px;color:#6B7280;text-align:center;margin-bottom:28px;}'
     + '.qualif{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:16px 20px;margin-bottom:20px;break-inside:avoid;page-break-inside:avoid;}'
@@ -372,15 +373,23 @@ function buildContratoHtml() {
     + '.sign-name{font-size:11.5px;color:#374151;font-weight:700;}'
     + '.sign-sub{font-size:10.5px;color:#6B7280;}'
     + '.footer-doc{margin-top:32px;border-top:1px solid #E5E7EB;padding-top:12px;text-align:center;font-size:10px;color:#9CA3AF;font-family:-apple-system,sans-serif;break-inside:avoid;page-break-inside:avoid;}'
-    + '@page{size:210mm 297mm;margin:18mm 20mm;}'
-    + '@media print{body{background:#fff;}.doc{width:auto;margin:0;box-shadow:none;padding:0;}}'
+    + '@page{size:210mm 297mm;margin:0;}'
+    + '@media print{body{background:#fff;}.doc{width:210mm;margin:0;box-shadow:none;}}'
     + '</style>';
 
   var CONTENT = '<div class="doc">'
     + '<div class="topbar"></div>'
     + '<div class="hdoc">'
-    +   '<div class="hlogo">R.E.C. &middot; HUB de Neg&oacute;cios</div>'
     +   '<div class="htitle">Contrato de Presta&ccedil;&atilde;o de Servi&ccedil;os<br>Emitido em: ' + now + '</div>'
+    +   '<div class="rec-logo-wrap">'
+    +     '<svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">'
+    +       '<rect width="56" height="56" rx="12" fill="#0E7490"/>'
+    +       '<text x="28" y="22" font-family="-apple-system,Arial,sans-serif" font-size="13" font-weight="900" fill="white" text-anchor="middle" letter-spacing="2">R.E.C.</text>'
+    +       '<rect x="10" y="27" width="36" height="1" fill="rgba(255,255,255,0.3)"/>'
+    +       '<text x="28" y="40" font-family="-apple-system,Arial,sans-serif" font-size="8" font-weight="700" fill="rgba(255,255,255,0.85)" text-anchor="middle" letter-spacing="2">HUB</text>'
+    +       '<text x="28" y="50" font-family="-apple-system,Arial,sans-serif" font-size="5.5" font-weight="600" fill="rgba(255,255,255,0.6)" text-anchor="middle" letter-spacing="1.5">DE NEG&#211;CIOS</text>'
+    +     '</svg>'
+    +   '</div>'
     + '</div>'
     + '<h1>CONTRATO DE PRESTA&Ccedil;&Atilde;O DE SERVI&Ccedil;OS REC HUB</h1>'
     + '<p class="sub">Pelo presente instrumento particular, na melhor forma de direito, as partes abaixo qualificadas:</p>'
@@ -519,10 +528,31 @@ function gerarContrato() {
   document.getElementById('pdf_area').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-function imprimirContrato() {
-  var frame = document.getElementById('pdf_frame');
-  if (frame.contentWindow) { frame.contentWindow.print(); }
-  else { window.open(frame.src, '_blank'); }
+async function imprimirContrato() {
+  var btn = document.getElementById('btn_print');
+  btn.disabled = true;
+  btn.textContent = '⏳ Gerando PDF...';
+  try {
+    var nome = v('c_nome') || 'contrato';
+    var filename = 'Contrato-REC-HUB-' + nome.trim().replace(/[^a-zA-Z0-9À-ɏ\s]/g, '').replace(/\s+/g, '-') + '.pdf';
+    var r = await apiFetch('/api/generate-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ html: buildContratoHtml(), filename: filename })
+    });
+    if (!r.ok) { var e = await r.json(); throw new Error(e.error || 'Erro ' + r.status); }
+    var blob = await r.blob();
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
+    btn.textContent = '✅ PDF baixado!';
+    setTimeout(function(){ btn.textContent = '⬇ Baixar PDF'; btn.disabled = false; }, 3000);
+  } catch(err) {
+    alert('Erro ao gerar PDF: ' + err.message);
+    btn.textContent = '⬇ Baixar PDF';
+    btn.disabled = false;
+  }
 }
 
 function novoContrato() {
