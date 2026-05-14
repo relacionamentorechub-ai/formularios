@@ -94,6 +94,16 @@ textarea{resize:vertical;min-height:80px;line-height:1.6;}
 .btn-print:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.35);}
 .btn-novo{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:rgba(6,182,212,.08);color:var(--cyan);border:1.5px solid rgba(6,182,212,.25);border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
 .btn-novo:hover{background:rgba(6,182,212,.15);}
+.btn-autentique{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:linear-gradient(135deg,#065F46,#10B981);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(16,185,129,.25);}
+.btn-autentique:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(16,185,129,.4);}
+.btn-autentique:disabled{opacity:.6;cursor:wait;transform:none;}
+.aut-result{margin:12px 20px 0;padding:16px 20px;border-radius:10px;font-size:13px;display:none;}
+.aut-result.show{display:block;}
+.aut-result.success{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.22);color:#34D399;}
+.aut-result.error{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);color:#FCA5A5;}
+.aut-link{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.2);border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;color:#34D399;text-decoration:none;}
+.aut-link:hover{background:rgba(16,185,129,.22);}
+.aut-link+.aut-link{margin-left:8px;}
 
 /* ASSINATURAS */
 .sig-label{font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
@@ -288,9 +298,11 @@ textarea{resize:vertical;min-height:80px;line-height:1.6;}
 <div class="pdf-preview-area" id="pdf_area">
   <div class="pdf-actions">
     <button class="btn-print" onclick="imprimirContrato()">🖨 Imprimir / Salvar PDF</button>
+    <button class="btn-autentique" id="btn_aut" onclick="enviarAutentique()">📩 Enviar para assinar (Autentique)</button>
     <button class="btn-novo" onclick="novoContrato()">+ Novo Contrato</button>
   </div>
-  <iframe id="pdf_frame" style="width:100%;height:1600px;border:none;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.4);"></iframe>
+  <div class="aut-result" id="aut_result"></div>
+  <iframe id="pdf_frame" style="width:100%;height:1600px;border:none;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.4);margin-top:16px;"></iframe>
 </div>
 
 <script src="_hub.js"></script>
@@ -673,7 +685,58 @@ function imprimirContrato() {
 
 function novoContrato() {
   document.getElementById('pdf_area').classList.remove('visible');
+  var btn = document.getElementById('btn_aut');
+  btn.disabled = false;
+  btn.textContent = '📩 Enviar para assinar (Autentique)';
+  var res = document.getElementById('aut_result');
+  res.className = 'aut-result';
+  res.innerHTML = '';
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function enviarAutentique() {
+  var email = v('c_email');
+  if (!email || !email.includes('@')) {
+    alert('Preencha o e-mail do contratante (Seção 1) para enviar para assinar.');
+    return;
+  }
+  var nome = v('c_nome') || 'Contratante';
+  var plano = v('s_plano') || '';
+  var btn = document.getElementById('btn_aut');
+  var resEl = document.getElementById('aut_result');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Gerando PDF e enviando...';
+  resEl.className = 'aut-result';
+  resEl.innerHTML = '';
+
+  try {
+    var html = buildContratoHtml();
+    var contractName = 'Contrato REC HUB — ' + nome + (plano ? ' (' + plano + ')' : '');
+    var tok = localStorage.getItem('hub_token') || '';
+    var r = await fetch('/api/autentique', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+      body: JSON.stringify({ html: html, contractName: contractName, clientName: nome, clientEmail: email })
+    });
+    var data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Erro ' + r.status);
+
+    var linksHtml = '';
+    if (data.clientLink) linksHtml += '<a class="aut-link" href="' + data.clientLink + '" target="_blank" rel="noopener">🔗 Link assinatura do cliente</a>';
+    if (data.recLink)    linksHtml += '<a class="aut-link" href="' + data.recLink    + '" target="_blank" rel="noopener">🔗 Link assinatura REC HUB</a>';
+
+    resEl.innerHTML = '<strong>✅ Contrato enviado com sucesso!</strong>'
+      + '<br><span style="color:var(--text-secondary);font-size:12px;">Um e-mail foi enviado para <strong>' + email + '</strong> para assinar digitalmente com validade jurídica.</span>'
+      + (linksHtml ? '<br><div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;">' + linksHtml + '</div>' : '');
+    resEl.className = 'aut-result success show';
+    btn.textContent = '✅ Enviado!';
+  } catch (err) {
+    resEl.innerHTML = '❌ ' + (err.message || 'Erro ao enviar para o Autentique');
+    resEl.className = 'aut-result error show';
+    btn.disabled = false;
+    btn.textContent = '📩 Tentar novamente';
+  }
 }
 </script>
 </body>
