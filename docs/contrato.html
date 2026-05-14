@@ -249,7 +249,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.6;}
     <button class="btn-print" id="btn_print" onclick="imprimirContrato()">⬇ Baixar PDF</button>
     <button class="btn-novo" onclick="novoContrato()">+ Novo Contrato</button>
   </div>
-  <iframe id="pdf_frame" style="width:100%;height:1600px;border:none;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.4);margin-top:16px;"></iframe>
+  <iframe id="pdf_frame" style="width:100%;height:2800px;border:none;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.4);margin-top:16px;"></iframe>
 </div>
 
 <script src="_hub.js"></script>
@@ -375,8 +375,7 @@ function buildContratoHtml() {
     + '.footer-doc{margin-top:32px;border-top:1px solid #E5E7EB;padding-top:12px;text-align:center;font-size:10px;color:#9CA3AF;font-family:-apple-system,sans-serif;break-inside:avoid;page-break-inside:avoid;}'
     + '.clause{break-inside:avoid;page-break-inside:avoid;}'
     + '@page{size:210mm 297mm;margin:0;}'
-    + '@media screen{.doc{background-color:#fff;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(297mm - 3px),rgba(99,102,241,.35) calc(297mm - 3px),rgba(99,102,241,.35) 297mm);}}'
-    + '@media print{body{background:#fff;}.doc{width:210mm;margin:0;box-shadow:none;background-image:none;}.valor-box{overflow:visible;}}'
+    + '@media print{body{background:#fff;}.doc{width:210mm;margin:0;box-shadow:none;}.valor-box{overflow:visible;}}'
     + '</style>';
 
   var CONTENT = '<div class="doc">'
@@ -533,53 +532,59 @@ function buildContratoHtml() {
   return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">' + CSS + '</head><body>' + CONTENT + '</body></html>';
 }
 
-function gerarContrato() {
+var _pdfBlob = null;
+
+async function gerarContrato() {
   var nome = v('c_nome'), plano = v('s_plano'), valor = v('s_valor'), inicio = v('v_inicio');
   if (!nome.trim()) { alert('Preencha o nome do contratante.'); return; }
   if (!plano) { alert('Selecione o plano.'); return; }
   if (!valor) { alert('Preencha o valor mensal.'); return; }
   if (!inicio) { alert('Informe a data de início.'); return; }
 
-  var html = buildContratoHtml();
-  var blob = new Blob([html], {type:'text/html'});
-  var url = URL.createObjectURL(blob);
-  var iframe = document.getElementById('pdf_frame');
-  iframe.onload = function() {
-    try { iframe.style.height = (iframe.contentDocument.documentElement.scrollHeight + 40) + 'px'; } catch(e) {}
-  };
-  iframe.src = url;
-  document.getElementById('pdf_area').classList.add('visible');
-  document.getElementById('pdf_area').scrollIntoView({behavior:'smooth',block:'start'});
-}
-
-async function imprimirContrato() {
-  var btn = document.getElementById('btn_print');
+  var btn = document.querySelector('.btn-generate');
   btn.disabled = true;
-  btn.textContent = '⏳ Gerando PDF...';
+  btn.innerHTML = '⏳ Gerando PDF...';
+
   try {
-    var nome = v('c_nome') || 'contrato';
-    var filename = 'Contrato-REC-HUB-' + nome.trim().replace(/[^a-zA-Z0-9À-ɏ\s]/g, '').replace(/\s+/g, '-') + '.pdf';
     var r = await apiFetch('/api/generate-pdf', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ html: buildContratoHtml(), filename: filename })
+      body: JSON.stringify({ html: buildContratoHtml() })
     });
     if (!r.ok) { var e = await r.json(); throw new Error(e.error || 'Erro ' + r.status); }
-    var blob = await r.blob();
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = filename; a.click();
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
-    btn.textContent = '✅ PDF baixado!';
-    setTimeout(function(){ btn.textContent = '⬇ Baixar PDF'; btn.disabled = false; }, 3000);
+    _pdfBlob = await r.blob();
+    var url = URL.createObjectURL(_pdfBlob);
+    var iframe = document.getElementById('pdf_frame');
+    iframe.onload = null;
+    iframe.style.height = '2800px';
+    iframe.src = url;
+    document.getElementById('pdf_area').classList.add('visible');
+    document.getElementById('pdf_area').scrollIntoView({behavior:'smooth',block:'start'});
   } catch(err) {
-    alert('Erro ao gerar PDF: ' + err.message);
-    btn.textContent = '⬇ Baixar PDF';
-    btn.disabled = false;
+    alert('Erro ao gerar contrato: ' + err.message);
   }
+
+  btn.innerHTML = '📄 Gerar Contrato PDF';
+  btn.disabled = false;
+}
+
+async function imprimirContrato() {
+  if (!_pdfBlob) { alert('Gere o contrato primeiro.'); return; }
+  var btn = document.getElementById('btn_print');
+  btn.disabled = true;
+  btn.textContent = '⏳ Preparando...';
+  var nome = v('c_nome') || 'contrato';
+  var filename = 'Contrato-REC-HUB-' + nome.trim().replace(/[^a-zA-Z0-9À-ɏ\s]/g, '').replace(/\s+/g, '-') + '.pdf';
+  var url = URL.createObjectURL(_pdfBlob);
+  var a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
+  btn.textContent = '✅ PDF baixado!';
+  setTimeout(function(){ btn.textContent = '⬇ Baixar PDF'; btn.disabled = false; }, 3000);
 }
 
 function novoContrato() {
+  _pdfBlob = null;
   document.getElementById('pdf_area').classList.remove('visible');
   window.scrollTo({top:0,behavior:'smooth'});
 }
