@@ -713,10 +713,9 @@ async function enviarAutentique() {
   try {
     var html = buildContratoHtml();
     var contractName = 'Contrato REC HUB — ' + nome + (plano ? ' (' + plano + ')' : '');
-    var tok = localStorage.getItem('hub_token') || '';
-    var r = await fetch('/api/autentique', {
+    var r = await apiFetch('/api/autentique', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ html: html, contractName: contractName, clientName: nome, clientEmail: email })
     });
     var data = await r.json();
