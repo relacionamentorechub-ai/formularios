@@ -4,6 +4,18 @@ const AUTENTIQUE_URL = 'https://api.autentique.com.br/v2/graphql';
 const REC_EMAIL = 'relacionamento.rechub@gmail.com';
 const REC_NAME = 'Francielle Caleffi — REC HUB';
 
+// GraphQL multipart upload spec: https://github.com/jaydenseric/graphql-multipart-request-spec
+function buildMultipartRequest(query, variables, fileBuffer, fileFieldPath) {
+  const operations = JSON.stringify({ query, variables });
+  const map = JSON.stringify({ '0': [fileFieldPath] });
+
+  const form = new FormData();
+  form.append('operations', operations);
+  form.append('map', map);
+  form.append('0', new Blob([fileBuffer], { type: 'application/pdf' }), 'contrato.pdf');
+  return form;
+}
+
 export default async function handler(req, res) {
   if (applyCors(req, res, 'POST,OPTIONS')) return;
   if (req.method !== 'POST') return res.status(405).end();
@@ -36,8 +48,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Erro ao gerar PDF' });
   }
 
-  const pdfBase64 = Buffer.from(await pdfRes.arrayBuffer()).toString('base64');
-
+  const pdfBuffer = Buffer.from(await pdfRes.arrayBuffer());
   const name = String(contractName || `Contrato REC HUB — ${clientName || clientEmail}`).slice(0, 255);
 
   const mutation = `
@@ -59,7 +70,7 @@ export default async function handler(req, res) {
   const variables = {
     document: {
       name,
-      content: pdfBase64,
+      content: null,
       refusable: false,
       sortable: false,
     },
@@ -69,18 +80,22 @@ export default async function handler(req, res) {
     ],
   };
 
+  const form = buildMultipartRequest(mutation, variables, pdfBuffer, 'variables.document.content');
+
   const autRes = await fetch(AUTENTIQUE_URL, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${autKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query: mutation, variables }),
+    headers: { 'Authorization': `Bearer ${autKey}` },
+    body: form,
   });
 
-  const autJson = await autRes.json();
-  console.log('autentique response status:', autRes.status);
-  console.log('autentique response body:', JSON.stringify(autJson).slice(0, 2000));
+  const autText = await autRes.text();
+  console.log('autentique status:', autRes.status);
+  console.log('autentique body:', autText.slice(0, 2000));
+
+  let autJson;
+  try { autJson = JSON.parse(autText); } catch {
+    return res.status(500).json({ error: 'Autentique retornou resposta inválida: ' + autText.slice(0, 200) });
+  }
 
   if (autJson.errors?.length) {
     const msg = autJson.errors[0]?.message || 'Erro desconhecido';
@@ -90,8 +105,8 @@ export default async function handler(req, res) {
 
   const doc = autJson.data?.createDocument;
   if (!doc) {
-    console.error('autentique: createDocument null, full response:', JSON.stringify(autJson));
-    return res.status(500).json({ error: 'Documento não criado pelo Autentique' });
+    console.error('autentique: createDocument null:', autText.slice(0, 500));
+    return res.status(500).json({ error: 'Documento não criado — resposta: ' + autText.slice(0, 300) });
   }
 
   const sigs = doc.signatures || [];
