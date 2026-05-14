@@ -94,27 +94,6 @@ textarea{resize:vertical;min-height:80px;line-height:1.6;}
 .btn-print:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.35);}
 .btn-novo{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:rgba(6,182,212,.08);color:var(--cyan);border:1.5px solid rgba(6,182,212,.25);border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
 .btn-novo:hover{background:rgba(6,182,212,.15);}
-.btn-autentique{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:linear-gradient(135deg,#065F46,#10B981);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(16,185,129,.25);}
-.btn-autentique:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(16,185,129,.4);}
-.btn-autentique:disabled{opacity:.6;cursor:wait;transform:none;}
-.aut-result{margin:12px 20px 0;padding:16px 20px;border-radius:10px;font-size:13px;display:none;}
-.aut-result.show{display:block;}
-.aut-result.success{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.22);color:#34D399;}
-.aut-result.error{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);color:#FCA5A5;}
-.aut-link{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.2);border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;color:#34D399;text-decoration:none;}
-.aut-link:hover{background:rgba(16,185,129,.22);}
-.aut-link+.aut-link{margin-left:8px;}
-
-/* ASSINATURAS */
-.sig-label{font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
-.sig-canvas{width:100%;height:130px;background:#fff;border-radius:8px;cursor:crosshair;touch-action:none;display:block;border:1.5px solid rgba(6,182,212,.2);}
-.sig-canvas:hover{border-color:rgba(6,182,212,.45);}
-.sig-actions{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;}
-.btn-clear-sig{padding:5px 12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);color:#FCA5A5;border-radius:7px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
-.btn-clear-sig:hover{background:rgba(239,68,68,.2);}
-.sig-hint{font-size:11px;color:var(--text-muted);}
-.sig-status{font-size:11px;font-weight:600;color:#34D399;display:none;}
-.sig-status.show{display:inline;}
 
 @media(max-width:640px){.two-col,.three-col{grid-template-columns:1fr;}.fidelidade-group{flex-direction:column;}}
 </style>
@@ -258,36 +237,6 @@ textarea{resize:vertical;min-height:80px;line-height:1.6;}
     </div>
   </div>
 
-  <!-- SEÇÃO 4: ASSINATURAS -->
-  <div class="form-section" id="s4">
-    <div class="section-header">
-      <div class="section-num purple">4</div>
-      <div><div class="section-title">Assinaturas digitais</div><div class="section-desc">Assine antes de gerar — serão incorporadas ao PDF</div></div>
-    </div>
-    <div class="two-col">
-      <div>
-        <div class="sig-label">✍️ Assinatura REC HUB (Contratada) <span style="font-size:10px;font-weight:500;color:#34D399;text-transform:none;letter-spacing:0;">— pré-configurada</span></div>
-        <canvas id="sig_rec" class="sig-canvas"></canvas>
-        <div class="sig-actions">
-          <button class="btn-clear-sig" type="button" onclick="sigRec.clear()" title="Restaura a assinatura original da REC">↺ Restaurar</button>
-          <span class="sig-status show" id="sig_rec_ok">✓ Assinado</span>
-        </div>
-      </div>
-      <div>
-        <div class="sig-label">✍️ Assinatura do Contratante</div>
-        <canvas id="sig_cliente" class="sig-canvas"></canvas>
-        <div class="sig-actions">
-          <button class="btn-clear-sig" type="button" onclick="sigCliente.clear()">🗑 Limpar</button>
-          <span class="sig-hint">Mouse ou dedo (touch)</span>
-          <span class="sig-status" id="sig_cliente_ok">✓ Assinado</span>
-        </div>
-      </div>
-    </div>
-    <div style="margin-top:14px;background:rgba(6,182,212,.05);border:1px solid rgba(6,182,212,.12);border-radius:8px;padding:11px 15px;font-size:12px;color:var(--text-muted);">
-      💡 Se preferir assinar depois no papel, deixe em branco — o espaço de assinatura aparece normalmente no PDF.
-    </div>
-  </div>
-
   <div class="submit-area">
     <button class="btn-generate" onclick="gerarContrato()">📄 Gerar Contrato PDF</button>
     <div class="submit-hint">Clique para montar o contrato — depois imprima ou salve como PDF</div>
@@ -298,96 +247,13 @@ textarea{resize:vertical;min-height:80px;line-height:1.6;}
 <div class="pdf-preview-area" id="pdf_area">
   <div class="pdf-actions">
     <button class="btn-print" onclick="imprimirContrato()">🖨 Imprimir / Salvar PDF</button>
-    <button class="btn-autentique" id="btn_aut" onclick="enviarAutentique()">📩 Enviar para assinar (Autentique)</button>
     <button class="btn-novo" onclick="novoContrato()">+ Novo Contrato</button>
   </div>
-  <div class="aut-result" id="aut_result"></div>
   <iframe id="pdf_frame" style="width:100%;height:1600px;border:none;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.4);margin-top:16px;"></iframe>
 </div>
 
 <script src="_hub.js"></script>
 <script>
-/* ── SIGNATURE PAD ── */
-function SigPad(canvasId, statusId) {
-  var canvas = document.getElementById(canvasId);
-  var ctx = canvas.getContext('2d');
-  var drawing = false, has = false;
-  var statusEl = statusId ? document.getElementById(statusId) : null;
-
-  function setup() {
-    var r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
-    canvas.width = Math.round(r.width * dpr);
-    canvas.height = Math.round(r.height * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.strokeStyle = '#0F172A';
-    ctx.lineWidth = 2.2;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-  }
-
-  function pt(e) {
-    var r = canvas.getBoundingClientRect();
-    var s = e.touches ? e.touches[0] : e;
-    return { x: s.clientX - r.left, y: s.clientY - r.top };
-  }
-
-  canvas.addEventListener('mousedown', function(e) { drawing = true; var p = pt(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
-  canvas.addEventListener('mousemove', function(e) { if (!drawing) return; var p = pt(e); ctx.lineTo(p.x, p.y); ctx.stroke(); has = true; if (statusEl) statusEl.classList.add('show'); });
-  canvas.addEventListener('mouseup', function() { drawing = false; });
-  canvas.addEventListener('mouseleave', function() { drawing = false; });
-  canvas.addEventListener('touchstart', function(e) { e.preventDefault(); drawing = true; var p = pt(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, { passive: false });
-  canvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (!drawing) return; var p = pt(e); ctx.lineTo(p.x, p.y); ctx.stroke(); has = true; if (statusEl) statusEl.classList.add('show'); }, { passive: false });
-  canvas.addEventListener('touchend', function() { drawing = false; });
-
-  setup();
-  window.addEventListener('resize', function() { var snap = has ? canvas.toDataURL() : null; setup(); if (snap) loadSnap(snap); });
-
-  var _fixedSrc = null;
-
-  function loadSnap(src) {
-    var img = new Image();
-    img.onload = function() {
-      var r = canvas.getBoundingClientRect();
-      var scale = Math.min(r.width / img.width, r.height / img.height) * 0.85;
-      var w = img.width * scale, h = img.height * scale;
-      ctx.clearRect(0, 0, r.width, r.height);
-      ctx.drawImage(img, (r.width - w) / 2, (r.height - h) / 2, w, h);
-    };
-    img.src = src;
-  }
-
-  return {
-    clear: function() {
-      var r = canvas.getBoundingClientRect();
-      ctx.clearRect(0, 0, r.width, r.height);
-      if (_fixedSrc) { loadSnap(_fixedSrc); }
-      else { has = false; if (statusEl) statusEl.classList.remove('show'); }
-    },
-    loadImage: function(src) {
-      _fixedSrc = src;
-      var img = new Image();
-      img.onload = function() {
-        var r = canvas.getBoundingClientRect();
-        var scale = Math.min(r.width / img.width, r.height / img.height) * 0.85;
-        var w = img.width * scale, h = img.height * scale;
-        ctx.clearRect(0, 0, r.width, r.height);
-        ctx.drawImage(img, (r.width - w) / 2, (r.height - h) / 2, w, h);
-        has = true;
-        if (statusEl) statusEl.classList.add('show');
-      };
-      img.onerror = function() { _fixedSrc = null; };
-      img.src = src;
-    },
-    toDataURL: function() { return has ? canvas.toDataURL('image/png') : null; }
-  };
-}
-
-var sigRec = SigPad('sig_rec', 'sig_rec_ok');
-var sigCliente = SigPad('sig_cliente', 'sig_cliente_ok');
-
-// Pré-carrega assinatura fixa da REC HUB
-sigRec.loadImage('sig-rec.png');
-
 hubInit('contrato');
 
 var fidelidadeMeses = 12;
@@ -639,13 +505,13 @@ function buildContratoHtml() {
 
     + '<div class="sign-area">'
     +   '<div class="sign-block">'
-    +     (sigRec && sigRec.toDataURL() ? '<div class="sign-line"><img src="' + sigRec.toDataURL() + '"></div>' : '<div class="sign-line"></div>')
+    +     '<div class="sign-line"></div>'
     +     '<div class="sign-name">CALEFFI TREINAMENTOS E EVENTOS LTDA</div>'
     +     '<div class="sign-sub">CONTRATADA &middot; REC HUB</div>'
     +     '<div class="sign-sub">CNPJ 37.612.639/0001-38</div>'
     +   '</div>'
     +   '<div class="sign-block">'
-    +     (sigCliente && sigCliente.toDataURL() ? '<div class="sign-line"><img src="' + sigCliente.toDataURL() + '"></div>' : '<div class="sign-line"></div>')
+    +     '<div class="sign-line"></div>'
     +     '<div class="sign-name">' + esc(nome) + '</div>'
     +     '<div class="sign-sub">CONTRATANTE' + (resp ? ' &middot; ' + esc(resp) : '') + '</div>'
     +     (doc ? '<div class="sign-sub">CPF/CNPJ: ' + esc(doc) + '</div>' : '')
@@ -685,57 +551,7 @@ function imprimirContrato() {
 
 function novoContrato() {
   document.getElementById('pdf_area').classList.remove('visible');
-  var btn = document.getElementById('btn_aut');
-  btn.disabled = false;
-  btn.textContent = '📩 Enviar para assinar (Autentique)';
-  var res = document.getElementById('aut_result');
-  res.className = 'aut-result';
-  res.innerHTML = '';
   window.scrollTo({top:0,behavior:'smooth'});
-}
-
-async function enviarAutentique() {
-  var email = v('c_email');
-  if (!email || !email.includes('@')) {
-    alert('Preencha o e-mail do contratante (Seção 1) para enviar para assinar.');
-    return;
-  }
-  var nome = v('c_nome') || 'Contratante';
-  var plano = v('s_plano') || '';
-  var btn = document.getElementById('btn_aut');
-  var resEl = document.getElementById('aut_result');
-
-  btn.disabled = true;
-  btn.textContent = '⏳ Gerando PDF e enviando...';
-  resEl.className = 'aut-result';
-  resEl.innerHTML = '';
-
-  try {
-    var html = buildContratoHtml();
-    var contractName = 'Contrato REC HUB — ' + nome + (plano ? ' (' + plano + ')' : '');
-    var r = await apiFetch('/api/autentique', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ html: html, contractName: contractName, clientName: nome, clientEmail: email })
-    });
-    var data = await r.json();
-    if (!r.ok) throw new Error(data.error || 'Erro ' + r.status);
-
-    var linksHtml = '';
-    if (data.clientLink) linksHtml += '<a class="aut-link" href="' + data.clientLink + '" target="_blank" rel="noopener">🔗 Link assinatura do cliente</a>';
-    if (data.recLink)    linksHtml += '<a class="aut-link" href="' + data.recLink    + '" target="_blank" rel="noopener">🔗 Link assinatura REC HUB</a>';
-
-    resEl.innerHTML = '<strong>✅ Contrato enviado com sucesso!</strong>'
-      + '<br><span style="color:var(--text-secondary);font-size:12px;">Um e-mail foi enviado para <strong>' + email + '</strong> para assinar digitalmente com validade jurídica.</span>'
-      + (linksHtml ? '<br><div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;">' + linksHtml + '</div>' : '');
-    resEl.className = 'aut-result success show';
-    btn.textContent = '✅ Enviado!';
-  } catch (err) {
-    resEl.innerHTML = '❌ ' + (err.message || 'Erro ao enviar para o Autentique');
-    resEl.className = 'aut-result error show';
-    btn.disabled = false;
-    btn.textContent = '📩 Tentar novamente';
-  }
 }
 </script>
 </body>
