@@ -79,15 +79,20 @@ export default async function handler(req, res) {
   });
 
   const autJson = await autRes.json();
+  console.log('autentique response status:', autRes.status);
+  console.log('autentique response body:', JSON.stringify(autJson).slice(0, 2000));
 
   if (autJson.errors?.length) {
     const msg = autJson.errors[0]?.message || 'Erro desconhecido';
-    console.error('autentique error', JSON.stringify(autJson.errors));
+    console.error('autentique errors:', JSON.stringify(autJson.errors));
     return res.status(500).json({ error: 'Autentique: ' + msg });
   }
 
   const doc = autJson.data?.createDocument;
-  if (!doc) return res.status(500).json({ error: 'Documento não criado pelo Autentique' });
+  if (!doc) {
+    console.error('autentique: createDocument null, full response:', JSON.stringify(autJson));
+    return res.status(500).json({ error: 'Documento não criado pelo Autentique' });
+  }
 
   const sigs = doc.signatures || [];
   const clientSig = sigs.find(s => s.email === clientEmail);
