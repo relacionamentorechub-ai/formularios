@@ -256,12 +256,11 @@ textarea{resize:vertical;min-height:80px;line-height:1.6;}
     </div>
     <div class="two-col">
       <div>
-        <div class="sig-label">✍️ Assinatura REC HUB (Contratada)</div>
+        <div class="sig-label">✍️ Assinatura REC HUB (Contratada) <span style="font-size:10px;font-weight:500;color:#34D399;text-transform:none;letter-spacing:0;">— pré-configurada</span></div>
         <canvas id="sig_rec" class="sig-canvas"></canvas>
         <div class="sig-actions">
-          <button class="btn-clear-sig" type="button" onclick="sigRec.clear()">🗑 Limpar</button>
-          <span class="sig-hint">Mouse ou dedo (touch)</span>
-          <span class="sig-status" id="sig_rec_ok">✓ Assinado</span>
+          <button class="btn-clear-sig" type="button" onclick="sigRec.clear()" title="Restaura a assinatura original da REC">↺ Restaurar</button>
+          <span class="sig-status show" id="sig_rec_ok">✓ Assinado</span>
         </div>
       </div>
       <div>
@@ -329,14 +328,43 @@ function SigPad(canvasId, statusId) {
   canvas.addEventListener('touchend', function() { drawing = false; });
 
   setup();
-  window.addEventListener('resize', setup);
+  window.addEventListener('resize', function() { var snap = has ? canvas.toDataURL() : null; setup(); if (snap) loadSnap(snap); });
+
+  var _fixedSrc = null;
+
+  function loadSnap(src) {
+    var img = new Image();
+    img.onload = function() {
+      var r = canvas.getBoundingClientRect();
+      var scale = Math.min(r.width / img.width, r.height / img.height) * 0.85;
+      var w = img.width * scale, h = img.height * scale;
+      ctx.clearRect(0, 0, r.width, r.height);
+      ctx.drawImage(img, (r.width - w) / 2, (r.height - h) / 2, w, h);
+    };
+    img.src = src;
+  }
 
   return {
     clear: function() {
       var r = canvas.getBoundingClientRect();
       ctx.clearRect(0, 0, r.width, r.height);
-      has = false;
-      if (statusEl) statusEl.classList.remove('show');
+      if (_fixedSrc) { loadSnap(_fixedSrc); }
+      else { has = false; if (statusEl) statusEl.classList.remove('show'); }
+    },
+    loadImage: function(src) {
+      _fixedSrc = src;
+      var img = new Image();
+      img.onload = function() {
+        var r = canvas.getBoundingClientRect();
+        var scale = Math.min(r.width / img.width, r.height / img.height) * 0.85;
+        var w = img.width * scale, h = img.height * scale;
+        ctx.clearRect(0, 0, r.width, r.height);
+        ctx.drawImage(img, (r.width - w) / 2, (r.height - h) / 2, w, h);
+        has = true;
+        if (statusEl) statusEl.classList.add('show');
+      };
+      img.onerror = function() { _fixedSrc = null; };
+      img.src = src;
     },
     toDataURL: function() { return has ? canvas.toDataURL('image/png') : null; }
   };
@@ -344,6 +372,9 @@ function SigPad(canvasId, statusId) {
 
 var sigRec = SigPad('sig_rec', 'sig_rec_ok');
 var sigCliente = SigPad('sig_cliente', 'sig_cliente_ok');
+
+// Pré-carrega assinatura fixa da REC HUB
+sigRec.loadImage('sig-rec.png');
 
 hubInit('contrato');
 
