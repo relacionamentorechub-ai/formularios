@@ -452,9 +452,10 @@ export default async function handler(req, res) {
 
   const { messages, max_tokens, system } = req.body;
 
-  // IMPORTANTE: max_tokens inclui thinking_tokens + output_tokens.
-  // Pra 9-10 páginas do layout novo precisamos de ~12k tokens de HTML.
-  // 32000 - 3000 (thinking) = 29000 disponíveis pro output. Folga grande.
+  // extended thinking DESATIVADO: claude-sonnet-4-6 com thinking ativo tinha
+  // comportamento imprevisível no budget e gerava saída truncada mesmo com 32k.
+  // Sem thinking, os 32k vão integralmente pro output HTML (~10 páginas cabe fácil).
+  // Web search mantido: busca dados reais de concorrentes/benchmarks.
   const effectiveMaxTokens = Math.max(max_tokens || 0, 32000);
   const body = {
     model: 'claude-sonnet-4-6',
@@ -462,16 +463,11 @@ export default async function handler(req, res) {
     system: system || SYSTEM_PROMPT,
     messages: messages,
     stream: true,
-    thinking: {
-      type: 'enabled',
-      budget_tokens: 3000,
-    },
     tools: [
       {
         type: 'web_search_20250305',
         name: 'web_search',
-        max_uses: 3, // Cada busca consome ~1-2k tokens do output budget. 3 buscas = ~4-6k tokens. Sobra ~23k pro HTML (9-10 págs).
-
+        max_uses: 3,
       },
     ],
   };
