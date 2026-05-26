@@ -9,25 +9,29 @@ export const config = { maxDuration: 300 };
 
 const SYSTEM_PROMPT = `Você é o gerador de diagnósticos digitais do R.E.C. HUB de Negócios.
 
-=========================================
-SAÍDA — FORMATO ESTRITO
-=========================================
-Gere APENAS o conteúdo do body — uma sequência de div.pdf-page e seus filhos.
-NÃO gere: DOCTYPE, html, head, meta, title, style, link, body, markdown, comentários HTML.
-A resposta deve COMEÇAR exatamente com: <div class="pdf-page dark">
-A última div deve ser: <div class="pdf-page dark"> (página hub-why de fechamento).
-Zero texto fora das tags HTML.
+╔══════════════════════════════════════════════════════════╗
+║  REGRA ABSOLUTA DE SAÍDA — LEIA ANTES DE QUALQUER COISA ║
+╚══════════════════════════════════════════════════════════╝
+Sua resposta deve conter EXCLUSIVAMENTE tags HTML.
+O PRIMEIRO CARACTERE da resposta deve ser "<" (abertura de tag).
+A resposta deve começar EXATAMENTE com: <div class="pdf-page dark">
+NÃO escreva nada antes do HTML — nenhum comentário, nenhuma explicação,
+nenhum "vou fazer as buscas", nenhuma introdução. ZERO texto antes do HTML.
+NÃO use markdown, NÃO gere DOCTYPE/html/head/style/body.
+A última div gerada deve ser <div class="pdf-page dark"> (hub-why).
+Qualquer texto fora das tags HTML destrói o PDF. Nunca faça isso.
 
 =========================================
-PESQUISA — USE web_search ANTES DE ESCREVER
+PESQUISA — USE web_search ANTES DE ESCREVER (silenciosamente)
 =========================================
-Você tem acesso à ferramenta web_search. ANTES de gerar o HTML, faça de 2 a 4 buscas para coletar dados REAIS:
+Faça de 2 a 3 buscas para coletar dados REAIS. Após cada busca, apenas processe os resultados internamente.
+Faça as buscas em paralelo ou sequencialmente — nunca anuncie que vai fazê-las.
 1. Concorrentes do segmento na cidade informada (ex: "salões de beleza Canoas RS Instagram")
 2. Benchmarks do setor no Brasil/RS (ex: "engajamento médio Instagram estética 2025")
-3. Ticket médio e CAC do nicho (ex: "ticket médio clínica odontológica RS")
-4. Se houver site, busque o domínio para entender posicionamento atual e SEO
+3. Ticket médio do nicho (ex: "ticket médio clínica odontológica RS")
 
-NUNCA invente nomes de concorrentes. Se a busca não retornar nomes locais reais, use "negócios similares na região" sem inventar marca.
+NUNCA invente nomes de concorrentes. Se a busca não retornar nomes locais reais, use "negócios similares na região".
+APÓS AS BUSCAS: gere o HTML diretamente, sem texto intermediário.
 
 =========================================
 REGRAS DE ESCRITA
@@ -466,7 +470,8 @@ export default async function handler(req, res) {
       {
         type: 'web_search_20250305',
         name: 'web_search',
-        max_uses: 5,
+        max_uses: 3, // Cada busca consome ~1-2k tokens do output budget. 3 buscas = ~4-6k tokens. Sobra ~23k pro HTML (9-10 págs).
+
       },
     ],
   };

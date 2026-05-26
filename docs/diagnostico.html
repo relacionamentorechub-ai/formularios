@@ -832,7 +832,7 @@ var lastAnalysisCost = null;
 var PDF_HTML_HEADER = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Diagnóstico Digital R.E.C. HUB</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,200;1,9..144,300;1,9..144,400&family=Manrope:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,200;1,9..144,300;1,9..144,400&family=Manrope:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=block" rel="stylesheet">
 <style>
 :root{--blue:#012659;--blue-2:#02377A;--blue-deep:#001a3d;--teal:#00a198;--teal-dark:#007a73;--teal-soft:#B8E0DD;--teal-faint:#E8F5F3;--cream:#FAF7F2;--cream-deep:#F3EEE5;--muted:#5b6477;--muted-soft:#9BA3B0;--line:#E8E4DC;--line-soft:#F0EDE6;--ink:#0B1426;--white:#fff;--red:#C2410C;--red-soft:#FED7AA;--amber:#B45309;--amber-soft:#FEF3C7;--green:#047857;--green-soft:#D1FAE5;--font-display:'Fraunces',Georgia,serif;--font-body:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;--font-num:'Space Grotesk','Manrope',sans-serif;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -1264,6 +1264,18 @@ async function chamarClaude(dados) {
     fullText = fullText.replace(/^```(?:html)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
   }
 
+  // Strip qualquer texto que o modelo escreveu ANTES do primeiro <div class="pdf-page
+  // (ex: "I'll run all searches..." antes do HTML)
+  var firstDiv = fullText.indexOf('<div class="pdf-page');
+  if (firstDiv > 0) {
+    var stripped = fullText.slice(0, firstDiv).trim();
+    if (stripped) console.warn('[claude] prefixo removido (' + stripped.length + ' chars):', stripped.slice(0, 120) + (stripped.length > 120 ? '…' : ''));
+    fullText = fullText.slice(firstDiv);
+  } else if (firstDiv === -1) {
+    // Nenhum div encontrado — resposta inválida
+    throw new Error('Resposta da IA não contém páginas válidas. Tente novamente.');
+  }
+
   // Custo: tokens (Sonnet) + buscas web ($0.01 cada = $10/1000)
   var custoBuscas = searchCount * 0.01;
   var custo = (inputTokens * PRICING.input) + (outputTokens * PRICING.output) + custoBuscas;
@@ -1283,28 +1295,21 @@ async function chamarClaude(dados) {
 async function abrirDiagnostico(htmlRaw, instagram) {
   var html = htmlRaw.trim();
 
-  // Injeta logo REC em qualquer <img class="rec-logo-footer" ...>
-  // (Claude pode variar a ordem dos atributos ou esquecer o src vazio)
+  // Injeta logo REC em todos os <img src="" alt="R.E.C."> e <img src="" alt="REC HUB">
+  // O novo layout usa esses padrões no cover-rec-logo e hw-footer-logo (sem class especial)
+  // O CSS já aplica filter:invert para deixar a logo branca sobre fundo navy
   if (window.REC_LOGO_B64) {
+    // Novo layout: <img src="" alt="R.E.C."> e variações
+    html = html.replace(/<img\s+src=""\s+alt="R\.E\.C\."/g, '<img src="' + window.REC_LOGO_B64 + '" alt="R.E.C."');
+    html = html.replace(/<img\s+alt="R\.E\.C\."\s+src=""/g, '<img src="' + window.REC_LOGO_B64 + '" alt="R.E.C."');
+    // Layout legado: class="rec-logo-footer"
     html = html.replace(/<img([^>]*?)class="rec-logo-footer"([^>]*?)>/g, function(match, before, after) {
       var combined = before + 'class="rec-logo-footer"' + after;
-      // Se já tem src com valor, mantém
       if (/src="[^"]+"/.test(combined) && !/src=""/.test(combined)) return match;
-      // Remove src="" se existir
       combined = combined.replace(/\s*src=""/g, '');
-      // Injeta src com a logo
       combined = combined.replace('class="rec-logo-footer"', 'class="rec-logo-footer" src="' + window.REC_LOGO_B64 + '"');
       return '<img ' + combined.trim() + '>';
     });
-
-    // Garantia adicional: se Claude esqueceu de adicionar a logo na última página, injeta antes do fim
-    if (html.indexOf('rec-logo-footer') === -1) {
-      // Procura o último div.hub-why-bottom e injeta a logo logo após
-      var idx = html.lastIndexOf('</div></div></div>');
-      if (idx > 0) {
-        html = html.slice(0, idx) + '<img class="rec-logo-footer" src="' + window.REC_LOGO_B64 + '" alt="REC HUB">' + html.slice(idx);
-      }
-    }
   }
 
   // Claude agora gera só os divs — envolver com template completo se necessário
