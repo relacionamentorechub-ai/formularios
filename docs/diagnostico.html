@@ -1184,109 +1184,111 @@ function buildPrompt(d) {
 }
 
 /* ═══════════════════════════════════════════
-   CLAUDE API CALL
+   CLAUDE API CALL — orquestrador page-by-page
+   Cada página é uma chamada pequena ao /api/diagnostico-page.
+   Chamadas paralelas. Tempo total = chamada mais lenta (~15s).
 ═══════════════════════════════════════════ */
-async function chamarClaude(dados) {
-  var resp = await apiFetch('/api/claude', {
+
+// Decide quais páginas gerar com base nos dados do lead.
+// Retorna array de page IDs na ordem em que devem aparecer no PDF.
+function planejarPaginas(d) {
+  var canais = (d.canais || '').split(',').map(function(c){ return c.trim(); }).filter(Boolean);
+  var nCanais = canais.length;
+
+  var paginas = ['cover', 'problems-1'];
+
+  if (nCanais >= 3) paginas.push('problems-2');
+
+  paginas.push('mercado', 'mercado-cont', 'verticais');
+
+  // SEO: só se tem site e Site/SEO está nos canais
+  var temSiteSeo = d.tem_site === 'Sim, tem site' && d.site && /site.*seo|seo/i.test(d.canais || '');
+  if (temSiteSeo) paginas.push('seo');
+
+  // Investimento: só se com_proposta = Sim
+  if (d.com_proposta === 'Sim' && d.plano) paginas.push('investimento');
+
+  paginas.push('modulos', 'hub-why');
+
+  return paginas;
+}
+
+// Mapeia dados do form para o objeto lead que o servidor espera.
+function buildLeadObject(d) {
+  return {
+    nome_empresa: d.nome_empresa, instagram: d.instagram,
+    segmento: d.segmento, cidade: d.cidade, site: d.site,
+    canais: d.canais,
+    tiktok_handle: d.tiktok_handle, youtube_handle: d.youtube_handle, linkedin_handle: d.linkedin_handle,
+    trafego_atual: d.trafego_atual, tem_site: d.tem_site, objetivo: d.objetivo,
+    observacoes: d.observacoes, obs_extra: d.obs_extra,
+    com_proposta: d.com_proposta, plano: d.plano,
+  };
+}
+
+async function chamarUmaPagina(page, lead) {
+  var resp = await apiFetch('/api/diagnostico-page', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      messages: [{ role: 'user', content: buildPrompt(dados) }],
-      // 32k inclui thinking (~3k) + output (~29k). PDFs grandes do novo layout usam ~10-15k de HTML.
-      max_tokens: 32000
-    })
+    body: JSON.stringify({ page: page, lead: lead }),
   });
-
   if (!resp.ok) {
     var err = await resp.json().catch(function(){ return {}; });
-    throw new Error(err.error && err.error.message ? err.error.message : 'Erro na API (' + resp.status + ')');
+    throw new Error('Página "' + page + '": ' + (err.error || 'HTTP ' + resp.status));
+  }
+  return resp.json();
+}
+
+async function chamarClaude(dados) {
+  var lead = buildLeadObject(dados);
+  var paginas = planejarPaginas(dados);
+  var total = paginas.length;
+
+  setSubtitle('Gerando ' + total + ' p&aacute;ginas em paralelo...');
+
+  // Dispara TODAS as chamadas em paralelo, atualiza UI conforme cada uma resolve
+  var concluidas = 0;
+  var promises = paginas.map(function(page) {
+    return chamarUmaPagina(page, lead).then(function(result) {
+      concluidas++;
+      setSubtitle('Concluiu p&aacute;gina ' + concluidas + '/' + total + ' (' + page + ')');
+      return result;
+    }).catch(function(err) {
+      console.error('[chamarClaude] falha em "' + page + '":', err.message);
+      throw err;
+    });
+  });
+
+  var resultados;
+  try {
+    resultados = await Promise.all(promises);
+  } catch (err) {
+    throw new Error('Erro ao gerar diagn&oacute;stico: ' + err.message);
   }
 
-  // Lê stream SSE
-  var reader = resp.body.getReader();
-  var decoder = new TextDecoder();
-  var buffer = '';
-  var fullText = '';
-  var inputTokens = 0, outputTokens = 0;
-  var charCount = 0;
-  var searchCount = 0;
-  var stopReason = null;
-
-  while (true) {
-    var chunk = await reader.read();
-    if (chunk.done) break;
-
-    buffer += decoder.decode(chunk.value, { stream: true });
-    var lines = buffer.split('\n');
-    buffer = lines.pop();
-
-    for (var i = 0; i < lines.length; i++) {
-      var line = lines[i];
-      if (!line.startsWith('data: ')) continue;
-      var raw = line.slice(6).trim();
-      if (!raw) continue;
-      try {
-        var ev = JSON.parse(raw);
-        if (ev.type === 'content_block_delta' && ev.delta && ev.delta.type === 'text_delta') {
-          fullText += ev.delta.text;
-          charCount += ev.delta.text.length;
-          if (charCount % 600 < ev.delta.text.length) {
-            setSubtitle('Gerando diagn&oacute;stico... (~' + Math.round(charCount / 4) + ' tokens gerados)');
-          }
-        } else if (ev.type === 'content_block_start' && ev.content_block) {
-          // Feedback visual durante thinking e web_search (que não emitem text_delta)
-          var blockType = ev.content_block.type;
-          if (blockType === 'thinking') {
-            setSubtitle('🧠 IA analisando dados do lead em profundidade...');
-          } else if (blockType === 'server_tool_use' || blockType === 'tool_use') {
-            searchCount++;
-            setSubtitle('🌐 Pesquisando dados reais na web (' + searchCount + '/' + 5 + ')...');
-          } else if (blockType === 'web_search_tool_result') {
-            setSubtitle('✓ Resultados coletados, continuando análise...');
-          } else if (blockType === 'text') {
-            setSubtitle('✍️ Escrevendo diagnóstico personalizado...');
-          }
-        } else if (ev.type === 'message_start' && ev.message && ev.message.usage) {
-          inputTokens = ev.message.usage.input_tokens || 0;
-        } else if (ev.type === 'message_delta') {
-          if (ev.usage) outputTokens = ev.usage.output_tokens || 0;
-          if (ev.delta && ev.delta.stop_reason) stopReason = ev.delta.stop_reason;
-        }
-      } catch (e) {}
+  // Soma tokens e monta HTML na ordem das páginas planejadas
+  var totalInput = 0, totalOutput = 0;
+  var truncadas = [];
+  var htmlPaginas = resultados.map(function(r) {
+    totalInput += (r.tokens && r.tokens.input) || 0;
+    totalOutput += (r.tokens && r.tokens.output) || 0;
+    if (r.stop_reason && r.stop_reason !== 'end_turn') {
+      truncadas.push(r.page + ':' + r.stop_reason);
+      console.warn('[chamarClaude] página "' + r.page + '" parou por:', r.stop_reason);
     }
-  }
+    return r.html;
+  });
 
-  if (!fullText) throw new Error('Resposta vazia da IA. Tente novamente.');
+  var fullHtml = htmlPaginas.join('\n');
 
-  // Remove markdown code block se Claude inseriu (```html ... ```)
-  fullText = fullText.trim();
-  if (fullText.startsWith('```')) {
-    fullText = fullText.replace(/^```(?:html)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
-  }
+  var custo = (totalInput * PRICING.input) + (totalOutput * PRICING.output);
+  lastAnalysisCost = {
+    input: totalInput, output: totalOutput, total_usd: custo,
+    stop_reason: truncadas.length ? truncadas.join(',') : 'end_turn',
+    paginas: total,
+  };
 
-  // Strip qualquer texto que o modelo escreveu ANTES do primeiro <div class="pdf-page
-  // (ex: "I'll run all searches..." antes do HTML)
-  var firstDiv = fullText.indexOf('<div class="pdf-page');
-  if (firstDiv > 0) {
-    var stripped = fullText.slice(0, firstDiv).trim();
-    if (stripped) console.warn('[claude] prefixo removido (' + stripped.length + ' chars):', stripped.slice(0, 120) + (stripped.length > 120 ? '…' : ''));
-    fullText = fullText.slice(firstDiv);
-  } else if (firstDiv === -1) {
-    // Nenhum div encontrado — resposta inválida
-    throw new Error('Resposta da IA não contém páginas válidas. Tente novamente.');
-  }
-
-  // Custo: tokens (Sonnet) + buscas web ($0.01 cada = $10/1000)
-  var custoBuscas = searchCount * 0.01;
-  var custo = (inputTokens * PRICING.input) + (outputTokens * PRICING.output) + custoBuscas;
-  lastAnalysisCost = { input: inputTokens, output: outputTokens, total_usd: custo, stop_reason: stopReason };
-
-  // Aviso se truncou — útil pra debug. stop_reason esperado: "end_turn".
-  // Outros: "max_tokens" (precisa subir limite), "pause_turn" (interrompido), "tool_use" (parou no meio de tool).
-  if (stopReason && stopReason !== 'end_turn') {
-    console.warn('[chamarClaude] stop_reason inesperado:', stopReason, 'output_tokens:', outputTokens);
-  }
-  return fullText;
+  return fullHtml;
 }
 
 /* ═══════════════════════════════════════════
@@ -1464,10 +1466,11 @@ async function enviarSolicitacao() {
       setSubtitle('PDF gerado e baixado com sucesso!');
       await new Promise(function(r){ setTimeout(r, 1800); });
       hideLoading();
-      var costMsg = lastAnalysisCost ? ' · Custo: $'+lastAnalysisCost.total_usd.toFixed(3)+' · '+lastAnalysisCost.output+' tok output' : '';
-      var truncMsg = (lastAnalysisCost && lastAnalysisCost.stop_reason && lastAnalysisCost.stop_reason !== 'end_turn') ? ' · ⚠️ stop_reason: '+lastAnalysisCost.stop_reason : '';
+      var paginasMsg = lastAnalysisCost && lastAnalysisCost.paginas ? ' · '+lastAnalysisCost.paginas+' p&aacute;ginas' : '';
+      var costMsg = lastAnalysisCost ? ' · $'+lastAnalysisCost.total_usd.toFixed(3) : '';
+      var truncMsg = (lastAnalysisCost && lastAnalysisCost.stop_reason && lastAnalysisCost.stop_reason !== 'end_turn') ? ' · ⚠️ '+lastAnalysisCost.stop_reason : '';
       document.getElementById('status_bar').className = (truncMsg ? 'status-bar error' : 'status-bar success');
-      document.getElementById('status_bar').innerHTML = (truncMsg ? '⚠️ PDF gerado mas truncado!' : '✅ PDF baixado com sucesso!') + costMsg + truncMsg;
+      document.getElementById('status_bar').innerHTML = (truncMsg ? '⚠️ PDF gerado mas com avisos!' : '✅ PDF baixado com sucesso!') + paginasMsg + costMsg + truncMsg;
       document.getElementById('btn_nova').style.display = 'inline-flex';
       atualizarCreditosHeader();
     } catch(err) {

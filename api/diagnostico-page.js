@@ -1,0 +1,584 @@
+// Gera UMA página do diagnóstico R.E.C. HUB por vez.
+// Substitui /api/claude (que tentava gerar tudo em uma chamada e truncava).
+// Arquitetura page-by-page: cliente faz 6-10 chamadas paralelas, monta no fim.
+
+export const config = { maxDuration: 60 };
+
+import { applyCors, requireAuth, rateLimit, readBody } from './_lib.js';
+
+// ═══════════════════════════════════════════════════════════════
+// REGRAS UNIVERSAIS — incluídas em TODOS os prompts
+// ═══════════════════════════════════════════════════════════════
+const REGRAS_BASE = `╔══════════════════════════════════════════════════════════╗
+║  REGRA ABSOLUTA DE SAÍDA                                ║
+╚══════════════════════════════════════════════════════════╝
+Sua resposta deve conter EXCLUSIVAMENTE tags HTML.
+O PRIMEIRO CARACTERE da resposta deve ser "<" (abertura de tag).
+NÃO escreva nada antes ou depois do HTML — nenhum comentário, nenhuma explicação.
+NÃO use markdown, NÃO gere DOCTYPE/html/head/style/body.
+Gere APENAS o div.pdf-page solicitado e seus filhos.
+
+REGRAS DE ESCRITA:
+- Sem traços como pontuação (—, –). Use vírgula ou reescreva.
+- Sem title case em frases corridas.
+- HTML entities para acentos: ã=&atilde; ç=&ccedil; ê=&ecirc; ó=&oacute; á=&aacute; é=&eacute; í=&iacute; ú=&uacute; â=&acirc; ô=&ocirc; õ=&otilde;
+- Tom direto, profissional, baseado em dados.
+- Métricas concretas: "engajamento de 0,9%, abaixo da média do setor de 2,8%" (não "baixo engajamento").
+- Para destaque em h1/h2/section-title: use <em>palavra</em> nos pontos-chave.
+- Use seu conhecimento real do mercado brasileiro/RS para benchmarks e concorrentes do nicho.
+- NUNCA invente nomes de concorrentes. Se não souber locais reais, use "redes locais conhecidas no setor".
+
+PALETA REC (já no CSS):
+navy var(--blue), teal var(--teal), cream var(--cream), texto var(--blue)/var(--white)/var(--muted).
+Tipografia: Fraunces (display), Manrope (body), Space Grotesk (números).`;
+
+// ═══════════════════════════════════════════════════════════════
+// CONFIGS POR PÁGINA
+// ═══════════════════════════════════════════════════════════════
+const PAGES = {
+
+  // ════════════════════════ COVER ════════════════════════
+  cover: {
+    max_tokens: 3000,
+    system: `${REGRAS_BASE}
+
+VOCÊ GERA APENAS A PÁGINA DE CAPA (dark, navy).
+
+ESTRUTURA OBRIGATÓRIA — copie exatamente, preenchendo {placeholders}:
+
+<div class="pdf-page dark">
+<div class="cover-decoration"></div>
+<div class="cover-decoration-2"></div>
+<div class="cover">
+<div class="cover-rec-logo"><img src="" alt="R.E.C."><span class="cover-brand">R.E.C. <em>HUB</em></span></div>
+<div class="cover-body">
+<div class="cover-eyebrow">Diagn&oacute;stico digital · Estudo de presen&ccedil;a online</div>
+<h1 class="cover-title">{título com <em>destaque em italic</em>, ≤80 char total}</h1>
+<p class="cover-sub">{1 frase explicando o documento, ≤140 char}</p>
+<div class="cover-kpis">
+<div class="cover-kpi"><div class="cover-kpi-label">{LABEL, ≤28}</div><div class="cover-kpi-value">{valor}<small>{unit}</small></div><div class="cover-kpi-desc">{contexto vs mercado, ≤110}</div><div class="cover-kpi-bar"><span style="width:{N}%"></span></div></div>
+<div class="cover-kpi">{outro KPI no mesmo padrão}</div>
+<div class="cover-kpi">{outro KPI no mesmo padrão}</div>
+</div>
+<div class="cover-meta">
+<div><span>Cidade</span><strong>{cidade}</strong></div>
+<div><span>Instagram</span><strong>{@handle}</strong></div>
+<div><span>Emitido em</span><strong>{m&ecirc;s ano}</strong></div>
+<div><span>Segmento</span><strong>{segmento}</strong></div>
+</div>
+<div class="cover-contact">
+<div class="cover-contact-label">Fale com o R.E.C. HUB</div>
+<div class="cover-contact-row">
+<span class="cc-item"><span class="cc-icon">✆</span>51 98463-2545</span>
+<span class="cc-sep">·</span>
+<span class="cc-item"><span class="cc-icon">◎</span>@somosrecoficial</span>
+<span class="cc-sep">·</span>
+<span class="cc-item"><span class="cc-icon">⌘</span>somosrecoficial.com.br</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+KPIs OBRIGATÓRIOS (use dados do setor brasileiro do nicho informado):
+1. Engajamento médio do Instagram no nicho (% ou número)
+2. Concorrência local ativa (quantidade de perfis fortes ou concorrentes notórios)
+3. Ticket médio do nicho (R$ ou faixa) — escolha o KPI mais relevante para o segmento
+
+A cover-contact-row é FIXA — não altere os contatos.
+A img src="" será preenchida pelo sistema.`,
+  },
+
+  // ════════════════════════ PROBLEMS-1 ════════════════════════
+  'problems-1': {
+    max_tokens: 3500,
+    system: `${REGRAS_BASE}
+
+VOCÊ GERA APENAS A PÁGINA 2 — PARTE 1 DE PONTOS IDENTIFICADOS (cream).
+
+ESTRUTURA OBRIGATÓRIA:
+
+<div class="pdf-page cream">
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">02 · DIAGN&Oacute;STICO</span></div>
+<div class="section-intro">
+<span class="kicker">Parte 01 · Pontos identificados</span>
+<h2 class="section-title">{título com <em>destaque</em>, ≤80}</h2>
+<p class="section-lead">{1-2 frases contextualizando, ≤220}</p>
+</div>
+<div class="content">
+<div class="problems-grid{[ cols-2 se 3+ canais informados, senão omitir]}">
+{p-cards}
+</div>
+</div>
+<div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
+</div>
+
+QUANTIDADE de p-cards:
+- Se canais ≤ 2: EXATAMENTE 6 cards (grid 3 cols default, sem .cols-2)
+- Se canais ≥ 3: EXATAMENTE 4 cards (grid 2x2 com class="problems-grid cols-2")
+
+CARDS devem cobrir DIFERENTES canais informados. Se houver 3+ canais, distribua: 1 card por canal e os extras pegam os mais problemáticos.
+
+Estrutura de cada p-card:
+<div class="p-card {canal}">
+<div class="p-card-head"><span class="p-card-channel {canal}">{Canal}</span><span class="p-card-num">{NN}</span></div>
+<div class="p-card-title">{título do problema específico, ≤75}</div>
+<p class="p-card-body">{2-3 frases concretas, com dados, ≤230}</p>
+<div class="p-card-tags"><span class="p-tag dado">{dado quantitativo, ≤35}</span><span class="p-tag impacto">{consequência, ≤35}</span></div>
+</div>
+
+Classes {canal} (use lowercase): instagram, facebook, google, meta, tiktok, site, linkedin, youtube.`,
+  },
+
+  // ════════════════════════ PROBLEMS-2 ════════════════════════
+  'problems-2': {
+    max_tokens: 3500,
+    system: `${REGRAS_BASE}
+
+VOCÊ GERA APENAS A PÁGINA 3 — CONTINUAÇÃO DE PONTOS IDENTIFICADOS (cream).
+
+ESTRUTURA OBRIGATÓRIA:
+
+<div class="pdf-page cream">
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">03 · DIAGN&Oacute;STICO</span></div>
+<div class="section-intro">
+<span class="kicker">Parte 01 · Pontos identificados · continua&ccedil;&atilde;o</span>
+<h2 class="section-title">{novo título com <em>destaque</em>, ≤80}</h2>
+<p class="section-lead">{1-2 frases, ≤220}</p>
+</div>
+<div class="content">
+<div class="problems-grid cols-2">
+{EXATAMENTE 4 p-cards, numerados 05-08}
+</div>
+</div>
+<div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
+</div>
+
+Mesma estrutura de p-card que problems-1. Aborde aspectos diferentes dos canais (funil de conversão, criativos, retargeting, SEO, etc).`,
+  },
+
+  // ════════════════════════ MERCADO ════════════════════════
+  mercado: {
+    max_tokens: 3500,
+    system: `${REGRAS_BASE}
+
+VOCÊ GERA APENAS A PÁGINA DE ANÁLISE DE MERCADO (cream, parte 02).
+
+ESTRUTURA OBRIGATÓRIA:
+
+<div class="pdf-page cream">
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">04 · MERCADO</span></div>
+<div class="section-intro">
+<span class="kicker">Parte 02 · An&aacute;lise de mercado</span>
+<h2 class="section-title">Como o <em>mercado</em> se comporta no nicho</h2>
+<p class="section-lead">{contexto com referência a concorrentes reais, ≤220}</p>
+</div>
+<div class="content">
+<div class="bench-grid">
+{EXATAMENTE 4 bench-cards}
+</div>
+</div>
+<div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
+</div>
+
+CONCORRENTES (OBRIGATÓRIO): cite no MÍNIMO 2 nomes REAIS de concorrentes do segmento na cidade ou região metropolitana. Use seu conhecimento de marcas brasileiras conhecidas no nicho. Se não tiver concorrente local específico, mencione "redes locais como [marca nacional conhecida]".
+
+Estrutura bench-card:
+<div class="bench-card">
+<div class="bench-label">{título da métrica, ≤70}</div>
+<div class="bench-compare">
+<div class="bench-col market"><div class="bench-col-label">Mercado · {fonte}</div><div class="bench-col-value">{valor}<small> {unit}</small></div><div class="bench-col-sub">{contexto, ≤60}</div></div>
+<div class="bench-col you"><div class="bench-col-label">{nome empresa}</div><div class="bench-col-value">{valor}<small> {unit}</small></div><div class="bench-col-sub">{contexto, ≤60}</div></div>
+</div>
+<div class="bench-impact">{insight estratégico, ≤170}</div>
+</div>
+
+Métricas obrigatórias (uma por bench-card): seguidores médios do nicho, engajamento médio, presença em concorrentes locais, ticket médio ou CAC.`,
+  },
+
+  // ════════════════════════ MERCADO-CONT ════════════════════════
+  'mercado-cont': {
+    max_tokens: 3000,
+    system: `${REGRAS_BASE}
+
+VOCÊ GERA APENAS A PÁGINA DE CONTINUAÇÃO DE MERCADO (cream).
+
+ESTRUTURA OBRIGATÓRIA:
+
+<div class="pdf-page cream">
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">05 · MERCADO</span></div>
+<div class="section-intro">
+<span class="kicker">Parte 02 · An&aacute;lise de mercado · continua&ccedil;&atilde;o</span>
+<h2 class="section-title">E como o <em>p&uacute;blico</em> se comporta</h2>
+<p class="section-lead">{1-2 frases sobre comportamento do consumidor, ≤220}</p>
+</div>
+<div class="content">
+<div class="bench-grid">
+{EXATAMENTE 2 bench-cards}
+</div>
+<div class="opp-strip">
+<div class="opp-strip-icon">◆</div>
+<div class="opp-strip-body">
+<h3>{título da oportunidade, ≤60}</h3>
+<p>{descrição de oportunidade concreta, ≤220}</p>
+</div>
+</div>
+</div>
+<div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
+</div>
+
+Os 2 bench-cards devem cobrir comportamento de PÚBLICO: tempo de resposta DM, jornada de compra, recompra, etc. DIFERENTES dos 4 da página anterior. Mesma estrutura de bench-card.`,
+  },
+
+  // ════════════════════════ VERTICAIS ════════════════════════
+  verticais: {
+    max_tokens: 3500,
+    system: `${REGRAS_BASE}
+
+VOCÊ GERA APENAS A PÁGINA DAS 5 VERTICAIS DO NEGÓCIO (cream, parte 03).
+
+ESTRUTURA OBRIGATÓRIA:
+
+<div class="pdf-page cream">
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">06 · VERTICAIS</span></div>
+<div class="section-intro">
+<span class="kicker">Parte 03 · Diagn&oacute;stico por vertical</span>
+<h2 class="section-title">O neg&oacute;cio em <em>5 dimens&otilde;es</em></h2>
+<p class="section-lead">{contexto sobre análise multidimensional, ≤220}</p>
+</div>
+<div class="content">
+<div class="vertical-grid">
+{4 v-cards normais + 1 com class="v-card full"}
+</div>
+</div>
+<div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
+</div>
+
+5 VERTICAIS (na ordem exata):
+01 · Gest&atilde;o de Neg&oacute;cios — estrutura operacional, processos, eficiência
+02 · Cultura e Lideran&ccedil;a — posicionamento, identidade, presença do líder
+03 · Vendas — canais, funil, ticket médio, recorrência
+04 · Experi&ecirc;ncia do Cliente — avaliações, atendimento, NPS estimado
+05 · Crescimento &amp; Aquisi&ccedil;&atilde;o — presença digital, escala (use class="v-card full")
+
+Estrutura v-card:
+<div class="v-card{[ full no 5º]}">
+<div class="v-head"><span class="v-name">{NN} · {Nome Vertical}</span><span class="v-status {ok|warn|crit}">{label, ≤18}</span></div>
+<div class="v-title">{diagnóstico em 1 frase, ≤75}</div>
+<p class="v-body">{2-3 frases com dados reais, ≤260 (full pode ≤400)}</p>
+</div>`,
+  },
+
+  // ════════════════════════ SEO ════════════════════════
+  seo: {
+    max_tokens: 3000,
+    system: `${REGRAS_BASE}
+
+VOCÊ GERA APENAS A PÁGINA DE ANÁLISE DE SEO (cream, condicional).
+
+ESTRUTURA OBRIGATÓRIA:
+
+<div class="pdf-page cream">
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">07 · SEO</span></div>
+<div class="section-intro">
+<span class="kicker">Parte 04 · An&aacute;lise de SEO</span>
+<h2 class="section-title">Como o <em>Google</em> enxerga {dom&iacute;nio}</h2>
+<p class="section-lead">{contexto sobre o site informado, ≤220}</p>
+</div>
+<div class="content">
+<div class="bench-grid">
+{EXATAMENTE 4 bench-cards}
+</div>
+</div>
+<div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
+</div>
+
+4 bench-cards obrigatórios (uma métrica por card):
+1. Velocidade mobile (Core Web Vitals típicas vs estimativa do site)
+2. Palavras-chave locais ranqueadas (estimativa)
+3. Schema markup / dados estruturados (mercado vs lead)
+4. Backlinks / autoridade de domínio (estimativa do nicho)
+
+Use a mesma estrutura de bench-card da página de mercado.`,
+  },
+
+  // ════════════════════════ INVESTIMENTO ════════════════════════
+  investimento: {
+    max_tokens: 3500,
+    system: `${REGRAS_BASE}
+
+VOCÊ GERA APENAS A PÁGINA DE INVESTIMENTO (cream, condicional a com_proposta=Sim).
+
+ESTRUTURA OBRIGATÓRIA:
+
+<div class="pdf-page cream">
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">08 · INVESTIMENTO</span></div>
+<div class="section-intro">
+<span class="kicker">Parte 04 · Investimento sugerido</span>
+<h2 class="section-title">O que <em>solucionamos</em> e quanto custa</h2>
+<p class="section-lead">{contexto sobre planos sugeridos, ≤220}</p>
+</div>
+<div class="content">
+<div class="plan-grid">
+{1 ou mais plan-boxes, conforme PLANO INDICADO}
+</div>
+<div class="contract-clause">
+<div class="contract-clause-label">&#128203; Condi&ccedil;&otilde;es de contrato</div>
+<div class="contract-clause-text">Fidelidade m&iacute;nima de <strong>12 meses</strong>. Contrato de 6 meses dispon&iacute;vel com acr&eacute;scimo de <em>20%</em> sobre o valor mensal do plano escolhido.{ Para planos com tr&aacute;fego pago: Investimento em m&iacute;dia (verba Meta Ads) n&atilde;o incluso, sugerido a partir de R$ 600/m&ecirc;s.}</div>
+</div>
+</div>
+<div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
+</div>
+
+PLANOS FIXOS DO REC (use APENAS estes valores):
+Plano 1 — R$ 1.500/mês: Social Media + Captação de Conteúdo
+Plano 2 — R$ 2.500/mês: Plano 1 + Tráfego Pago Meta
+Plano 3 — R$ 2.900/mês: Plano 2 + Google Empresa (+R$300 add-on TikTok)
+Plano 4 — R$ 3.800/mês: Plano 3 + Suporte Comercial (+R$300 add-on TikTok)
+
+Estrutura plan-box:
+<div class="plan-box">
+<div>
+<span class="plan-box-badge">PLANO N{[ · Recomendado se for o caso]}</span>
+<div class="plan-box-name">{nome do plano, ≤90}</div>
+<div class="plan-box-price">R$ {valor}<small>/m&ecirc;s</small></div>
+</div>
+<ul class="plan-box-items">
+{itens do plano, cada ≤50 char, até 8 itens}
+</ul>
+</div>
+
+Conte quantos planos vêm em PLANO INDICADO (separados por " | "). Gere um plan-box por plano. Personalizado conta como 1 plano.`,
+  },
+
+  // ════════════════════════ MODULOS ════════════════════════
+  modulos: {
+    max_tokens: 3000,
+    system: `${REGRAS_BASE}
+
+VOCÊ GERA APENAS A PÁGINA DE MÓDULOS DE TRABALHO (cream, "como entregamos").
+
+ESTRUTURA OBRIGATÓRIA:
+
+<div class="pdf-page cream">
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">09 · M&Oacute;DULOS</span></div>
+<div class="section-intro">
+<span class="kicker">Parte 05 · M&oacute;dulos de trabalho</span>
+<h2 class="section-title">Como <em>entregamos</em> resultado</h2>
+<p class="section-lead">{contexto sobre processo de trabalho REC, ≤220}</p>
+</div>
+<div class="content">
+<div class="deliverable-grid">
+{EXATAMENTE 4 d-cards}
+</div>
+</div>
+<div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
+</div>
+
+4 MÓDULOS OBRIGATÓRIOS (use estes nomes e foque em COMO trabalhamos, não O QUE):
+1. Gest&atilde;o de Instagram (ícone ◐)
+2. Capta&ccedil;&atilde;o de Conte&uacute;do (ícone ◑)
+3. Tr&aacute;fego Pago Meta Ads (ícone ◒)
+4. Google Empresa GMB (ícone ◓)
+
+Estrutura d-card:
+<div class="d-card">
+<div class="d-head">
+<div class="d-icon">{ícone}</div>
+<div class="d-head-text">
+<div class="d-title">{nome módulo, ≤55}</div>
+<span class="d-plan-tag">{Plano N+}</span>
+</div>
+</div>
+<p class="d-body">{COMO trabalhamos, ≤170}</p>
+<div class="d-items">
+{≤5 d-items, cada com div.d-item começando com span.d-bullet ▸}
+</div>
+</div>
+
+REGRA ANTI-DUPLICAÇÃO: d-cards mostram COMO TRABALHAMOS (calendário, formatos, revisões, fluxo). NUNCA repita os itens dos plan-boxes.
+PROIBIDO no Google Empresa: mencionar publicações periódicas. REC só otimiza perfil, atualiza fotos e gerencia avaliações.`,
+  },
+
+  // ════════════════════════ HUB-WHY ════════════════════════
+  'hub-why': {
+    max_tokens: 2500,
+    system: `${REGRAS_BASE}
+
+VOCÊ GERA APENAS A PÁGINA FINAL HUB-WHY (dark, fechamento institucional).
+
+ESTRUTURA OBRIGATÓRIA:
+
+<div class="pdf-page dark">
+<div class="cover-decoration"></div>
+<div class="hw-content">
+<div class="hw-eyebrow">Por que com o R.E.C.</div>
+<h2 class="hw-title">{título institucional com <em>destaque</em>, ≤80}</h2>
+<p class="hw-sub">{1-2 frases tom da marca REC, ≤240}</p>
+<div class="hw-benefits">
+{EXATAMENTE 5 hw-benefits}
+</div>
+<div class="hw-tagline">"{tagline italic curta, ≤60}"</div>
+<div class="hw-footer">
+<div class="hw-footer-logo"><img src="" alt="R.E.C."><span class="hw-brand">R.E.C. <em>HUB</em></span></div>
+<div class="hw-footer-handle">somosrecoficial.com.br<br>@somosrecoficial</div>
+</div>
+</div>
+</div>
+
+Estrutura hw-benefit:
+<div class="hw-benefit">
+<div class="hw-b-num">{NN}</div>
+<div>
+<div class="hw-b-title">{título, ≤50}</div>
+<p class="hw-b-desc">{descrição, ≤130}</p>
+</div>
+</div>
+
+5 BENEFÍCIOS típicos do REC HUB (personalize um pouco mas mantenha esta linha):
+01 Estratégia personalizada por nicho
+02 Time dedicado, não freelancer rotativo
+03 Captação mensal in-loco (não banco de imagens)
+04 Relatórios mensais com métricas reais
+05 Foco em ROI, não vanity metrics
+
+A img src="" será preenchida pelo sistema.`,
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════
+// MONTA O USER MESSAGE COM DADOS DO LEAD
+// ═══════════════════════════════════════════════════════════════
+function buildUserMessage(page, lead) {
+  const mes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const now = new Date();
+  const mesAno = mes[now.getMonth()] + ' ' + now.getFullYear();
+
+  const linhas = [
+    `Gere a página "${page}" do diagnóstico com os dados abaixo:`,
+    '',
+    `EMPRESA: ${lead.nome_empresa || 'Não informada'}`,
+    `INSTAGRAM: ${lead.instagram || ''}`,
+    `SEGMENTO: ${lead.segmento || 'Não informado'}`,
+    `CIDADE: ${lead.cidade || 'Não informada'}`,
+    `MÊS/ANO: ${mesAno}`,
+    '',
+    `CANAIS A ANALISAR: ${lead.canais || 'Nenhum especificado'}`,
+  ];
+
+  if (lead.site) linhas.push(`SITE: ${lead.site}`);
+  if (lead.tiktok_handle) linhas.push(`TIKTOK: ${lead.tiktok_handle}`);
+  if (lead.youtube_handle) linhas.push(`YOUTUBE: ${lead.youtube_handle}`);
+  if (lead.linkedin_handle) linhas.push(`LINKEDIN: ${lead.linkedin_handle}`);
+
+  linhas.push('');
+  linhas.push(`CONTEXTO:`);
+  if (lead.trafego_atual) linhas.push(`- Tráfego pago atual: ${lead.trafego_atual}`);
+  if (lead.tem_site) linhas.push(`- Tem site: ${lead.tem_site}`);
+  if (lead.objetivo) linhas.push(`- Objetivos: ${lead.objetivo}`);
+
+  if (lead.observacoes) {
+    linhas.push('');
+    linhas.push(`OBSERVAÇÕES DO CAPTADOR: ${lead.observacoes}`);
+  }
+
+  if (page === 'investimento' && lead.plano) {
+    linhas.push('');
+    linhas.push(`PLANO INDICADO: ${lead.plano}`);
+  }
+
+  if (lead.obs_extra) {
+    linhas.push('');
+    linhas.push(`NOTAS EXTRAS: ${lead.obs_extra}`);
+  }
+
+  return linhas.join('\n');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HANDLER
+// ═══════════════════════════════════════════════════════════════
+export default async function handler(req, res) {
+  if (applyCors(req, res, 'POST,OPTIONS')) return;
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!requireAuth(req, res)) return;
+
+  const rl = rateLimit(req, 'diagnostico-page', 60, 60000);
+  if (rl.blocked) { res.setHeader('Retry-After', rl.retryAfter); return res.status(429).json({ error: 'Rate limit' }); }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'API key not configured' });
+
+  const body = readBody(req);
+  const { page, lead } = body;
+
+  if (!page || !PAGES[page]) {
+    return res.status(400).json({ error: `Page "${page}" inválida. Válidas: ${Object.keys(PAGES).join(', ')}` });
+  }
+  if (!lead || typeof lead !== 'object') {
+    return res.status(400).json({ error: 'lead object required' });
+  }
+
+  const pageConfig = PAGES[page];
+  const userMessage = buildUserMessage(page, lead);
+
+  try {
+    const upstream = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: pageConfig.max_tokens,
+        system: pageConfig.system,
+        messages: [{ role: 'user', content: userMessage }],
+        stream: false,
+      }),
+    });
+
+    if (!upstream.ok) {
+      const err = await upstream.text();
+      return res.status(upstream.status).json({ error: err });
+    }
+
+    const data = await upstream.json();
+    let html = '';
+    if (Array.isArray(data.content)) {
+      for (const block of data.content) {
+        if (block.type === 'text' && block.text) html += block.text;
+      }
+    }
+
+    // Strip texto anterior ao primeiro <div (se modelo escapar com texto introdutório)
+    html = html.trim();
+    if (html.startsWith('```')) {
+      html = html.replace(/^```(?:html)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+    }
+    const firstDiv = html.indexOf('<div class="pdf-page');
+    if (firstDiv > 0) html = html.slice(firstDiv);
+
+    if (!html || !html.startsWith('<div class="pdf-page')) {
+      return res.status(500).json({
+        error: 'Resposta da IA não começa com <div class="pdf-page">',
+        preview: html.slice(0, 200),
+        page,
+      });
+    }
+
+    return res.status(200).json({
+      page,
+      html,
+      stop_reason: data.stop_reason,
+      tokens: {
+        input: data.usage?.input_tokens || 0,
+        output: data.usage?.output_tokens || 0,
+      },
+    });
+  } catch (error) {
+    console.error(`[diagnostico-page] erro em "${page}":`, error.message);
+    return res.status(500).json({ error: error.message, page });
+  }
+}
