@@ -1192,7 +1192,8 @@ async function chamarClaude(dados) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       messages: [{ role: 'user', content: buildPrompt(dados) }],
-      max_tokens: 16000
+      // 32k inclui thinking (~3k) + output (~29k). PDFs grandes do novo layout usam ~10-15k de HTML.
+      max_tokens: 32000
     })
   });
 
@@ -1209,6 +1210,7 @@ async function chamarClaude(dados) {
   var inputTokens = 0, outputTokens = 0;
   var charCount = 0;
   var searchCount = 0;
+  var stopReason = null;
 
   while (true) {
     var chunk = await reader.read();
@@ -1246,8 +1248,9 @@ async function chamarClaude(dados) {
           }
         } else if (ev.type === 'message_start' && ev.message && ev.message.usage) {
           inputTokens = ev.message.usage.input_tokens || 0;
-        } else if (ev.type === 'message_delta' && ev.usage) {
-          outputTokens = ev.usage.output_tokens || 0;
+        } else if (ev.type === 'message_delta') {
+          if (ev.usage) outputTokens = ev.usage.output_tokens || 0;
+          if (ev.delta && ev.delta.stop_reason) stopReason = ev.delta.stop_reason;
         }
       } catch (e) {}
     }
@@ -1264,7 +1267,13 @@ async function chamarClaude(dados) {
   // Custo: tokens (Sonnet) + buscas web ($0.01 cada = $10/1000)
   var custoBuscas = searchCount * 0.01;
   var custo = (inputTokens * PRICING.input) + (outputTokens * PRICING.output) + custoBuscas;
-  lastAnalysisCost = { input: inputTokens, output: outputTokens, total_usd: custo };
+  lastAnalysisCost = { input: inputTokens, output: outputTokens, total_usd: custo, stop_reason: stopReason };
+
+  // Aviso se truncou — útil pra debug. stop_reason esperado: "end_turn".
+  // Outros: "max_tokens" (precisa subir limite), "pause_turn" (interrompido), "tool_use" (parou no meio de tool).
+  if (stopReason && stopReason !== 'end_turn') {
+    console.warn('[chamarClaude] stop_reason inesperado:', stopReason, 'output_tokens:', outputTokens);
+  }
   return fullText;
 }
 
@@ -1450,9 +1459,10 @@ async function enviarSolicitacao() {
       setSubtitle('PDF gerado e baixado com sucesso!');
       await new Promise(function(r){ setTimeout(r, 1800); });
       hideLoading();
-      var costMsg = lastAnalysisCost ? ' · Custo: $'+lastAnalysisCost.total_usd.toFixed(3) : '';
-      document.getElementById('status_bar').className = 'status-bar success';
-      document.getElementById('status_bar').innerHTML = '✅ PDF baixado com sucesso!' + costMsg;
+      var costMsg = lastAnalysisCost ? ' · Custo: $'+lastAnalysisCost.total_usd.toFixed(3)+' · '+lastAnalysisCost.output+' tok output' : '';
+      var truncMsg = (lastAnalysisCost && lastAnalysisCost.stop_reason && lastAnalysisCost.stop_reason !== 'end_turn') ? ' · ⚠️ stop_reason: '+lastAnalysisCost.stop_reason : '';
+      document.getElementById('status_bar').className = (truncMsg ? 'status-bar error' : 'status-bar success');
+      document.getElementById('status_bar').innerHTML = (truncMsg ? '⚠️ PDF gerado mas truncado!' : '✅ PDF baixado com sucesso!') + costMsg + truncMsg;
       document.getElementById('btn_nova').style.display = 'inline-flex';
       atualizarCreditosHeader();
     } catch(err) {

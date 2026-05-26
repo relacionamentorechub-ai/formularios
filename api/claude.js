@@ -448,15 +448,19 @@ export default async function handler(req, res) {
 
   const { messages, max_tokens, system } = req.body;
 
+  // IMPORTANTE: max_tokens inclui thinking_tokens + output_tokens.
+  // Pra 9-10 páginas do layout novo precisamos de ~12k tokens de HTML.
+  // 32000 - 3000 (thinking) = 29000 disponíveis pro output. Folga grande.
+  const effectiveMaxTokens = Math.max(max_tokens || 0, 32000);
   const body = {
     model: 'claude-sonnet-4-6',
-    max_tokens: max_tokens || 16000,
+    max_tokens: effectiveMaxTokens,
     system: system || SYSTEM_PROMPT,
     messages: messages,
     stream: true,
     thinking: {
       type: 'enabled',
-      budget_tokens: 6000,
+      budget_tokens: 3000,
     },
     tools: [
       {
