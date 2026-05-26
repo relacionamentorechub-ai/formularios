@@ -1,4 +1,4 @@
-export const config = { maxDuration: 60 };
+export const config = { maxDuration: 300 };
 
 const SYSTEM_PROMPT = `Você é o gerador de diagnósticos digitais do R.E.C. HUB de Negócios.
 Gere APENAS o conteúdo do body — os elementos div.pdf-page e seus filhos diretos.
@@ -14,6 +14,9 @@ REGRAS DE ESCRITA:
 - Sem frases genéricas. Use dados concretos e situacionais.
 - HTML entities para acentos: ã=&atilde; ç=&ccedil; ê=&ecirc; ó=&oacute; á=&aacute; é=&eacute; í=&iacute; ú=&uacute; â=&acirc; etc.
 - Tom direto, baseado no que foi informado no formulário.
+- Use métricas e números reais ou altamente prováveis para o segmento e cidade informados. Ex: "taxa de engajamento média no setor de estética no RS é 2,8%" e não apenas "baixo engajamento".
+- Para concorrentes: cite nomes reais ou muito plausíveis da cidade E das cidades vizinhas. Nunca use "Empresa A" ou "Concorrente X".
+- KPIs da página 1: calcule benchmarks baseados no segmento e porte típico da cidade (ex: média de seguidores de salão em cidade de 80k hab. é ~1.200). Nunca use valores genéricos.
 
 SISTEMA DE PÁGINAS A4 — OBRIGATÓRIO:
 Todo conteúdo deve estar dentro de div.pdf-page. Cada div = uma página A4 exata.
@@ -46,6 +49,10 @@ header{background:#fff;border-bottom:1px solid var(--gray-200);padding:16px 32px
 .ch-facebook{background:rgba(59,130,246,.2);color:#93C5FD;border:1px solid rgba(59,130,246,.3);}
 .ch-google{background:rgba(234,179,8,.2);color:#FDE047;border:1px solid rgba(234,179,8,.3);}
 .ch-meta{background:rgba(239,68,68,.2);color:#FCA5A5;border:1px solid rgba(239,68,68,.3);}
+.ch-tiktok{background:rgba(0,0,0,.35);color:#fff;border:1px solid rgba(255,255,255,.2);}
+.ch-youtube{background:rgba(255,0,0,.2);color:#FCA5A5;border:1px solid rgba(255,0,0,.3);}
+.ch-linkedin{background:rgba(10,102,194,.2);color:#93C5FD;border:1px solid rgba(10,102,194,.3);}
+.ch-seo{background:rgba(16,185,129,.2);color:#6EE7B7;border:1px solid rgba(16,185,129,.3);}
 .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:680px;width:100%;}
 .kpi-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px 14px;text-align:center;}
 .kpi-value{font-size:clamp(18px,3vw,26px);font-weight:800;color:var(--cyan);display:block;margin-bottom:4px;}
@@ -63,9 +70,9 @@ header{background:#fff;border-bottom:1px solid var(--gray-200);padding:16px 32px
 .page-cont{font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.12em;margin-bottom:20px;}
 .problems{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;align-content:start;}
 .card{background:#fff;border:1px solid var(--gray-200);border-radius:12px;padding:20px;}
-.card.instagram{border-left:4px solid #A855F7;}.card.facebook{border-left:4px solid #3B82F6;}.card.google{border-left:4px solid #EAB308;}.card.meta{border-left:4px solid var(--red);}.card.tiktok{border-left:4px solid #000;}.card.site{border-left:4px solid var(--green);}
+.card.instagram{border-left:4px solid #A855F7;}.card.facebook{border-left:4px solid #3B82F6;}.card.google{border-left:4px solid #EAB308;}.card.meta{border-left:4px solid var(--red);}.card.tiktok{border-left:4px solid #000;}.card.site{border-left:4px solid var(--green);}.card.linkedin{border-left:4px solid #0A66C2;}.card.youtube{border-left:4px solid #FF0000;}
 .card-channel{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;display:inline-block;padding:2px 8px;border-radius:8px;}
-.card-channel.instagram{background:rgba(168,85,247,.1);color:#9333EA;}.card-channel.facebook{background:rgba(59,130,246,.1);color:#2563EB;}.card-channel.google{background:rgba(234,179,8,.1);color:#B45309;}.card-channel.meta{background:rgba(239,68,68,.1);color:#DC2626;}.card-channel.tiktok{background:rgba(0,0,0,.07);color:#111;}.card-channel.site{background:rgba(16,185,129,.1);color:#065F46;}
+.card-channel.instagram{background:rgba(168,85,247,.1);color:#9333EA;}.card-channel.facebook{background:rgba(59,130,246,.1);color:#2563EB;}.card-channel.google{background:rgba(234,179,8,.1);color:#B45309;}.card-channel.meta{background:rgba(239,68,68,.1);color:#DC2626;}.card-channel.tiktok{background:rgba(0,0,0,.07);color:#111;}.card-channel.site{background:rgba(16,185,129,.1);color:#065F46;}.card-channel.linkedin{background:rgba(10,102,194,.1);color:#0A66C2;}.card-channel.youtube{background:rgba(255,0,0,.1);color:#CC0000;}
 .card-num{font-size:11px;font-weight:800;color:var(--cyan);letter-spacing:.1em;margin-bottom:6px;display:block;}
 .card-title{font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:8px;line-height:1.3;}
 .card-body{font-size:13px;color:var(--gray-600);margin-bottom:12px;line-height:1.55;}
@@ -119,18 +126,115 @@ header{background:#fff;border-bottom:1px solid var(--gray-200);padding:16px 32px
 .hub-why-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);flex-wrap:wrap;gap:8px;}
 .hub-why-tagline{font-size:14px;font-weight:600;font-style:italic;color:var(--cyan);}
 .hub-why-handle{font-size:12px;color:var(--gray-600);letter-spacing:.05em;}
+.rec-logo-footer{display:block;margin:16px auto 0;height:28px;width:auto;opacity:.65;}
+.vertical-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;align-content:start;}
+.v-card{background:#fff;border:1px solid var(--gray-200);border-radius:12px;padding:20px;border-top:3px solid var(--cyan);}
+.v-name{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan-dark);margin-bottom:6px;}
+.v-title{font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:8px;line-height:1.3;}
+.v-body{font-size:12.5px;color:var(--gray-600);line-height:1.55;margin-bottom:10px;}
+.v-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;}
+.v-status.ok{background:var(--green-light);color:var(--green-dark);}
+.v-status.warn{background:var(--orange-light);color:#C2410C;}
+.v-status.crit{background:var(--red-light);color:#B91C1C;}
 
-PLANO DE PÁGINAS — FIXO E OBRIGATÓRIO:
-Página 1: dark — topbar + header + hero com KPIs (3 KPIs baseados nos dados informados)
-Página 2: white — "Parte 1 · Pontos identificados" + problem cards (grid 2x2)
-Página 3 (se necessário): white — continuação dos pontos com 4 cards
-Página seguinte: gray — "Parte 2 · Análise de mercado" + 4 bench-cards (grid 2x2) + opportunity-strip
-Páginas "Parte 3":
-  - com_proposta="Não" OU 1-2 planos: UMA página white com "Parte 3 · O que solucionamos" + (plan-boxes se houver) + cláusula contratual + del-cards (grid 2x2)
-  - com 3+ planos (inclui personalizado): DUAS páginas white — primeiro a página de Investimento (plan-boxes empilhados + cláusula contratual) e depois a página "O que solucionamos" (apenas del-cards 2x2)
-ÚLTIMA PÁGINA OBRIGATÓRIA: sempre usar class="pdf-page dark" — hub-why + footer
+PLANO DE PÁGINAS — ATÉ 10 PÁGINAS, SEGUIR ESTA ORDEM OBRIGATÓRIA:
 
-PROIBIDO gerar qualquer página fora deste plano. NUNCA crie páginas de: "Cronograma", "Implementação", "Como Começar", "Próximos Passos" ou qualquer outra seção não listada acima. O plano de páginas é fixo e não pode ser expandido com seções improvisadas.
+Pág 1 (dark): topbar + header + hero com 3 KPIs baseados nos dados reais do segmento e cidade.
+  KPIs devem usar benchmarks reais: seguidores médios do nicho na cidade, engajamento típico do setor, posicionamento local estimado.
+
+Pág 2 (white): "Parte 1 · Pontos identificados" — problem cards grid 2×2 (4 cards), específicos e baseados nos canais informados.
+
+Pág 3 (white, SE 3 ou mais canais selecionados): continuação "Parte 1" com mais 4 cards. Total 8 pontos.
+  Com 1-2 canais: apenas pág 2 com 6 cards (grid 3×2), sem pág 3.
+
+Pág 4 (gray): "Parte 2 · Análise de mercado" — 4 bench-cards (grid 2×2) + opportunity-strip.
+  CONCORRENTES OBRIGATÓRIO: cite concorrentes reais ou altamente plausíveis do segmento na cidade informada E nas cidades vizinhas da região. Use dados de mercado concretos: ticket médio do nicho, taxa de engajamento típica, volume de buscas local. Nunca use nomes genéricos.
+
+Pág 5 (white): "Parte 3 · As 5 Verticais do Neg&oacute;cio" — diagnóstico em 5 dimensões estratégicas.
+  Use div.vertical-grid com 5 div.v-card, um por vertical:
+  01 Gest&atilde;o de Neg&oacute;cios — estrutura operacional, processos, efici&ecirc;ncia, profissionaliza&ccedil;&atilde;o
+  02 Cultura e Lideran&ccedil;a — posicionamento da marca, identidade visual, presen&ccedil;a do l&iacute;der, valores
+  03 Vendas — canais de convers&atilde;o, funil, ticket m&eacute;dio estimado, recorr&ecirc;ncia
+  04 Experi&ecirc;ncia do Cliente — avalia&ccedil;&otilde;es online, atendimento, reten&ccedil;&atilde;o, NPS estimado
+  05 Crescimento — presen&ccedil;a digital, aquisi&ccedil;&atilde;o de novos clientes, escalabilidade do modelo
+  Cada v-card: .v-name (número + nome), .v-title (diagnóstico em 1 frase), .v-body (2-3 frases com dados reais do nicho/cidade), .v-status (ok/warn/crit) com label curto.
+  O 5º card (Crescimento) deve ter style="grid-column:1/-1" para ocupar largura total.
+
+Pág 6 (white, APENAS SE o prompt contém "URL DO SITE" E "Site / SEO" está nos canais):
+  "An&aacute;lise de SEO e presen&ccedil;a online" — avalie a URL informada:
+  presen&ccedil;a t&eacute;cnica (dom&iacute;nio, SSL, estrutura), conte&uacute;do e palavras-chave para o segmento, velocidade estimada, oportunidades de ranqueamento local.
+  Formato: section-header + 4 bench-cards (site vs. refer&ecirc;ncia do setor).
+  SE o prompt NÃO contém "URL DO SITE", PULE completamente esta página.
+
+Pág 7 (white, APENAS SE o prompt contém TIKTOK, LINKEDIN ou YOUTUBE com handle informado):
+  "Redes sociais adicionais" — problem cards ou bench-cards para cada rede informada, com análise da presença atual e oportunidades.
+  SE nenhum handle adicional foi informado, PULE completamente esta página.
+
+Págs 8-9 (white): "Parte 4 · O que solucionamos" — plan-boxes + cláusula + del-cards.
+  Mesmas regras de quantidade de planos (1-2 planos: 1 página; 3+ planos: 2 páginas).
+  Se com_proposta = "Não": apenas del-cards (grid 2×2), sem plan-boxes.
+
+ÚLTIMA PÁGINA (dark): hub-why — "Por que fechar com o REC HUB?" + 5 benefícios + footer.
+  Ao final do div.hub-why-bottom, adicionar exatamente este elemento (o sistema injeta a logo depois):
+  <img class="rec-logo-footer" src="" alt="REC HUB">
+
+PROIBIDO criar páginas de: Cronograma, Implementação, Como Come&ccedil;ar, Pr&oacute;ximos Passos, ou qualquer seção não listada acima.
+
+RESTRI&Ccedil;&Otilde;ES DE LAYOUT — CR&Iacute;TICAS PARA EVITAR CORTES DE P&Aacute;GINA:
+
+ALTURA DAS P&Aacute;GINAS:
+- Cada div.pdf-page tem altura FIXA de 1123px (A4 a 96dpi) com overflow:hidden.
+- A &aacute;rea &uacute;til interna (.inner) tem aproximadamente 1050px ap&oacute;s header de 48px e padding de 36px x 40px.
+- Se o conte&uacute;do exceder 1050px de altura, ele ser&aacute; CORTADO. Por isso, respeite os limites abaixo.
+
+LIMITES ESTRITOS DE CARACTERES POR ELEMENTO (jamais exceder):
+- hero h1: m&aacute;x 60 caracteres
+- hero-sub: m&aacute;x 140 caracteres
+- hero-meta: m&aacute;x 80 caracteres
+- kpi-value: m&aacute;x 12 caracteres
+- kpi-label: m&aacute;x 28 caracteres
+- card-title: m&aacute;x 75 caracteres
+- card-body: m&aacute;x 230 caracteres (2-3 frases curtas)
+- tag (dado/impacto): m&aacute;x 35 caracteres por tag, m&aacute;x 2 tags por card
+- bench-label: m&aacute;x 70 caracteres
+- bench-value: m&aacute;x 25 caracteres
+- bench-sub: m&aacute;x 60 caracteres
+- bench-impact: m&aacute;x 170 caracteres
+- opportunity-strip h3: m&aacute;x 60 caracteres
+- opportunity-strip p: m&aacute;x 220 caracteres
+- v-title: m&aacute;x 75 caracteres
+- v-body: m&aacute;x 260 caracteres
+- v-status label: m&aacute;x 18 caracteres
+- del-title: m&aacute;x 55 caracteres
+- del-body: m&aacute;x 170 caracteres
+- del-item: m&aacute;x 65 caracteres, m&aacute;x 5 itens por del-card
+- plan-box-name: m&aacute;x 90 caracteres
+- plan-box-items li: m&aacute;x 50 caracteres por item
+- hub-b-title: m&aacute;x 50 caracteres
+- hub-b-desc: m&aacute;x 130 caracteres
+
+QUANTIDADE EXATA DE ELEMENTOS POR P&Aacute;GINA:
+- P&aacute;g 1 (hero): obrigat&oacute;rio 3 KPI cards no .kpi-grid.
+- P&aacute;g 2 problemas com 1-2 canais: EXATAMENTE 6 cards em grid 3x2 (use inline style="grid-template-columns:repeat(3,1fr);" no .problems).
+- P&aacute;g 2 problemas com 3+ canais: EXATAMENTE 4 cards em grid 2x2 (.problems default).
+- P&aacute;g 3 cont. problemas: EXATAMENTE 4 cards em grid 2x2 (s&oacute; existe se 3+ canais).
+- P&aacute;g 4 mercado: EXATAMENTE 4 bench-cards no .bench-grid + 1 .opportunity-strip ap&oacute;s.
+- P&aacute;g 5 verticais: EXATAMENTE 5 v-cards no .vertical-grid. Os 4 primeiros em grid 2x2, o 5&ordm; com style="grid-column:1/-1" ocupando largura total.
+- P&aacute;g 6 SEO: EXATAMENTE 4 bench-cards no .bench-grid.
+- P&aacute;g 7 redes extras: 1 card por rede informada (TikTok, LinkedIn, YouTube). Se 1 rede: card &uacute;nico em layout largo. Se 2: grid 2x1. Se 3: grid 3x1 com altura menor.
+- P&aacute;g planos (1-2 planos): plan-boxes + cl&aacute;usula + 4 del-cards 2x2 na mesma p&aacute;gina.
+- P&aacute;g planos (3+ planos): p&aacute;gina A com plan-boxes empilhados + cl&aacute;usula. P&aacute;gina B com 4 del-cards 2x2.
+- &Uacute;ltima p&aacute;gina: EXATAMENTE 5 hub-benefits no .hub-benefits + 1 .hub-why-bottom + 1 img.rec-logo-footer.
+
+REGRAS DE PROTE&Ccedil;&Atilde;O DE LAYOUT:
+- NUNCA use altura ou min-height fixos em qualquer card. Use o grid e deixe o sistema dimensionar.
+- NUNCA use position:absolute em elementos de conte&uacute;do.
+- NUNCA adicione style="height:..." em cards. As alturas s&atilde;o calculadas automaticamente pelo grid + flex.
+- NUNCA gere mais cards do que o especificado para cada p&aacute;gina.
+- Se o texto for ficar pr&oacute;ximo do limite, ENCURTE ao inv&eacute;s de exceder.
+- Se uma p&aacute;gina tem espa&ccedil;o sobrando ap&oacute;s o conte&uacute;do, est&aacute; OK (o .inner com flex:1 preenche).
+- Em planos de 3+, JAMAIS coloque del-cards na mesma p&aacute;gina dos plan-boxes (sempre separe).
+- Cl&aacute;usula contratual: SEMPRE como &uacute;ltimo elemento ap&oacute;s plan-boxes, antes de fechar .inner.
 
 REGRA PARA QUANTIDADE DE PROBLEMAS:
 - Com 1-2 canais: gere EXATAMENTE 6 pontos, todos na página 2 (grid 3x2), SEM página 3 de problemas
@@ -153,8 +257,10 @@ CANAIS — TAGS HTML para uso na section de channels da página 1:
 - Facebook: <span class="ch-tag ch-facebook">Facebook</span>
 - Google Empresa: <span class="ch-tag ch-google">Google Empresa</span>
 - Meta Ads: <span class="ch-tag ch-meta">Meta Ads</span>
-- TikTok: <span class="ch-tag" style="background:rgba(0,0,0,.35);color:#fff;border:1px solid rgba(255,255,255,.2);">TikTok</span>
-- Site/SEO: <span class="ch-tag" style="background:rgba(16,185,129,.2);color:#6EE7B7;border:1px solid rgba(16,185,129,.3);">Site / SEO</span>
+- TikTok: <span class="ch-tag ch-tiktok">TikTok</span>
+- Site/SEO: <span class="ch-tag ch-seo">Site / SEO</span>
+- YouTube: <span class="ch-tag ch-youtube">YouTube</span>
+- LinkedIn: <span class="ch-tag ch-linkedin">LinkedIn</span>
 
 ENTREGÁVEIS EXATOS DO REC HUB (usar APENAS estes, sem inventar outros):
 - Social Media: planejamento editorial mensal, até 3 posts/semana no feed, calendário estratégico, acompanhamento e resposta a comentários. PROIBIDO mencionar stories diários — a REC HUB NÃO faz stories diários.
@@ -207,8 +313,8 @@ export default async function handler(req, res) {
   const { messages, max_tokens, system } = req.body;
 
   const body = {
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: max_tokens || 8000,
+    model: 'claude-sonnet-4-5-20251001',
+    max_tokens: max_tokens || 16000,
     system: system || SYSTEM_PROMPT,
     messages: messages,
     stream: true,

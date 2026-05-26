@@ -466,6 +466,16 @@ footer strong { color:var(--cyan); }
       <label class="choice-item"><input type="checkbox" name="canais" value="YouTube"><div><div class="choice-label">▶ YouTube</div><div class="choice-sub">Canal, inscritos, frequência de vídeos, autoridade</div></div></label>
       <label class="choice-item"><input type="checkbox" name="canais" value="LinkedIn"><div><div class="choice-label">💼 LinkedIn</div><div class="choice-sub">Perfil da empresa, posição, presença profissional</div></div></label>
     </div>
+
+    <div class="field-group" style="margin-top:18px;padding-top:18px;border-top:1px solid rgba(6,182,212,.08);">
+      <label class="field-label">Handles das redes selecionadas <span style="color:var(--text-muted);font-size:11px;font-weight:400;text-transform:none;letter-spacing:0;">(preencha apenas se marcou TikTok, YouTube ou LinkedIn acima)</span></label>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <input id="tiktok_handle" type="text" placeholder="@perfil TikTok">
+        <input id="youtube_handle" type="text" placeholder="@canal YouTube ou URL">
+        <input id="linkedin_handle" type="text" placeholder="URL ou nome empresa LinkedIn">
+      </div>
+      <div class="field-hint" style="margin-top:8px;">Quando informado, a IA faz análise específica daquela rede no diagnóstico.</div>
+    </div>
   </div>
 
   <!-- BLOCO 4 -->
@@ -813,7 +823,7 @@ footer strong { color:var(--cyan); }
 var SUPABASE_URL  = 'https://dissknbpwxvhkjltuzya.supabase.co';
 var SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpc3NrbmJwd3h2aGtqbHR1enlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzOTM4OTYsImV4cCI6MjA5MTk2OTg5Nn0.VcAUjRZ9thxNCJZ2QZ6IUQkFyzZ99cDB5ADdvu00a7M';
 var EMAIL_DESTINO = 'relacionamento.rechub@gmail.com';
-var PRICING = { input: 0.000001, output: 0.000005 }; // Haiku 4.5 pricing
+var PRICING = { input: 0.000003, output: 0.000015 }; // Sonnet 4.5/4.6 pricing
 var lastAnalysisCost = null;
 
 /* Template HTML completo — envolve o output de Claude (que gera só os divs) */
@@ -836,7 +846,7 @@ var PDF_HTML_HEADER = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UT
 '.hero-sub{font-size:13.5px;color:#94A3B8;margin-bottom:12px;max-width:540px;}.hero-meta{font-size:12px;color:#64748B;margin-bottom:28px;}.hero-meta strong{color:#CBD5E1;}' +
 '.channels{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:28px;}' +
 '.ch-tag{font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;}' +
-'.ch-instagram{background:rgba(131,58,180,.2);color:#D8B4FE;border:1px solid rgba(131,58,180,.3);}.ch-facebook{background:rgba(59,130,246,.2);color:#93C5FD;border:1px solid rgba(59,130,246,.3);}.ch-google{background:rgba(234,179,8,.2);color:#FDE047;border:1px solid rgba(234,179,8,.3);}.ch-meta{background:rgba(239,68,68,.2);color:#FCA5A5;border:1px solid rgba(239,68,68,.3);}' +
+'.ch-instagram{background:rgba(131,58,180,.2);color:#D8B4FE;border:1px solid rgba(131,58,180,.3);}.ch-facebook{background:rgba(59,130,246,.2);color:#93C5FD;border:1px solid rgba(59,130,246,.3);}.ch-google{background:rgba(234,179,8,.2);color:#FDE047;border:1px solid rgba(234,179,8,.3);}.ch-meta{background:rgba(239,68,68,.2);color:#FCA5A5;border:1px solid rgba(239,68,68,.3);}.ch-tiktok{background:rgba(0,0,0,.35);color:#fff;border:1px solid rgba(255,255,255,.2);}.ch-youtube{background:rgba(255,0,0,.2);color:#FCA5A5;border:1px solid rgba(255,0,0,.3);}.ch-linkedin{background:rgba(10,102,194,.2);color:#93C5FD;border:1px solid rgba(10,102,194,.3);}.ch-seo{background:rgba(16,185,129,.2);color:#6EE7B7;border:1px solid rgba(16,185,129,.3);}' +
 '.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:680px;width:100%;}' +
 '.kpi-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px 14px;text-align:center;}' +
 '.kpi-value{font-size:clamp(18px,3vw,26px);font-weight:800;color:var(--cyan);display:block;margin-bottom:4px;}.kpi-label{font-size:10px;color:#CBD5E1;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:block;}' +
@@ -846,9 +856,9 @@ var PDF_HTML_HEADER = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UT
 '.section-title{font-size:clamp(16px,2.5vw,22px);font-weight:800;color:var(--gray-900);}.page-cont{font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.12em;margin-bottom:20px;}' +
 '.problems{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;align-content:start;}' +
 '.card{background:#fff;border:1px solid var(--gray-200);border-radius:12px;padding:20px;}' +
-'.card.instagram{border-left:4px solid #A855F7;}.card.facebook{border-left:4px solid #3B82F6;}.card.google{border-left:4px solid #EAB308;}.card.meta{border-left:4px solid var(--red);}.card.tiktok{border-left:4px solid #000;}.card.site{border-left:4px solid var(--green);}' +
+'.card.instagram{border-left:4px solid #A855F7;}.card.facebook{border-left:4px solid #3B82F6;}.card.google{border-left:4px solid #EAB308;}.card.meta{border-left:4px solid var(--red);}.card.tiktok{border-left:4px solid #000;}.card.site{border-left:4px solid var(--green);}.card.linkedin{border-left:4px solid #0A66C2;}.card.youtube{border-left:4px solid #FF0000;}' +
 '.card-channel{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;display:inline-block;padding:2px 8px;border-radius:8px;}' +
-'.card-channel.instagram{background:rgba(168,85,247,.1);color:#9333EA;}.card-channel.facebook{background:rgba(59,130,246,.1);color:#2563EB;}.card-channel.google{background:rgba(234,179,8,.1);color:#B45309;}.card-channel.meta{background:rgba(239,68,68,.1);color:#DC2626;}.card-channel.tiktok{background:rgba(0,0,0,.07);color:#111;}.card-channel.site{background:rgba(16,185,129,.1);color:#065F46;}' +
+'.card-channel.instagram{background:rgba(168,85,247,.1);color:#9333EA;}.card-channel.facebook{background:rgba(59,130,246,.1);color:#2563EB;}.card-channel.google{background:rgba(234,179,8,.1);color:#B45309;}.card-channel.meta{background:rgba(239,68,68,.1);color:#DC2626;}.card-channel.tiktok{background:rgba(0,0,0,.07);color:#111;}.card-channel.site{background:rgba(16,185,129,.1);color:#065F46;}.card-channel.linkedin{background:rgba(10,102,194,.1);color:#0A66C2;}.card-channel.youtube{background:rgba(255,0,0,.1);color:#CC0000;}' +
 '.card-num{font-size:11px;font-weight:800;color:var(--cyan);letter-spacing:.1em;margin-bottom:6px;display:block;}.card-title{font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:8px;line-height:1.3;}' +
 '.card-body{font-size:13px;color:var(--gray-600);margin-bottom:12px;line-height:1.55;}.card-tags{display:flex;flex-wrap:wrap;gap:5px;}' +
 '.tag{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;display:inline-block;}.tag.dado{background:var(--orange-light);color:#C2410C;}.tag.impacto{background:var(--red-light);color:#B91C1C;}' +
@@ -879,6 +889,14 @@ var PDF_HTML_HEADER = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UT
 '.hub-b-num{font-size:11px;font-weight:800;color:var(--cyan);letter-spacing:.05em;padding-top:2px;flex-shrink:0;width:22px;}.hub-b-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;}.hub-b-desc{font-size:13px;color:var(--gray-400);line-height:1.6;}' +
 '.hub-why-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);flex-wrap:wrap;gap:8px;}' +
 '.hub-why-tagline{font-size:14px;font-weight:600;font-style:italic;color:var(--cyan);}.hub-why-handle{font-size:12px;color:var(--gray-600);letter-spacing:.05em;}' +
+'.rec-logo-footer{display:block;margin:16px auto 0;height:28px;width:auto;opacity:.65;}' +
+'.vertical-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;align-content:start;}' +
+'.v-card{background:#fff;border:1px solid var(--gray-200);border-radius:12px;padding:20px;border-top:3px solid var(--cyan);}' +
+'.v-name{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan-dark);margin-bottom:6px;}' +
+'.v-title{font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:8px;line-height:1.3;}' +
+'.v-body{font-size:12.5px;color:var(--gray-600);line-height:1.55;margin-bottom:10px;}' +
+'.v-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;}' +
+'.v-status.ok{background:var(--green-light);color:var(--green-dark);}.v-status.warn{background:var(--orange-light);color:#C2410C;}.v-status.crit{background:var(--red-light);color:#B91C1C;}' +
 '@page{size:210mm 297mm;margin:0;}' +
 '@media print{body{background:white;}' +
 '.pdf-page{width:210mm!important;height:297mm!important;min-height:unset!important;max-height:297mm!important;margin:0!important;box-shadow:none!important;overflow:hidden!important;break-after:page;page-break-after:always;}' +
@@ -1019,6 +1037,7 @@ function coletarDados() {
   return {
     nome_empresa: getVal('nome')||'(não informado)', instagram: getVal('instagram')||'(não informado)',
     segmento: getVal('segmento')||'', cidade: getVal('cidade')||'', site: getVal('site')||'',
+    tiktok_handle: getVal('tiktok_handle')||'', youtube_handle: getVal('youtube_handle')||'', linkedin_handle: getVal('linkedin_handle')||'',
     responsavel: getRadio('responsavel')||'', origem: getRadio('origem')||'',
     canais: getChecked('canais').join(', '), trafego_atual: getRadio('trafego_atual')||'',
     tem_site: getRadio('tem_site')||'', objetivo: getChecked('objetivo').join(', '),
@@ -1055,8 +1074,19 @@ function gerarResumoTexto(d) {
 function buildPrompt(d) {
   var mes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   var now = new Date(); var mesAno = mes[now.getMonth()] + ' ' + now.getFullYear();
+
+  // Site/SEO condicional — só informa URL se tem_site=Sim AND URL preenchida
+  var siteUrl = (d.tem_site === 'Sim, tem site' && d.site) ? d.site : '';
+  var siteLine = siteUrl ? ('\nURL DO SITE (analisar SEO): '+siteUrl) : '';
+
+  // Redes adicionais — só inclui se handle preenchido
+  var redesExtras = '';
+  if (d.tiktok_handle) redesExtras += '\nTIKTOK: '+d.tiktok_handle;
+  if (d.youtube_handle) redesExtras += '\nYOUTUBE: '+d.youtube_handle;
+  if (d.linkedin_handle) redesExtras += '\nLINKEDIN: '+d.linkedin_handle;
+
   return 'Gere o diagnóstico digital completo com as seguintes informações do lead:\n\n'
-    +'EMPRESA: '+d.nome_empresa+'\nINSTAGRAM: '+d.instagram+'\nSEGMENTO: '+(d.segmento||'Não informado')+'\nCIDADE: '+(d.cidade||'Não informada')+'\nSITE: '+(d.site||'Não tem')+'\n\n'
+    +'EMPRESA: '+d.nome_empresa+'\nINSTAGRAM: '+d.instagram+'\nSEGMENTO: '+(d.segmento||'Não informado')+'\nCIDADE: '+(d.cidade||'Não informada')+'\nSITE: '+(d.site||'Não tem')+siteLine+redesExtras+'\n\n'
     +'CANAIS A ANALISAR: '+(d.canais||'Nenhum especificado')+'\n\n'
     +'CONTEXTO DO CLIENTE:\n- Tráfego pago atual: '+(d.trafego_atual||'Não informado')+'\n- Tem site: '+(d.tem_site||'Não informado')+'\n- Objetivos: '+(d.objetivo||'Não informado')+'\n\n'
     +'OBSERVAÇÕES DO CAPTADOR: '+(d.observacoes||'Nenhuma')+'\n\n'
@@ -1074,7 +1104,7 @@ async function chamarClaude(dados) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       messages: [{ role: 'user', content: buildPrompt(dados) }],
-      max_tokens: 8000
+      max_tokens: 16000
     })
   });
 
@@ -1139,6 +1169,30 @@ async function chamarClaude(dados) {
 ═══════════════════════════════════════════ */
 async function abrirDiagnostico(htmlRaw, instagram) {
   var html = htmlRaw.trim();
+
+  // Injeta logo REC em qualquer <img class="rec-logo-footer" ...>
+  // (Claude pode variar a ordem dos atributos ou esquecer o src vazio)
+  if (window.REC_LOGO_B64) {
+    html = html.replace(/<img([^>]*?)class="rec-logo-footer"([^>]*?)>/g, function(match, before, after) {
+      var combined = before + 'class="rec-logo-footer"' + after;
+      // Se já tem src com valor, mantém
+      if (/src="[^"]+"/.test(combined) && !/src=""/.test(combined)) return match;
+      // Remove src="" se existir
+      combined = combined.replace(/\s*src=""/g, '');
+      // Injeta src com a logo
+      combined = combined.replace('class="rec-logo-footer"', 'class="rec-logo-footer" src="' + window.REC_LOGO_B64 + '"');
+      return '<img ' + combined.trim() + '>';
+    });
+
+    // Garantia adicional: se Claude esqueceu de adicionar a logo na última página, injeta antes do fim
+    if (html.indexOf('rec-logo-footer') === -1) {
+      // Procura o último div.hub-why-bottom e injeta a logo logo após
+      var idx = html.lastIndexOf('</div></div></div>');
+      if (idx > 0) {
+        html = html.slice(0, idx) + '<img class="rec-logo-footer" src="' + window.REC_LOGO_B64 + '" alt="REC HUB">' + html.slice(idx);
+      }
+    }
+  }
 
   // Claude agora gera só os divs — envolver com template completo se necessário
   if (!html.startsWith('<!DOCTYPE') && !html.startsWith('<html')) {
@@ -1749,5 +1803,6 @@ function novaProposta() {
 </style>
 <script src="_hub.js"></script>
 <script>hubInit('diagnostico');</script>
+<script src="_rec_logo.js"></script>
 </body>
 </html>
