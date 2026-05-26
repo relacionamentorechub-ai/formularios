@@ -15,23 +15,30 @@ const SYSTEM_PROMPT = `Você é o gerador de diagnósticos digitais do R.E.C. HU
 Sua resposta deve conter EXCLUSIVAMENTE tags HTML.
 O PRIMEIRO CARACTERE da resposta deve ser "<" (abertura de tag).
 A resposta deve começar EXATAMENTE com: <div class="pdf-page dark">
-NÃO escreva nada antes do HTML — nenhum comentário, nenhuma explicação,
-nenhum "vou fazer as buscas", nenhuma introdução. ZERO texto antes do HTML.
+NÃO escreva nada antes do HTML — nenhum comentário, nenhuma explicação, nenhuma introdução.
 NÃO use markdown, NÃO gere DOCTYPE/html/head/style/body.
 A última div gerada deve ser <div class="pdf-page dark"> (hub-why).
-Qualquer texto fora das tags HTML destrói o PDF. Nunca faça isso.
 
 =========================================
-PESQUISA — USE web_search ANTES DE ESCREVER (silenciosamente)
+COMPLETUDE — OBRIGATÓRIA
 =========================================
-Faça de 2 a 3 buscas para coletar dados REAIS. Após cada busca, apenas processe os resultados internamente.
-Faça as buscas em paralelo ou sequencialmente — nunca anuncie que vai fazê-las.
-1. Concorrentes do segmento na cidade informada (ex: "salões de beleza Canoas RS Instagram")
-2. Benchmarks do setor no Brasil/RS (ex: "engajamento médio Instagram estética 2025")
-3. Ticket médio do nicho (ex: "ticket médio clínica odontológica RS")
+Você DEVE gerar o documento COMPLETO de 7 a 10 páginas em uma única resposta.
+NÃO pare antes da página final hub-why dark.
+NÃO entregue um documento parcial achando que é suficiente.
+A última instrução obrigatória do seu output é fechar a página hub-why com </div>.
 
-NUNCA invente nomes de concorrentes. Se a busca não retornar nomes locais reais, use "negócios similares na região".
-APÓS AS BUSCAS: gere o HTML diretamente, sem texto intermediário.
+=========================================
+DADOS — USE CONHECIMENTO REAL DO SETOR (sem web search neste momento)
+=========================================
+Use seu conhecimento sobre o segmento brasileiro/RS para fornecer dados concretos:
+- Benchmarks de engajamento por nicho (ex: estética RS: 2,8%, varejo móveis: 0,5%, odonto: 1,2%)
+- Ticket médio típico do nicho na região
+- Nomes de concorrentes notórios do segmento na cidade ou região (use SEU conhecimento de marcas brasileiras reais)
+- CAC e CPL médios do setor
+
+Se NÃO tiver certeza de um nome de concorrente local, use "redes locais como [nome de rede nacional conhecida no setor]" ou "negócios similares na região metropolitana".
+NUNCA escreva "Concorrente A", "Empresa X" ou nomes claramente fictícios.
+Use números específicos sempre que possível, baseados em benchmarks reais do setor brasileiro.
 
 =========================================
 REGRAS DE ESCRITA
@@ -452,24 +459,18 @@ export default async function handler(req, res) {
 
   const { messages, max_tokens, system } = req.body;
 
-  // extended thinking DESATIVADO: claude-sonnet-4-6 com thinking ativo tinha
-  // comportamento imprevisível no budget e gerava saída truncada mesmo com 32k.
-  // Sem thinking, os 32k vão integralmente pro output HTML (~10 páginas cabe fácil).
-  // Web search mantido: busca dados reais de concorrentes/benchmarks.
-  const effectiveMaxTokens = Math.max(max_tokens || 0, 32000);
+  // DIAGNÓSTICO em andamento: extended thinking desativado e web_search desativado
+  // temporariamente. Truncamento persistente apesar de 32k max_tokens sugere que
+  // os web_search_tool_result blocks (que são server-side) consomem muito do output
+  // budget. Sem tools, os 48k vão 100% pro HTML — esperamos 7-10 páginas estáveis.
+  // Se funcionar, reabilitamos web_search com max_uses: 1.
+  const effectiveMaxTokens = Math.max(max_tokens || 0, 48000);
   const body = {
     model: 'claude-sonnet-4-6',
     max_tokens: effectiveMaxTokens,
     system: system || SYSTEM_PROMPT,
     messages: messages,
     stream: true,
-    tools: [
-      {
-        type: 'web_search_20250305',
-        name: 'web_search',
-        max_uses: 3,
-      },
-    ],
   };
 
   try {
