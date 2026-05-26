@@ -99,7 +99,7 @@ VOCÊ GERA APENAS A PÁGINA 2 — PARTE 1 DE PONTOS IDENTIFICADOS (cream).
 ESTRUTURA OBRIGATÓRIA:
 
 <div class="pdf-page cream">
-<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">02 · DIAGN&Oacute;STICO</span></div>
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">{NN} · DIAGN&Oacute;STICO</span></div>
 <div class="section-intro">
 <span class="kicker">Parte 01 · Pontos identificados</span>
 <h2 class="section-title">{título com <em>destaque</em>, ≤80}</h2>
@@ -140,7 +140,7 @@ VOCÊ GERA APENAS A PÁGINA 3 — CONTINUAÇÃO DE PONTOS IDENTIFICADOS (cream).
 ESTRUTURA OBRIGATÓRIA:
 
 <div class="pdf-page cream">
-<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">03 · DIAGN&Oacute;STICO</span></div>
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">{NN} · DIAGN&Oacute;STICO</span></div>
 <div class="section-intro">
 <span class="kicker">Parte 01 · Pontos identificados · continua&ccedil;&atilde;o</span>
 <h2 class="section-title">{novo título com <em>destaque</em>, ≤80}</h2>
@@ -167,7 +167,7 @@ VOCÊ GERA APENAS A PÁGINA DE ANÁLISE DE MERCADO (cream, parte 02).
 ESTRUTURA OBRIGATÓRIA:
 
 <div class="pdf-page cream">
-<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">04 · MERCADO</span></div>
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">{NN} · MERCADO</span></div>
 <div class="section-intro">
 <span class="kicker">Parte 02 · An&aacute;lise de mercado</span>
 <h2 class="section-title">Como o <em>mercado</em> se comporta no nicho</h2>
@@ -206,7 +206,7 @@ VOCÊ GERA APENAS A PÁGINA DE CONTINUAÇÃO DE MERCADO (cream).
 ESTRUTURA OBRIGATÓRIA:
 
 <div class="pdf-page cream">
-<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">05 · MERCADO</span></div>
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">{NN} · MERCADO</span></div>
 <div class="section-intro">
 <span class="kicker">Parte 02 · An&aacute;lise de mercado · continua&ccedil;&atilde;o</span>
 <h2 class="section-title">E como o <em>p&uacute;blico</em> se comporta</h2>
@@ -240,7 +240,7 @@ VOCÊ GERA APENAS A PÁGINA DAS 5 VERTICAIS DO NEGÓCIO (cream, parte 03).
 ESTRUTURA OBRIGATÓRIA:
 
 <div class="pdf-page cream">
-<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">06 · VERTICAIS</span></div>
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">{NN} · VERTICAIS</span></div>
 <div class="section-intro">
 <span class="kicker">Parte 03 · Diagn&oacute;stico por vertical</span>
 <h2 class="section-title">O neg&oacute;cio em <em>5 dimens&otilde;es</em></h2>
@@ -279,7 +279,7 @@ VOCÊ GERA APENAS A PÁGINA DE ANÁLISE DE SEO (cream, condicional).
 ESTRUTURA OBRIGATÓRIA:
 
 <div class="pdf-page cream">
-<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">07 · SEO</span></div>
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">{NN} · SEO</span></div>
 <div class="section-intro">
 <span class="kicker">Parte 04 · An&aacute;lise de SEO</span>
 <h2 class="section-title">Como o <em>Google</em> enxerga {dom&iacute;nio}</h2>
@@ -312,7 +312,7 @@ VOCÊ GERA APENAS A PÁGINA DE INVESTIMENTO (cream, condicional a com_proposta=S
 ESTRUTURA OBRIGATÓRIA:
 
 <div class="pdf-page cream">
-<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">08 · INVESTIMENTO</span></div>
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">{NN} · INVESTIMENTO</span></div>
 <div class="section-intro">
 <span class="kicker">Parte 04 · Investimento sugerido</span>
 <h2 class="section-title">O que <em>solucionamos</em> e quanto custa</h2>
@@ -361,7 +361,7 @@ VOCÊ GERA APENAS A PÁGINA DE MÓDULOS DE TRABALHO (cream, "como entregamos").
 ESTRUTURA OBRIGATÓRIA:
 
 <div class="pdf-page cream">
-<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">09 · M&Oacute;DULOS</span></div>
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">{NN} · M&Oacute;DULOS</span></div>
 <div class="section-intro">
 <span class="kicker">Parte 05 · M&oacute;dulos de trabalho</span>
 <h2 class="section-title">Como <em>entregamos</em> resultado</h2>
@@ -449,13 +449,16 @@ A img src="" será preenchida pelo sistema.`,
 // ═══════════════════════════════════════════════════════════════
 // MONTA O USER MESSAGE COM DADOS DO LEAD
 // ═══════════════════════════════════════════════════════════════
-function buildUserMessage(page, lead) {
+function buildUserMessage(page, lead, pageNumber, totalPages) {
   const mes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const now = new Date();
   const mesAno = mes[now.getMonth()] + ' ' + now.getFullYear();
+  const pageNumStr = String(pageNumber).padStart(2, '0');
 
   const linhas = [
-    `Gere a página "${page}" do diagnóstico com os dados abaixo:`,
+    `Gere a página "${page}" (${pageNumStr} de ${totalPages}) do diagnóstico com os dados abaixo:`,
+    '',
+    `NÚMERO DESTA PÁGINA (use exatamente este número no .page-number do header): ${pageNumStr}`,
     '',
     `EMPRESA: ${lead.nome_empresa || 'Não informada'}`,
     `INSTAGRAM: ${lead.instagram || ''}`,
@@ -510,7 +513,7 @@ export default async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: 'API key not configured' });
 
   const body = readBody(req);
-  const { page, lead } = body;
+  const { page, lead, pageNumber, totalPages } = body;
 
   if (!page || !PAGES[page]) {
     return res.status(400).json({ error: `Page "${page}" inválida. Válidas: ${Object.keys(PAGES).join(', ')}` });
@@ -520,7 +523,7 @@ export default async function handler(req, res) {
   }
 
   const pageConfig = PAGES[page];
-  const userMessage = buildUserMessage(page, lead);
+  const userMessage = buildUserMessage(page, lead, pageNumber || 1, totalPages || 1);
 
   try {
     const upstream = await fetch('https://api.anthropic.com/v1/messages', {
@@ -559,6 +562,10 @@ export default async function handler(req, res) {
     }
     const firstDiv = html.indexOf('<div class="pdf-page');
     if (firstDiv > 0) html = html.slice(firstDiv);
+
+    // Substitui {NN} literal pelo número da página (se modelo esqueceu de fazer)
+    const pageNumStr = String(pageNumber || 1).padStart(2, '0');
+    html = html.replace(/\{NN\}/g, pageNumStr);
 
     if (!html || !html.startsWith('<div class="pdf-page')) {
       return res.status(500).json({

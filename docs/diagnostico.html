@@ -1226,11 +1226,11 @@ function buildLeadObject(d) {
   };
 }
 
-async function chamarUmaPagina(page, lead) {
+async function chamarUmaPagina(page, lead, pageNumber, totalPages) {
   var resp = await apiFetch('/api/diagnostico-page', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ page: page, lead: lead }),
+    body: JSON.stringify({ page: page, lead: lead, pageNumber: pageNumber, totalPages: totalPages }),
   });
   if (!resp.ok) {
     var err = await resp.json().catch(function(){ return {}; });
@@ -1248,8 +1248,9 @@ async function chamarClaude(dados) {
 
   // Dispara TODAS as chamadas em paralelo, atualiza UI conforme cada uma resolve
   var concluidas = 0;
-  var promises = paginas.map(function(page) {
-    return chamarUmaPagina(page, lead).then(function(result) {
+  var promises = paginas.map(function(page, idx) {
+    var pageNumber = idx + 1; // 1-indexed (capa=1, segunda página=2, etc)
+    return chamarUmaPagina(page, lead, pageNumber, total).then(function(result) {
       concluidas++;
       setSubtitle('Concluiu p&aacute;gina ' + concluidas + '/' + total + ' (' + page + ')');
       return result;
@@ -1297,20 +1298,19 @@ async function chamarClaude(dados) {
 async function abrirDiagnostico(htmlRaw, instagram) {
   var html = htmlRaw.trim();
 
-  // Injeta logo REC em todos os <img src="" alt="R.E.C."> e <img src="" alt="REC HUB">
-  // O novo layout usa esses padrões no cover-rec-logo e hw-footer-logo (sem class especial)
-  // O CSS já aplica filter:invert para deixar a logo branca sobre fundo navy
+  // Injeta logo REC em qualquer <img ... src="" ... alt="R.E.C....">
+  // Regex tolerante a ordem de atributos e espaços extras (modelo pode variar)
   if (window.REC_LOGO_B64) {
-    // Novo layout: <img src="" alt="R.E.C."> e variações
-    html = html.replace(/<img\s+src=""\s+alt="R\.E\.C\."/g, '<img src="' + window.REC_LOGO_B64 + '" alt="R.E.C."');
-    html = html.replace(/<img\s+alt="R\.E\.C\."\s+src=""/g, '<img src="' + window.REC_LOGO_B64 + '" alt="R.E.C."');
-    // Layout legado: class="rec-logo-footer"
-    html = html.replace(/<img([^>]*?)class="rec-logo-footer"([^>]*?)>/g, function(match, before, after) {
-      var combined = before + 'class="rec-logo-footer"' + after;
-      if (/src="[^"]+"/.test(combined) && !/src=""/.test(combined)) return match;
-      combined = combined.replace(/\s*src=""/g, '');
-      combined = combined.replace('class="rec-logo-footer"', 'class="rec-logo-footer" src="' + window.REC_LOGO_B64 + '"');
-      return '<img ' + combined.trim() + '>';
+    // Match qualquer <img> que contenha src="" E alt="R.E.C." (em qualquer ordem)
+    html = html.replace(/<img\b[^>]*>/g, function(match) {
+      // Verifica se este img é candidato a injeção
+      var hasEmptySrc = /\bsrc\s*=\s*""/i.test(match);
+      var isRecAlt = /\balt\s*=\s*"R\.E\.C\."/i.test(match);
+      var isLegacyClass = /\bclass\s*=\s*"[^"]*\brec-logo-footer\b[^"]*"/i.test(match);
+      if (!hasEmptySrc) return match;
+      if (!isRecAlt && !isLegacyClass) return match;
+      // Substitui src="" por src com a logo
+      return match.replace(/\bsrc\s*=\s*""/i, 'src="' + window.REC_LOGO_B64 + '"');
     });
   }
 
