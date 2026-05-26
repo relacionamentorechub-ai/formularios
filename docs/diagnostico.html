@@ -1128,6 +1128,7 @@ async function chamarClaude(dados) {
   var fullText = '';
   var inputTokens = 0, outputTokens = 0;
   var charCount = 0;
+  var searchCount = 0;
 
   while (true) {
     var chunk = await reader.read();
@@ -1150,6 +1151,19 @@ async function chamarClaude(dados) {
           if (charCount % 600 < ev.delta.text.length) {
             setSubtitle('Gerando diagn&oacute;stico... (~' + Math.round(charCount / 4) + ' tokens gerados)');
           }
+        } else if (ev.type === 'content_block_start' && ev.content_block) {
+          // Feedback visual durante thinking e web_search (que não emitem text_delta)
+          var blockType = ev.content_block.type;
+          if (blockType === 'thinking') {
+            setSubtitle('🧠 IA analisando dados do lead em profundidade...');
+          } else if (blockType === 'server_tool_use' || blockType === 'tool_use') {
+            searchCount++;
+            setSubtitle('🌐 Pesquisando dados reais na web (' + searchCount + '/' + 5 + ')...');
+          } else if (blockType === 'web_search_tool_result') {
+            setSubtitle('✓ Resultados coletados, continuando análise...');
+          } else if (blockType === 'text') {
+            setSubtitle('✍️ Escrevendo diagnóstico personalizado...');
+          }
         } else if (ev.type === 'message_start' && ev.message && ev.message.usage) {
           inputTokens = ev.message.usage.input_tokens || 0;
         } else if (ev.type === 'message_delta' && ev.usage) {
@@ -1167,7 +1181,9 @@ async function chamarClaude(dados) {
     fullText = fullText.replace(/^```(?:html)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
   }
 
-  var custo = (inputTokens * PRICING.input) + (outputTokens * PRICING.output);
+  // Custo: tokens (Sonnet) + buscas web ($0.01 cada = $10/1000)
+  var custoBuscas = searchCount * 0.01;
+  var custo = (inputTokens * PRICING.input) + (outputTokens * PRICING.output) + custoBuscas;
   lastAnalysisCost = { input: inputTokens, output: outputTokens, total_usd: custo };
   return fullText;
 }
