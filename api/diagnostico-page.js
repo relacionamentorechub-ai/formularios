@@ -18,18 +18,29 @@ NÃO escreva nada antes ou depois do HTML — nenhum comentário, nenhuma explic
 NÃO use markdown, NÃO gere DOCTYPE/html/head/style/body.
 Gere APENAS o div.pdf-page solicitado e seus filhos.
 
+╔══════════════════════════════════════════════════════════╗
+║  USE OS DADOS DA PESQUISA — NÃO INVENTE NÚMEROS         ║
+╚══════════════════════════════════════════════════════════╝
+O usuário fornecerá um objeto JSON "DADOS PESQUISADOS" com fatos verificados.
+USE ESSES NÚMEROS EXATOS em qualquer métrica que você citar.
+- Se "instagram.followers" não for null, use ESSE número exato (jamais invente)
+- Se for null, use linguagem qualitativa: "base ainda em crescimento", "presença modesta", etc
+- Para benchmarks de setor, use "setor.engajamento_medio_pct_brasil" e cite "fonte_engajamento"
+- Para ticket, use o range de "setor.ticket_medio_brl_min" a "setor.ticket_medio_brl_max"
+- Para concorrentes, use APENAS nomes do array "concorrentes" (são reais e pesquisados)
+- Mantenha consistência: TODAS as páginas usarão o mesmo JSON, números devem bater
+
 REGRAS DE ESCRITA:
 - Sem traços como pontuação (—, –). Use vírgula ou reescreva.
 - Sem title case em frases corridas.
 - HTML entities para acentos: ã=&atilde; ç=&ccedil; ê=&ecirc; ó=&oacute; á=&aacute; é=&eacute; í=&iacute; ú=&uacute; â=&acirc; ô=&ocirc; õ=&otilde;
-- Tom direto, profissional, baseado em dados.
-- Métricas concretas: "engajamento de 0,9%, abaixo da média do setor de 2,8%" (não "baixo engajamento").
+- Tom direto, profissional, embasado em DADOS PESQUISADOS.
+- SEMPRE cite fontes quando usar números: "0,6% (mLabs 2024)" ou "R$ 3.600 a R$ 30.000 (Cronoshare)"
 - Para destaque em h1/h2/section-title: use <em>palavra</em> nos pontos-chave.
-- Use seu conhecimento real do mercado brasileiro/RS para benchmarks e concorrentes do nicho.
-- NUNCA invente nomes de concorrentes. Se não souber locais reais, use "redes locais conhecidas no setor".
+- LIMITE de texto por elemento: respeite os caracteres máximos para evitar overflow visual no PDF.
 
 PALETA REC (já no CSS):
-navy var(--blue), teal var(--teal), cream var(--cream), texto var(--blue)/var(--white)/var(--muted).
+navy var(--blue), teal var(--teal), cream var(--cream).
 Tipografia: Fraunces (display), Manrope (body), Space Grotesk (números).`;
 
 // ═══════════════════════════════════════════════════════════════
@@ -181,19 +192,23 @@ ESTRUTURA OBRIGATÓRIA:
 <div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
 </div>
 
-CONCORRENTES (OBRIGATÓRIO): cite no MÍNIMO 2 nomes REAIS de concorrentes do segmento na cidade ou região metropolitana. Use seu conhecimento de marcas brasileiras conhecidas no nicho. Se não tiver concorrente local específico, mencione "redes locais como [marca nacional conhecida]".
+CONCORRENTES: use APENAS nomes do array research.concorrentes (já pesquisados e reais).
 
-Estrutura bench-card:
+Estrutura bench-card (LIMITES APERTADOS para caber 4 cards em 2x2):
 <div class="bench-card">
-<div class="bench-label">{título da métrica, ≤70}</div>
+<div class="bench-label">{título da métrica, ≤55 char}</div>
 <div class="bench-compare">
-<div class="bench-col market"><div class="bench-col-label">Mercado · {fonte}</div><div class="bench-col-value">{valor}<small> {unit}</small></div><div class="bench-col-sub">{contexto, ≤60}</div></div>
-<div class="bench-col you"><div class="bench-col-label">{nome empresa}</div><div class="bench-col-value">{valor}<small> {unit}</small></div><div class="bench-col-sub">{contexto, ≤60}</div></div>
+<div class="bench-col market"><div class="bench-col-label">Mercado · {fonte, ≤24 char}</div><div class="bench-col-value">{valor}<small> {unit}</small></div><div class="bench-col-sub">{contexto, ≤45}</div></div>
+<div class="bench-col you"><div class="bench-col-label">{nome empresa, ≤24 char}</div><div class="bench-col-value">{valor}<small> {unit}</small></div><div class="bench-col-sub">{contexto, ≤45}</div></div>
 </div>
-<div class="bench-impact">{insight estratégico, ≤170}</div>
+<div class="bench-impact">{insight, ≤130 char (3 linhas max)}</div>
 </div>
 
-Métricas obrigatórias (uma por bench-card): seguidores médios do nicho, engajamento médio, presença em concorrentes locais, ticket médio ou CAC.`,
+Métricas obrigatórias (uma por bench-card):
+1. Seguidores médios do nicho vs lead (use research.instagram.followers)
+2. Engajamento médio (use research.setor.engajamento_medio_pct_brasil + research.instagram.engajamento_estimado_pct)
+3. Presença concorrentes locais (use research.concorrentes)
+4. Ticket médio ou CAC (use research.setor.ticket_medio_brl_central ou cac_estimado)`,
   },
 
   // ════════════════════════ MERCADO-CONT ════════════════════════
@@ -307,7 +322,7 @@ Use a mesma estrutura de bench-card da página de mercado.`,
     max_tokens: 3500,
     system: `${REGRAS_BASE}
 
-VOCÊ GERA APENAS A PÁGINA DE INVESTIMENTO (cream, condicional a com_proposta=Sim).
+VOCÊ GERA APENAS A PÁGINA DE INVESTIMENTO (cream). SEM CLÁUSULA — a cláusula vai em página separada.
 
 ESTRUTURA OBRIGATÓRIA:
 
@@ -316,15 +331,11 @@ ESTRUTURA OBRIGATÓRIA:
 <div class="section-intro">
 <span class="kicker">Parte 04 · Investimento sugerido</span>
 <h2 class="section-title">O que <em>solucionamos</em> e quanto custa</h2>
-<p class="section-lead">{contexto sobre planos sugeridos, ≤220}</p>
+<p class="section-lead">{contexto sobre planos sugeridos, ≤220 char}</p>
 </div>
 <div class="content">
 <div class="plan-grid">
-{1 ou mais plan-boxes, conforme PLANO INDICADO}
-</div>
-<div class="contract-clause">
-<div class="contract-clause-label">&#128203; Condi&ccedil;&otilde;es de contrato</div>
-<div class="contract-clause-text">Fidelidade m&iacute;nima de <strong>12 meses</strong>. Contrato de 6 meses dispon&iacute;vel com acr&eacute;scimo de <em>20%</em> sobre o valor mensal do plano escolhido.{ Para planos com tr&aacute;fego pago: Investimento em m&iacute;dia (verba Meta Ads) n&atilde;o incluso, sugerido a partir de R$ 600/m&ecirc;s.}</div>
+{plan-boxes conforme PLANO INDICADO}
 </div>
 </div>
 <div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
@@ -336,19 +347,57 @@ Plano 2 — R$ 2.500/mês: Plano 1 + Tráfego Pago Meta
 Plano 3 — R$ 2.900/mês: Plano 2 + Google Empresa (+R$300 add-on TikTok)
 Plano 4 — R$ 3.800/mês: Plano 3 + Suporte Comercial (+R$300 add-on TikTok)
 
-Estrutura plan-box:
+Estrutura plan-box (LIMITE: até 6 itens por plano para caber):
 <div class="plan-box">
 <div>
 <span class="plan-box-badge">PLANO N{[ · Recomendado se for o caso]}</span>
-<div class="plan-box-name">{nome do plano, ≤90}</div>
+<div class="plan-box-name">{nome do plano, ≤80 char}</div>
 <div class="plan-box-price">R$ {valor}<small>/m&ecirc;s</small></div>
 </div>
 <ul class="plan-box-items">
-{itens do plano, cada ≤50 char, até 8 itens}
+{até 6 itens, cada ≤45 char}
 </ul>
 </div>
 
-Conte quantos planos vêm em PLANO INDICADO (separados por " | "). Gere um plan-box por plano. Personalizado conta como 1 plano.`,
+Conte quantos planos vêm em PLANO INDICADO (separados por " | "). Gere um plan-box por plano. Personalizado conta como 1 plano.
+
+REGRA: NÃO inclua contract-clause. Ela vai em página separada (page=contrato).`,
+  },
+
+  // ════════════════════════ CONTRATO (separado quando há planos) ════════════════════════
+  contrato: {
+    max_tokens: 2000,
+    system: `${REGRAS_BASE}
+
+VOCÊ GERA APENAS A PÁGINA DE CONDIÇÕES CONTRATUAIS (cream). Página dedicada à cláusula + observações finais sobre o investimento.
+
+ESTRUTURA OBRIGATÓRIA:
+
+<div class="pdf-page cream">
+<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">{NN} · CONTRATO</span></div>
+<div class="section-intro">
+<span class="kicker">Parte 04 · Condi&ccedil;&otilde;es comerciais</span>
+<h2 class="section-title">Como funciona a <em>parceria</em></h2>
+<p class="section-lead">{1-2 frases sobre o modelo de parceria contínua REC, ≤220}</p>
+</div>
+<div class="content">
+<div class="contract-clause">
+<div class="contract-clause-label">&#128203; Fidelidade e prazo</div>
+<div class="contract-clause-text">Fidelidade m&iacute;nima de <strong>12 meses</strong> para garantir o ciclo completo de planejamento, execu&ccedil;&atilde;o e otimiza&ccedil;&atilde;o. Contrato de 6 meses dispon&iacute;vel com acr&eacute;scimo de <em>20%</em> sobre o valor mensal do plano escolhido.</div>
+</div>
+<div class="contract-clause">
+<div class="contract-clause-label">&#128184; Verba de m&iacute;dia paga</div>
+<div class="contract-clause-text">{se houver plano com tráfego pago: "O investimento em m&iacute;dia (verba Meta Ads, Google Ads) <strong>n&atilde;o est&aacute; incluso</strong> nos valores dos planos. Sugerimos verba m&iacute;nima de <strong>R$ 600/m&ecirc;s</strong> para in&iacute;cio com escala progressiva conforme resultados."; senão: "Os planos selecionados n&atilde;o incluem investimento em m&iacute;dia paga. Caso a estrat&eacute;gia evolua para incluir tr&aacute;fego pago, a verba ser&aacute; tratada separadamente."}</div>
+</div>
+<div class="contract-clause">
+<div class="contract-clause-label">&#128221; Pr&oacute;ximos passos</div>
+<div class="contract-clause-text">Ap&oacute;s alinhamento do plano escolhido, iniciamos com reuni&atilde;o de <strong>kickoff em at&eacute; 7 dias</strong> para imers&atilde;o na marca, defini&ccedil;&atilde;o de calend&aacute;rio editorial e agendamento da primeira capta&ccedil;&atilde;o presencial.</div>
+</div>
+</div>
+<div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
+</div>
+
+REGRA: gere EXATAMENTE 3 cards de contract-clause, na ordem acima.`,
   },
 
   // ════════════════════════ MODULOS ════════════════════════
@@ -381,18 +430,18 @@ ESTRUTURA OBRIGATÓRIA:
 3. Tr&aacute;fego Pago Meta Ads (ícone ◒)
 4. Google Empresa GMB (ícone ◓)
 
-Estrutura d-card:
+Estrutura d-card (LIMITES APERTADOS para caber 4 em 2x2):
 <div class="d-card">
 <div class="d-head">
 <div class="d-icon">{ícone}</div>
 <div class="d-head-text">
-<div class="d-title">{nome módulo, ≤55}</div>
+<div class="d-title">{nome módulo, ≤45 char}</div>
 <span class="d-plan-tag">{Plano N+}</span>
 </div>
 </div>
-<p class="d-body">{COMO trabalhamos, ≤170}</p>
+<p class="d-body">{COMO trabalhamos, ≤140 char}</p>
 <div class="d-items">
-{≤5 d-items, cada com div.d-item começando com span.d-bullet ▸}
+{EXATAMENTE 4 d-items, cada ≤55 char, com div.d-item começando com span.d-bullet ▸}
 </div>
 </div>
 
@@ -449,7 +498,7 @@ A img src="" será preenchida pelo sistema.`,
 // ═══════════════════════════════════════════════════════════════
 // MONTA O USER MESSAGE COM DADOS DO LEAD
 // ═══════════════════════════════════════════════════════════════
-function buildUserMessage(page, lead, pageNumber, totalPages) {
+function buildUserMessage(page, lead, pageNumber, totalPages, research) {
   const mes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const now = new Date();
   const mesAno = mes[now.getMonth()] + ' ' + now.getFullYear();
@@ -460,6 +509,19 @@ function buildUserMessage(page, lead, pageNumber, totalPages) {
     '',
     `NÚMERO DESTA PÁGINA (use exatamente este número no .page-number do header): ${pageNumStr}`,
     '',
+  ];
+
+  if (research) {
+    linhas.push('═════════════════════════════════════════════════════');
+    linhas.push('DADOS PESQUISADOS (fonte da verdade — USE ESTES NÚMEROS):');
+    linhas.push('═════════════════════════════════════════════════════');
+    linhas.push(JSON.stringify(research, null, 2));
+    linhas.push('═════════════════════════════════════════════════════');
+    linhas.push('');
+  }
+
+  linhas.push('DADOS DO LEAD (do formulário):');
+  linhas.push('');
     `EMPRESA: ${lead.nome_empresa || 'Não informada'}`,
     `INSTAGRAM: ${lead.instagram || ''}`,
     `SEGMENTO: ${lead.segmento || 'Não informado'}`,
@@ -513,7 +575,7 @@ export default async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: 'API key not configured' });
 
   const body = readBody(req);
-  const { page, lead, pageNumber, totalPages } = body;
+  const { page, lead, pageNumber, totalPages, research } = body;
 
   if (!page || !PAGES[page]) {
     return res.status(400).json({ error: `Page "${page}" inválida. Válidas: ${Object.keys(PAGES).join(', ')}` });
@@ -523,7 +585,7 @@ export default async function handler(req, res) {
   }
 
   const pageConfig = PAGES[page];
-  const userMessage = buildUserMessage(page, lead, pageNumber || 1, totalPages || 1);
+  const userMessage = buildUserMessage(page, lead, pageNumber || 1, totalPages || 1, research);
 
   try {
     const upstream = await fetch('https://api.anthropic.com/v1/messages', {
