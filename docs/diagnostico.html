@@ -912,7 +912,7 @@ body{font-family:var(--font-body);background:#D1D5DB;color:var(--ink);line-heigh
 .p-tag.dado{background:var(--amber-soft);color:var(--amber);}
 .p-tag.impacto{background:var(--red-soft);color:var(--red);}
 .bench-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-content:start;}
-.bench-card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:24px;}
+.bench-card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:20px;overflow:hidden;}
 .bench-label{font-family:var(--font-display);font-weight:500;font-size:16px;color:var(--blue);margin-bottom:18px;line-height:1.3;letter-spacing:-.005em;}
 .bench-compare{display:flex;gap:12px;margin-bottom:14px;}
 .bench-col{flex:1;padding:14px 14px 12px;border-radius:10px;border:1px solid transparent;}
@@ -935,8 +935,8 @@ body{font-family:var(--font-body);background:#D1D5DB;color:var(--ink);line-heigh
 .opp-strip h3{font-family:var(--font-display);font-weight:500;font-size:18px;color:var(--blue);margin-bottom:6px;letter-spacing:-.005em;}
 .opp-strip p{font-family:var(--font-body);font-size:12.5px;color:var(--muted);line-height:1.55;font-weight:400;}
 .vertical-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;flex:1;align-content:start;}
-.v-card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:24px;}
-.v-card.full{grid-column:1/-1;}
+.v-card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:20px 22px;overflow:hidden;}
+.v-card.full{grid-column:1/-1;padding:18px 22px;}
 .v-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .v-name{font-family:var(--font-num);font-size:10px;letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--teal);}
 .v-status{font-family:var(--font-num);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;padding:4px 11px;border-radius:99px;}
@@ -1267,7 +1267,7 @@ async function chamarUmaPagina(page, lead, pageNumber, totalPages, research) {
     if ((isRateLimit || isOverloaded) && attempt < maxAttempts) {
       var waitMs = isRateLimit ? 35000 : 8000 * attempt; // 35s para rate limit (janela de 60s), backoff para overload
       console.warn('[chamarUmaPagina] "' + page + '" tentativa ' + attempt + ' falhou (' + (isRateLimit ? 'rate limit' : 'overloaded') + '), aguardando ' + (waitMs/1000) + 's...');
-      setSubtitle('⏳ Rate limit atingido. Aguardando ' + (waitMs/1000) + 's antes de retomar (tentativa ' + (attempt+1) + ')...');
+      setSubtitle('Otimizando gera&ccedil;&atilde;o, aguarde...');
       await new Promise(function(r){ setTimeout(r, waitMs); });
       continue;
     }
@@ -1314,12 +1314,12 @@ async function chamarClaude(dados) {
     setSubtitle('Gerando ' + total + ' p&aacute;ginas...');
   }
 
-  // FASE 2: dispara páginas em LOTES com pacing (respeita rate limit Anthropic 30k input tok/min).
-  // Concorrência 3 = ~12k input tok/burst. Pausa 25s entre lotes mantém abaixo de 30k/min.
+  // FASE 2: páginas com Haiku 4.5 (limite 50k tok/min). Concorrência 6, pausa curta.
+  // 11 páginas × ~4k tok = 44k → cabe num burst. Pausa 5s entre lotes só por segurança.
   var concluidas = 0;
-  var CONCURRENCY = 3;
-  var PAUSE_MS = 25000;
-  setSubtitle('Gerando ' + total + ' p&aacute;ginas em lotes de ' + CONCURRENCY + ' (pacing para respeitar rate limit)...');
+  var CONCURRENCY = 6;
+  var PAUSE_MS = 5000;
+  setSubtitle('Gerando ' + total + ' p&aacute;ginas em paralelo...');
 
   var resultados;
   try {

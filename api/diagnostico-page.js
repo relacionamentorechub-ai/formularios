@@ -279,9 +279,14 @@ ESTRUTURA OBRIGATÓRIA:
 Estrutura v-card:
 <div class="v-card{[ full no 5º]}">
 <div class="v-head"><span class="v-name">{NN} · {Nome Vertical}</span><span class="v-status {ok|warn|crit}">{label, ≤18}</span></div>
-<div class="v-title">{diagnóstico em 1 frase, ≤75}</div>
-<p class="v-body">{2-3 frases com dados reais, ≤260 (full pode ≤400)}</p>
-</div>`,
+<div class="v-title">{diagnóstico em 1 frase, ≤72}</div>
+<p class="v-body">{2 frases curtas, ≤200 char (full pode ≤260 — N&Atilde;O ULTRAPASSE)}</p>
+</div>
+
+LIMITES CR&Iacute;TICOS — verticais é a página mais propensa a overflow no PDF:
+- v-body normal: M&Aacute;XIMO 200 caracteres (conte). Se passar, encurte.
+- v-body full (vertical 05): M&Aacute;XIMO 260 caracteres. N&Atilde;O FA&Ccedil;A PAR&Aacute;GRAFO LONGO.
+- Total da página deve caber em A4 com header+intro+grid 3 linhas.`,
   },
 
   // ════════════════════════ SEO ════════════════════════
@@ -314,7 +319,13 @@ ESTRUTURA OBRIGATÓRIA:
 3. Schema markup / dados estruturados (mercado vs lead)
 4. Backlinks / autoridade de domínio (estimativa do nicho)
 
-Use a mesma estrutura de bench-card da página de mercado.`,
+Use a mesma estrutura de bench-card da página de mercado.
+
+LIMITES CR&Iacute;TICOS — bench-cards de SEO precisam caber 2x2 em A4:
+- bench-label: M&Aacute;XIMO 50 char
+- bench-col-sub: M&Aacute;XIMO 38 char (3 linhas curtas)
+- bench-impact: M&Aacute;XIMO 110 char (2 linhas, n&atilde;o 3)
+- N&Atilde;O escreva par&aacute;grafos longos dentro dos cards. Frases telegr&aacute;ficas.`,
   },
 
   // ════════════════════════ INVESTIMENTO ════════════════════════
@@ -595,7 +606,9 @@ export default async function handler(req, res) {
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        // Haiku 4.5: 3x mais rápido, 3x mais barato, limite 50k tok/min (vs 30k do Sonnet tier 1).
+        // Qualidade analítica vem do research (Sonnet) — páginas só formatam HTML seguindo template.
+        model: 'claude-haiku-4-5',
         max_tokens: pageConfig.max_tokens,
         system: pageConfig.system,
         messages: [{ role: 'user', content: userMessage }],
