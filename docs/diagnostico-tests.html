@@ -296,7 +296,10 @@ async function rodarCenario(scn) {
       }
       var pgData = await pgResp.json();
       resultados.push(pgData);
-      log('  ✓ ' + page + ' (' + pgData.tokens.input + ' in / ' + pgData.tokens.output + ' out)', 'info');
+      var attemptStr = pgData.attempts > 1 ? ' [' + pgData.attempts + ' tent.]' : '';
+      var warnStr = pgData.validation_warnings ? ' ⚠ ' + pgData.validation_warnings.join(', ') : '';
+      log('  ✓ ' + page + attemptStr + ' (' + pgData.tokens.input + ' in / ' + pgData.tokens.output + ' out)' + warnStr,
+        pgData.validation_warnings ? 'warn' : 'info');
     }
     var tPages = Date.now() - t1;
     log('✓ Páginas OK em ' + tPages + 'ms', 'ok');

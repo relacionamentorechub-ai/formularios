@@ -281,14 +281,37 @@ ESTRUTURA OBRIGATÓRIA:
 02 · Cultura e Lideran&ccedil;a — posicionamento, identidade, presença do líder
 03 · Vendas — canais, funil, ticket médio, recorrência
 04 · Experi&ecirc;ncia do Cliente — avaliações, atendimento, NPS estimado
-05 · Crescimento &amp; Aquisi&ccedil;&atilde;o — presença digital, escala (use class="v-card full")
+05 · Crescimento &amp; Aquisi&ccedil;&atilde;o — presença digital, escala
 
-Estrutura v-card:
-<div class="v-card{[ full no 5º]}">
+ESTRUTURA HTML CR&Iacute;TICA — siga LITERALMENTE este padr&atilde;o:
+
+<div class="vertical-grid">
+  <div class="v-card">    ← VERTICAL 01 (SEM class full)
+    <div class="v-head">...</div>
+    <div class="v-title">...</div>
+    <p class="v-body">...</p>
+  </div>
+  <div class="v-card">    ← VERTICAL 02 (SEM class full)
+    ...
+  </div>
+  <div class="v-card">    ← VERTICAL 03 (SEM class full)
+    ...
+  </div>
+  <div class="v-card">    ← VERTICAL 04 (SEM class full)
+    ...
+  </div>
+  <div class="v-card full">   ← APENAS VERTICAL 05 LEVA class="v-card full"
+    ...
+  </div>
+</div>
+
+REGRA ABSOLUTA: exatamente 4 cards com class="v-card" + 1 card com class="v-card full".
+NUNCA coloque "full" nas verticais 01, 02, 03 ou 04. NUNCA esque&ccedil;a "full" na 05.
+
+Cada v-card cont&eacute;m:
 <div class="v-head"><span class="v-name">{NN} · {Nome Vertical}</span><span class="v-status {ok|warn|crit}">{label, ≤18}</span></div>
 <div class="v-title">{diagnóstico em 1 frase, ≤72}</div>
 <p class="v-body">{texto seguindo regra abaixo}</p>
-</div>
 
 REGRA DE TAMANHO PARA v-body — CR&Iacute;TICO (a p&aacute;gina &eacute; A4 fixo, qualquer estouro &eacute; cortado):
 
@@ -585,6 +608,92 @@ function buildUserMessage(page, lead, pageNumber, totalPages, research) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// VALIDAÇÃO ESTRUTURAL — checa se Haiku gerou HTML válido para a página
+// ═══════════════════════════════════════════════════════════════
+// Cada página tem classes esperadas. Se ausentes, é página em branco / corrompida.
+const REQUIRED_CLASSES = {
+  'cover': ['cover-rec-logo', 'cover-title', 'cover-kpis'],
+  'problems-1': ['problems-grid', 'p-card'],
+  'problems-2': ['problems-grid', 'p-card'],
+  'mercado': ['bench-grid', 'bench-card'],
+  'mercado-cont': ['bench-grid', 'bench-card', 'opp-strip'],
+  'verticais': ['vertical-grid', 'v-card'],
+  'seo': ['bench-grid', 'bench-card'],
+  'investimento': ['plan-grid', 'plan-box'],
+  'contrato': ['contract-clause'],
+  'modulos': ['deliverable-grid', 'd-card'],
+  'hub-why': ['hw-content', 'hw-benefits', 'hw-benefit'],
+};
+
+// Validações específicas por página (além das classes obrigatórias)
+function validaEstrutura(page, html) {
+  const erros = [];
+  const required = REQUIRED_CLASSES[page] || [];
+  for (const cls of required) {
+    if (!html.includes('class="' + cls) && !html.includes('class="' + cls + ' ') && !html.includes(' ' + cls + '"') && !html.includes(' ' + cls + ' ')) {
+      erros.push('classe obrigatória ausente: ' + cls);
+    }
+  }
+  // HTML mínimo razoável: header (~80b) + intro (~200b) + conteúdo. <600 bytes é página fantasma.
+  if (html.length < 600) {
+    erros.push('HTML muito curto (' + html.length + ' bytes) — provável página em branco');
+  }
+  // Verticais: deve ter EXATAMENTE 1 v-card.full
+  if (page === 'verticais') {
+    const matchesFull = (html.match(/class="v-card full"|class="v-card\s+full"/g) || []).length;
+    const matchesNormal = (html.match(/class="v-card"(?!\s*full)/g) || []).length;
+    if (matchesFull !== 1) erros.push('verticais: encontrou ' + matchesFull + ' v-card.full (esperado 1)');
+    if (matchesNormal !== 4) erros.push('verticais: encontrou ' + matchesNormal + ' v-card normal (esperado 4)');
+  }
+  return erros;
+}
+
+// Chama a API Anthropic e devolve {html, stop_reason, usage}. Pode lançar.
+async function callAnthropic(apiKey, pageConfig, userMessage, hint) {
+  const systemFinal = hint ? pageConfig.system + '\n\nIMPORTANTE — TENTATIVA ANTERIOR FALHOU: ' + hint : pageConfig.system;
+  const upstream = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5',
+      max_tokens: pageConfig.max_tokens,
+      system: systemFinal,
+      messages: [{ role: 'user', content: userMessage }],
+      stream: false,
+    }),
+  });
+  if (!upstream.ok) {
+    const err = await upstream.text();
+    const error = new Error(err);
+    error.status = upstream.status;
+    throw error;
+  }
+  return upstream.json();
+}
+
+function extractHtml(data, pageNumber) {
+  let html = '';
+  if (Array.isArray(data.content)) {
+    for (const block of data.content) {
+      if (block.type === 'text' && block.text) html += block.text;
+    }
+  }
+  html = html.trim();
+  if (html.startsWith('```')) {
+    html = html.replace(/^```(?:html)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+  }
+  const firstDiv = html.indexOf('<div class="pdf-page');
+  if (firstDiv > 0) html = html.slice(firstDiv);
+  const pageNumStr = String(pageNumber || 1).padStart(2, '0');
+  html = html.replace(/\{NN\}/g, pageNumStr);
+  return html;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // HANDLER
 // ═══════════════════════════════════════════════════════════════
 export default async function handler(req, res) {
@@ -612,68 +721,49 @@ export default async function handler(req, res) {
   const userMessage = buildUserMessage(page, lead, pageNumber || 1, totalPages || 1, research);
 
   try {
-    const upstream = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        // Haiku 4.5: 3x mais rápido, 3x mais barato, limite 50k tok/min (vs 30k do Sonnet tier 1).
-        // Qualidade analítica vem do research (Sonnet) — páginas só formatam HTML seguindo template.
-        model: 'claude-haiku-4-5',
-        max_tokens: pageConfig.max_tokens,
-        system: pageConfig.system,
-        messages: [{ role: 'user', content: userMessage }],
-        stream: false,
-      }),
-    });
-
-    if (!upstream.ok) {
-      const err = await upstream.text();
-      return res.status(upstream.status).json({ error: err });
-    }
-
-    const data = await upstream.json();
-    let html = '';
-    if (Array.isArray(data.content)) {
-      for (const block of data.content) {
-        if (block.type === 'text' && block.text) html += block.text;
-      }
-    }
-
-    // Strip texto anterior ao primeiro <div (se modelo escapar com texto introdutório)
-    html = html.trim();
-    if (html.startsWith('```')) {
-      html = html.replace(/^```(?:html)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
-    }
-    const firstDiv = html.indexOf('<div class="pdf-page');
-    if (firstDiv > 0) html = html.slice(firstDiv);
-
-    // Substitui {NN} literal pelo número da página (se modelo esqueceu de fazer)
-    const pageNumStr = String(pageNumber || 1).padStart(2, '0');
-    html = html.replace(/\{NN\}/g, pageNumStr);
+    // 1ª tentativa
+    let data = await callAnthropic(apiKey, pageConfig, userMessage, null);
+    let html = extractHtml(data, pageNumber);
+    let tokensTotal = { input: data.usage?.input_tokens || 0, output: data.usage?.output_tokens || 0 };
 
     if (!html || !html.startsWith('<div class="pdf-page')) {
       return res.status(500).json({
         error: 'Resposta da IA não começa com <div class="pdf-page">',
-        preview: html.slice(0, 200),
-        page,
+        preview: html.slice(0, 200), page,
       });
+    }
+
+    // Validação estrutural — checa classes obrigatórias, tamanho mínimo e v-card.full count
+    let erros = validaEstrutura(page, html);
+    let attempt = 1;
+
+    if (erros.length) {
+      console.warn(`[diagnostico-page] "${page}" tent.${attempt} falhou: ${erros.join('; ')} — retentando`);
+      const hint = 'A resposta anterior teve estes problemas: ' + erros.join('; ') +
+        '. Refaça a página seguindo EXATAMENTE a estrutura HTML do prompt. ' +
+        'NÃO omita classes obrigatórias. NÃO retorne HTML vazio ou só com header.';
+      data = await callAnthropic(apiKey, pageConfig, userMessage, hint);
+      html = extractHtml(data, pageNumber);
+      tokensTotal.input += data.usage?.input_tokens || 0;
+      tokensTotal.output += data.usage?.output_tokens || 0;
+      attempt = 2;
+      erros = validaEstrutura(page, html);
+      if (erros.length) {
+        console.error(`[diagnostico-page] "${page}" tent.2 TAMBÉM falhou: ${erros.join('; ')}`);
+        // Retorna mesmo assim com warning — melhor que quebrar o PDF inteiro
+      }
     }
 
     return res.status(200).json({
       page,
       html,
       stop_reason: data.stop_reason,
-      tokens: {
-        input: data.usage?.input_tokens || 0,
-        output: data.usage?.output_tokens || 0,
-      },
+      attempts: attempt,
+      validation_warnings: erros.length ? erros : undefined,
+      tokens: tokensTotal,
     });
   } catch (error) {
     console.error(`[diagnostico-page] erro em "${page}":`, error.message);
-    return res.status(500).json({ error: error.message, page });
+    return res.status(error.status || 500).json({ error: error.message, page });
   }
 }
