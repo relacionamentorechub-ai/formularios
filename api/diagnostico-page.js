@@ -522,14 +522,13 @@ function buildUserMessage(page, lead, pageNumber, totalPages, research) {
 
   linhas.push('DADOS DO LEAD (do formulário):');
   linhas.push('');
-    `EMPRESA: ${lead.nome_empresa || 'Não informada'}`,
-    `INSTAGRAM: ${lead.instagram || ''}`,
-    `SEGMENTO: ${lead.segmento || 'Não informado'}`,
-    `CIDADE: ${lead.cidade || 'Não informada'}`,
-    `MÊS/ANO: ${mesAno}`,
-    '',
-    `CANAIS A ANALISAR: ${lead.canais || 'Nenhum especificado'}`,
-  ];
+  linhas.push(`EMPRESA: ${lead.nome_empresa || 'Não informada'}`);
+  linhas.push(`INSTAGRAM: ${lead.instagram || ''}`);
+  linhas.push(`SEGMENTO: ${lead.segmento || 'Não informado'}`);
+  linhas.push(`CIDADE: ${lead.cidade || 'Não informada'}`);
+  linhas.push(`MÊS/ANO: ${mesAno}`);
+  linhas.push('');
+  linhas.push(`CANAIS A ANALISAR: ${lead.canais || 'Nenhum especificado'}`);
 
   if (lead.site) linhas.push(`SITE: ${lead.site}`);
   if (lead.tiktok_handle) linhas.push(`TIKTOK: ${lead.tiktok_handle}`);
