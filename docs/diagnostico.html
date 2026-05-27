@@ -1246,20 +1246,51 @@ function buildLeadObject(d) {
 }
 
 async function chamarUmaPagina(page, lead, pageNumber, totalPages, research) {
-  var resp = await apiFetch('/api/diagnostico-page', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      page: page, lead: lead,
-      pageNumber: pageNumber, totalPages: totalPages,
-      research: research,
-    }),
-  });
-  if (!resp.ok) {
-    var err = await resp.json().catch(function(){ return {}; });
-    throw new Error('Página "' + page + '": ' + (err.error || 'HTTP ' + resp.status));
+  // Retry com backoff em 429 (rate limit do Anthropic) ou 529 (overloaded).
+  var maxAttempts = 4;
+  for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+    var resp = await apiFetch('/api/diagnostico-page', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        page: page, lead: lead,
+        pageNumber: pageNumber, totalPages: totalPages,
+        research: research,
+      }),
+    });
+    if (resp.ok) return resp.json();
+
+    var errJson = await resp.json().catch(function(){ return {}; });
+    var errMsg = errJson.error || ('HTTP ' + resp.status);
+    var isRateLimit = resp.status === 429 || (typeof errMsg === 'string' && errMsg.indexOf('rate_limit') >= 0);
+    var isOverloaded = resp.status === 529 || (typeof errMsg === 'string' && errMsg.indexOf('overloaded') >= 0);
+    if ((isRateLimit || isOverloaded) && attempt < maxAttempts) {
+      var waitMs = isRateLimit ? 35000 : 8000 * attempt; // 35s para rate limit (janela de 60s), backoff para overload
+      console.warn('[chamarUmaPagina] "' + page + '" tentativa ' + attempt + ' falhou (' + (isRateLimit ? 'rate limit' : 'overloaded') + '), aguardando ' + (waitMs/1000) + 's...');
+      setSubtitle('⏳ Rate limit atingido. Aguardando ' + (waitMs/1000) + 's antes de retomar (tentativa ' + (attempt+1) + ')...');
+      await new Promise(function(r){ setTimeout(r, waitMs); });
+      continue;
+    }
+    throw new Error('Página "' + page + '": ' + errMsg);
   }
-  return resp.json();
+  throw new Error('Página "' + page + '": esgotou retries');
+}
+
+// Executa promises com limite de concorrência E pacing entre lotes.
+// Mantém input tokens/min abaixo do limite do Anthropic (30k/min no tier 1).
+async function runComLimite(items, mapper, concurrency, pauseBetweenBatchesMs) {
+  var results = new Array(items.length);
+  for (var i = 0; i < items.length; i += concurrency) {
+    var batch = items.slice(i, i + concurrency);
+    var batchPromises = batch.map(function(item, j) {
+      return mapper(item, i + j).then(function(r){ results[i + j] = r; });
+    });
+    await Promise.all(batchPromises);
+    if (i + concurrency < items.length && pauseBetweenBatchesMs > 0) {
+      await new Promise(function(r){ setTimeout(r, pauseBetweenBatchesMs); });
+    }
+  }
+  return results;
 }
 
 async function chamarClaude(dados) {
@@ -1283,23 +1314,26 @@ async function chamarClaude(dados) {
     setSubtitle('Gerando ' + total + ' p&aacute;ginas...');
   }
 
-  // FASE 2: dispara TODAS as páginas em paralelo, com research como contexto
+  // FASE 2: dispara páginas em LOTES com pacing (respeita rate limit Anthropic 30k input tok/min).
+  // Concorrência 3 = ~12k input tok/burst. Pausa 25s entre lotes mantém abaixo de 30k/min.
   var concluidas = 0;
-  var promises = paginas.map(function(page, idx) {
-    var pageNumber = idx + 1; // 1-indexed (capa=1, segunda página=2, etc)
-    return chamarUmaPagina(page, lead, pageNumber, total, research).then(function(result) {
-      concluidas++;
-      setSubtitle('Concluiu p&aacute;gina ' + concluidas + '/' + total + ' (' + page + ')');
-      return result;
-    }).catch(function(err) {
-      console.error('[chamarClaude] falha em "' + page + '":', err.message);
-      throw err;
-    });
-  });
+  var CONCURRENCY = 3;
+  var PAUSE_MS = 25000;
+  setSubtitle('Gerando ' + total + ' p&aacute;ginas em lotes de ' + CONCURRENCY + ' (pacing para respeitar rate limit)...');
 
   var resultados;
   try {
-    resultados = await Promise.all(promises);
+    resultados = await runComLimite(paginas, function(page, idx) {
+      var pageNumber = idx + 1;
+      return chamarUmaPagina(page, lead, pageNumber, total, research).then(function(result) {
+        concluidas++;
+        setSubtitle('Concluiu p&aacute;gina ' + concluidas + '/' + total + ' (' + page + ')');
+        return result;
+      }).catch(function(err) {
+        console.error('[chamarClaude] falha em "' + page + '":', err.message);
+        throw err;
+      });
+    }, CONCURRENCY, PAUSE_MS);
   } catch (err) {
     throw new Error('Erro ao gerar diagn&oacute;stico: ' + err.message);
   }
