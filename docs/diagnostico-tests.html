@@ -193,22 +193,30 @@ function validaConsistenciaInstagram(html, research) {
   return { ok: false, msg: 'Números suspeitos (não batem com research): ' + suspeitos.join(', ') + '. Esperado: ' + validos.join(', ') };
 }
 
+function contaPalavras(txt) {
+  return (txt.trim().match(/\S+/g) || []).length;
+}
+
 function validaCharsCard(html) {
-  // Checa se .v-body, .bench-impact, .d-body estouram limites
+  // Mede em PALAVRAS (Haiku respeita melhor que char count) e em CHAR como fallback.
   var doc = new DOMParser().parseFromString(html, 'text/html');
   var problemas = [];
   doc.querySelectorAll('.v-body').forEach(function(el, i) {
-    var len = el.textContent.trim().length;
-    var max = el.closest('.v-card.full') ? 280 : 220;
-    if (len > max) problemas.push('v-body[' + i + ']=' + len + ' (max ' + max + ')');
+    var w = contaPalavras(el.textContent);
+    var max = el.closest('.v-card.full') ? 40 : 32;
+    if (w > max) problemas.push('v-body[' + i + ']=' + w + 'w (max ' + max + 'w)');
   });
   doc.querySelectorAll('.bench-impact').forEach(function(el, i) {
-    var len = el.textContent.trim().length;
-    if (len > 130) problemas.push('bench-impact[' + i + ']=' + len + ' (max 130)');
+    var w = contaPalavras(el.textContent);
+    if (w > 20) problemas.push('bench-impact[' + i + ']=' + w + 'w (max 20w)');
   });
   doc.querySelectorAll('.d-body').forEach(function(el, i) {
-    var len = el.textContent.trim().length;
-    if (len > 150) problemas.push('d-body[' + i + ']=' + len + ' (max 150)');
+    var w = contaPalavras(el.textContent);
+    if (w > 25) problemas.push('d-body[' + i + ']=' + w + 'w (max 25w)');
+  });
+  doc.querySelectorAll('.bench-col-sub').forEach(function(el, i) {
+    var w = contaPalavras(el.textContent);
+    if (w > 8) problemas.push('bench-col-sub[' + i + ']=' + w + 'w (max 8w)');
   });
   return problemas;
 }
@@ -304,11 +312,13 @@ async function rodarCenario(scn) {
     addCheck(checks, 'Sem placeholders {x} não substituídos' + (placeholders.length ? ': ' + placeholders.slice(0, 3).join(', ') : ''),
       placeholders.length === 0);
 
-    var inv = htmlCompleto.indexOf('Parte 04 · Investimento') >= 0 || htmlCompleto.indexOf('INVESTIMENTO') >= 0;
+    // Detecção de páginas pelo header (.page-number contém "NN · INVESTIMENTO" / "NN · SEO")
+    // Evita falso positivo de menção casual da palavra no corpo de outro card.
+    var inv = /·\s*INVESTIMENTO\s*</.test(htmlCompleto);
     addCheck(checks, 'Página Investimento ' + (scn.espera.temInvestimento ? 'presente' : 'ausente'),
       inv === scn.espera.temInvestimento);
 
-    var seo = htmlCompleto.indexOf('Parte 04 · An&aacute;lise de SEO') >= 0 || htmlCompleto.indexOf('SEO') >= 0;
+    var seo = /·\s*SEO\s*</.test(htmlCompleto);
     addCheck(checks, 'Página SEO ' + (scn.espera.temSeo ? 'presente' : 'ausente'),
       seo === scn.espera.temSeo);
 
@@ -356,6 +366,12 @@ function addCheck(container, msg, ok) {
 async function runAll() {
   for (var i = 0; i < SCENARIOS.length; i++) {
     await rodarCenario(SCENARIOS[i]);
+    if (i < SCENARIOS.length - 1) {
+      // Pausa 25s entre cenários: research usa Sonnet (30k input tok/min).
+      // Sem pausa, 5 researches seguidos batem no rate limit.
+      log('⏸ Pausa 25s antes do próximo cenário (rate limit do research)...', 'warn');
+      await new Promise(function(r){ setTimeout(r, 25000); });
+    }
   }
   log('═══ TODOS os cenários concluídos ═══', 'ok');
 }

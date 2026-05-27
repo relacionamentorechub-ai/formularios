@@ -194,15 +194,22 @@ ESTRUTURA OBRIGATÓRIA:
 
 CONCORRENTES: use APENAS nomes do array research.concorrentes (já pesquisados e reais).
 
-Estrutura bench-card (LIMITES APERTADOS para caber 4 cards em 2x2):
+Estrutura bench-card (LIMITES APERTADOS para caber 4 cards em 2x2 em A4):
 <div class="bench-card">
-<div class="bench-label">{título da métrica, ≤55 char}</div>
+<div class="bench-label">{título da métrica, máx 8 palavras}</div>
 <div class="bench-compare">
-<div class="bench-col market"><div class="bench-col-label">Mercado · {fonte, ≤24 char}</div><div class="bench-col-value">{valor}<small> {unit}</small></div><div class="bench-col-sub">{contexto, ≤45}</div></div>
-<div class="bench-col you"><div class="bench-col-label">{nome empresa, ≤24 char}</div><div class="bench-col-value">{valor}<small> {unit}</small></div><div class="bench-col-sub">{contexto, ≤45}</div></div>
+<div class="bench-col market"><div class="bench-col-label">Mercado · {fonte curta, máx 3 palavras}</div><div class="bench-col-value">{valor}<small> {unit}</small></div><div class="bench-col-sub">{contexto, máx 6 palavras}</div></div>
+<div class="bench-col you"><div class="bench-col-label">{nome empresa, máx 3 palavras}</div><div class="bench-col-value">{valor}<small> {unit}</small></div><div class="bench-col-sub">{contexto, máx 6 palavras}</div></div>
 </div>
-<div class="bench-impact">{insight, ≤130 char (3 linhas max)}</div>
+<div class="bench-impact">{insight em 1 frase, M&Aacute;XIMO 18 palavras — ver regra abaixo}</div>
 </div>
+
+REGRA DE TAMANHO PARA bench-impact — CR&Iacute;TICO:
+EXATAMENTE 1 frase. M&aacute;ximo 18 palavras. Nunca 2 frases. Nunca par&aacute;grafo.
+EXEMPLO BOM (15 palavras): "Sem indexa&ccedil;&atilde;o p&uacute;blica, a marca perde visibilidade org&acirc;nica frente a concorrentes j&aacute; estabelecidos em Canoas."
+EXEMPLO RUIM (28 palavras — REJEITAR): "Sem volume de posts e seguidores rastre&aacute;veis, &eacute; imposs&iacute;vel avaliar se o conte&uacute;do gera retorno real. Benchmark de refer&ecirc;ncia: 0,36% (mLabs fev/2026)."
+
+CHECAGEM: conte palavras antes de fechar </div>. Se &gt; 18, REESCREVA.
 
 Métricas obrigatórias (uma por bench-card):
 1. Seguidores médios do nicho vs lead (use research.instagram.followers)
@@ -280,13 +287,21 @@ Estrutura v-card:
 <div class="v-card{[ full no 5º]}">
 <div class="v-head"><span class="v-name">{NN} · {Nome Vertical}</span><span class="v-status {ok|warn|crit}">{label, ≤18}</span></div>
 <div class="v-title">{diagnóstico em 1 frase, ≤72}</div>
-<p class="v-body">{2 frases curtas, ≤200 char (full pode ≤260 — N&Atilde;O ULTRAPASSE)}</p>
+<p class="v-body">{texto seguindo regra abaixo}</p>
 </div>
 
-LIMITES CR&Iacute;TICOS — verticais é a página mais propensa a overflow no PDF:
-- v-body normal: M&Aacute;XIMO 200 caracteres (conte). Se passar, encurte.
-- v-body full (vertical 05): M&Aacute;XIMO 260 caracteres. N&Atilde;O FA&Ccedil;A PAR&Aacute;GRAFO LONGO.
-- Total da página deve caber em A4 com header+intro+grid 3 linhas.`,
+REGRA DE TAMANHO PARA v-body — CR&Iacute;TICO (a p&aacute;gina &eacute; A4 fixo, qualquer estouro &eacute; cortado):
+
+v-body NORMAL (verticais 01 a 04):
+EXATAMENTE 2 frases. Total entre 25 e 32 palavras. Cada frase no m&aacute;ximo 16 palavras.
+EXEMPLO BOM (28 palavras): "Estrutura de franquia oferece processos prontos e respaldo de marca. Por&eacute;m a opera&ccedil;&atilde;o local limita autonomia para diferencia&ccedil;&atilde;o estrat&eacute;gica frente a concorrentes regionais."
+EXEMPLO RUIM (43 palavras — REJEITAR): "A loja funciona como franquia Italinea com showroom pr&oacute;prio em Canoas, equipe de arquitetura e design, e landing page dedicada. A estrutura franqueada oferece respaldo de marca e processos, mas tamb&eacute;m limita autonomia na diferencia&ccedil;&atilde;o local..."
+
+v-body FULL (vertical 05, class="v-card full"):
+EXATAMENTE 2 frases. Total entre 30 e 38 palavras. M&aacute;ximo 18 palavras por frase.
+NUNCA escreva 3 frases. NUNCA passe de 40 palavras.
+
+CHECAGEM ANTES DE FECHAR A TAG: conte mentalmente as palavras. Se passou, REESCREVA mais curto.`,
   },
 
   // ════════════════════════ SEO ════════════════════════
@@ -319,13 +334,12 @@ ESTRUTURA OBRIGATÓRIA:
 3. Schema markup / dados estruturados (mercado vs lead)
 4. Backlinks / autoridade de domínio (estimativa do nicho)
 
-Use a mesma estrutura de bench-card da página de mercado.
+Use a mesma estrutura de bench-card da página de mercado, COM AS MESMAS REGRAS DE TAMANHO:
+- bench-label: m&aacute;ximo 8 palavras
+- bench-col-sub: m&aacute;ximo 6 palavras
+- bench-impact: 1 frase, m&aacute;ximo 18 palavras (ver exemplos na p&aacute;gina de mercado)
 
-LIMITES CR&Iacute;TICOS — bench-cards de SEO precisam caber 2x2 em A4:
-- bench-label: M&Aacute;XIMO 50 char
-- bench-col-sub: M&Aacute;XIMO 38 char (3 linhas curtas)
-- bench-impact: M&Aacute;XIMO 110 char (2 linhas, n&atilde;o 3)
-- N&Atilde;O escreva par&aacute;grafos longos dentro dos cards. Frases telegr&aacute;ficas.`,
+CHECAGEM: conte palavras antes de fechar cada </div>.`,
   },
 
   // ════════════════════════ INVESTIMENTO ════════════════════════
