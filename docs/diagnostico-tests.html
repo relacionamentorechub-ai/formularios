@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>R.E.C. HUB · Testes do Diagnóstico</title>
+<style>
+  :root { --navy:#012659; --teal:#00a198; --cream:#FAF7F2; --ok:#16a34a; --warn:#d97706; --err:#dc2626; }
+  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background:#0a1628; color:#e2e8f0; margin:0; padding:24px; }
+  h1 { color:#fff; font-weight:400; letter-spacing:-.02em; margin:0 0 8px; }
+  .sub { color:#94a3b8; margin-bottom:32px; }
+  .scenarios { display:grid; grid-template-columns:repeat(auto-fill,minmax(380px,1fr)); gap:16px; }
+  .scn { background:#0f1f3a; border:1px solid #1e3a5f; border-radius:12px; padding:18px; }
+  .scn h3 { margin:0 0 8px; color:#fff; font-size:15px; }
+  .scn .desc { color:#94a3b8; font-size:12px; margin-bottom:12px; min-height:32px; }
+  .scn button { background:var(--teal); color:#001f1d; border:0; padding:8px 14px; border-radius:6px; font-weight:600; cursor:pointer; font-size:12px; }
+  .scn button:disabled { opacity:.4; cursor:wait; }
+  .scn .status { margin-top:12px; font-size:11px; line-height:1.5; }
+  .scn .checks { margin-top:8px; font-size:11px; }
+  .check { display:flex; gap:6px; padding:2px 0; }
+  .check.ok { color:var(--ok); }
+  .check.warn { color:var(--warn); }
+  .check.err { color:var(--err); }
+  .controls { display:flex; gap:8px; margin-bottom:24px; }
+  .controls button { background:#1e3a5f; color:#fff; border:0; padding:10px 18px; border-radius:6px; cursor:pointer; }
+  .controls button.primary { background:var(--teal); color:#001f1d; font-weight:700; }
+  .log { background:#020617; border:1px solid #1e3a5f; border-radius:8px; padding:12px; max-height:280px; overflow:auto; font-family:monospace; font-size:11px; margin-top:12px; }
+  .log .L-info { color:#7dd3fc; }
+  .log .L-ok { color:#86efac; }
+  .log .L-err { color:#fca5a5; }
+  .log .L-warn { color:#fcd34d; }
+  iframe { width:100%; height:600px; border:1px solid #1e3a5f; background:#fff; border-radius:8px; margin-top:12px; }
+</style>
+</head>
+<body>
+<h1>R.E.C. HUB &middot; Testes do Diagn&oacute;stico</h1>
+<p class="sub">Roda cen&aacute;rios reais contra /api/diagnostico-research + /api/diagnostico-page. Valida HTML, conta p&aacute;ginas, detecta placeholders, confere consist&ecirc;ncia de dados pesquisados. <strong>Cada cen&aacute;rio custa ~$0.05.</strong></p>
+
+<div class="controls">
+  <button class="primary" onclick="runAll()">▶ Rodar TODOS sequencialmente</button>
+  <button onclick="document.getElementById('global-log').innerHTML='';">Limpar log</button>
+  <button onclick="document.querySelectorAll('iframe').forEach(f=>f.remove())">Limpar previews</button>
+</div>
+
+<div class="log" id="global-log"></div>
+
+<div class="scenarios" id="scenarios"></div>
+
+<script src="_hub.js"></script>
+<script>
+// ════════════════════════════════════════════════════════════════════
+// CENÁRIOS DE TESTE
+// ════════════════════════════════════════════════════════════════════
+var SCENARIOS = [
+  {
+    id: 'minimo',
+    nome: '🔹 Mínimo (1 canal, sem proposta)',
+    desc: '2 canais, sem site, sem plano. Esperado: 8 páginas.',
+    lead: {
+      nome_empresa: 'Padaria Sabor de Casa',
+      instagram: '@saborcasa.canoas',
+      segmento: 'Padaria artesanal',
+      cidade: 'Canoas, RS',
+      canais: 'Instagram, Facebook',
+      tem_site: 'Não tem site',
+      trafego_atual: 'Não',
+      objetivo: 'Aumentar movimento físico',
+      observacoes: '',
+      com_proposta: 'Não',
+      plano: '',
+    },
+    espera: { paginasMin: 7, paginasMax: 9, temInvestimento: false, temSeo: false }
+  },
+  {
+    id: 'medio',
+    nome: '🔸 Médio (3 canais + site + plano)',
+    desc: '3 canais incluindo Site/SEO, com proposta plano 2.',
+    lead: {
+      nome_empresa: 'Mistura Cozinha & Bar',
+      instagram: '@misturacozinhabar',
+      segmento: 'Restaurante / bistrô',
+      cidade: 'Porto Alegre, RS',
+      canais: 'Instagram, Google Empresa, Site/SEO',
+      site: 'misturacozinhabar.com.br',
+      tem_site: 'Sim, tem site',
+      trafego_atual: 'Pouco',
+      objetivo: 'Mais reservas via digital',
+      observacoes: 'Já tem boa base de Instagram, mas Google não está otimizado',
+      com_proposta: 'Sim',
+      plano: 'Plano 2',
+    },
+    espera: { paginasMin: 10, paginasMax: 11, temInvestimento: true, temSeo: true }
+  },
+  {
+    id: 'completo',
+    nome: '🔶 Completo (5 canais + site + plano 4)',
+    desc: 'Todos os canais, plano top, observações detalhadas.',
+    lead: {
+      nome_empresa: 'Clínica Heden Estética',
+      instagram: '@clinicaheden',
+      segmento: 'Clínica de estética e dermatologia',
+      cidade: 'Novo Hamburgo, RS',
+      canais: 'Instagram, Facebook, Google Empresa, Site/SEO, TikTok',
+      site: 'clinicaheden.com.br',
+      tiktok_handle: '@clinicaheden',
+      tem_site: 'Sim, tem site',
+      trafego_atual: 'Sim, ativo',
+      objetivo: 'Escala de leads qualificados para procedimentos estéticos',
+      observacoes: 'Concorrência alta em NH; precisa diferenciar por autoridade médica',
+      com_proposta: 'Sim',
+      plano: 'Plano 4',
+    },
+    espera: { paginasMin: 11, paginasMax: 12, temInvestimento: true, temSeo: true }
+  },
+  {
+    id: 'sem-site-com-plano',
+    nome: '🔹 Sem site mas com plano 1',
+    desc: '2 canais, sem site (sem página SEO), com proposta.',
+    lead: {
+      nome_empresa: 'Bartzen Canoas Centro',
+      instagram: '@bartzencanoascentro',
+      segmento: 'Móveis e decoração',
+      cidade: 'Canoas, RS',
+      canais: 'Instagram, Facebook',
+      tem_site: 'Não tem site',
+      trafego_atual: 'Não',
+      objetivo: 'Estruturar presença digital do zero',
+      com_proposta: 'Sim',
+      plano: 'Plano 1',
+    },
+    espera: { paginasMin: 9, paginasMax: 10, temInvestimento: true, temSeo: false }
+  },
+  {
+    id: 'plano-personalizado',
+    nome: '🔸 Plano personalizado',
+    desc: 'Lead com plano "Personalizado" — campo livre.',
+    lead: {
+      nome_empresa: 'Geração Água',
+      instagram: '@geracao_agua',
+      segmento: 'Sustentabilidade / saneamento',
+      cidade: 'Porto Alegre, RS',
+      canais: 'Instagram, LinkedIn, Site/SEO',
+      site: 'geracaoagua.com.br',
+      linkedin_handle: 'geracao-agua',
+      tem_site: 'Sim, tem site',
+      trafego_atual: 'Não',
+      objetivo: 'Awareness institucional B2B',
+      com_proposta: 'Sim',
+      plano: 'Personalizado',
+    },
+    espera: { paginasMin: 10, paginasMax: 11, temInvestimento: true, temSeo: true }
+  },
+];
+
+// ════════════════════════════════════════════════════════════════════
+// VALIDADORES
+// ════════════════════════════════════════════════════════════════════
+function contaPaginas(html) {
+  var m = html.match(/<div class="pdf-page/g);
+  return m ? m.length : 0;
+}
+
+function temPlaceholders(html) {
+  // Detecta {coisas}, {NN}, {placeholder}, etc não substituídos
+  var matches = html.match(/\{[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ_ 0-9·\-–—\.,\/]{1,60}\}/g) || [];
+  // Ignora padrões CSS dentro de string (raro mas possível)
+  return matches.filter(function(m){
+    return !/^\{(NN|[0-9]+)\}$/.test(m); // NN já deveria estar substituído
+  });
+}
+
+function validaConsistenciaInstagram(html, research) {
+  // Se research tem followers definido, verifica que NÃO aparecem números inventados
+  // de followers no HTML (heurística: procura "X seguidores" e cruza com research.instagram.followers)
+  var pat = /(\d[\d\.,]*)\s*seguidores/gi;
+  var encontrados = [];
+  var m;
+  while ((m = pat.exec(html)) !== null) {
+    var num = parseInt(m[1].replace(/\D/g, ''), 10);
+    if (!isNaN(num) && num > 100) encontrados.push(num);
+  }
+  if (!encontrados.length) return { ok: true, msg: 'sem números de seguidores citados (ok se research null)' };
+
+  var realFollowers = research && research.instagram && research.instagram.followers;
+  var concorrentes = (research && research.concorrentes) || [];
+  var validos = [realFollowers].concat(concorrentes.map(function(c){ return c.followers; })).filter(Boolean);
+
+  // Aceita se o número está dentro de 5% de algum valor real (margem de arredondamento)
+  var suspeitos = encontrados.filter(function(n) {
+    return !validos.some(function(v) { return Math.abs(n - v) / v < 0.05; });
+  });
+
+  if (suspeitos.length === 0) return { ok: true, msg: encontrados.length + ' números de seguidores, todos batem com research' };
+  return { ok: false, msg: 'Números suspeitos (não batem com research): ' + suspeitos.join(', ') + '. Esperado: ' + validos.join(', ') };
+}
+
+function validaCharsCard(html) {
+  // Checa se .v-body, .bench-impact, .d-body estouram limites
+  var doc = new DOMParser().parseFromString(html, 'text/html');
+  var problemas = [];
+  doc.querySelectorAll('.v-body').forEach(function(el, i) {
+    var len = el.textContent.trim().length;
+    var max = el.closest('.v-card.full') ? 280 : 220;
+    if (len > max) problemas.push('v-body[' + i + ']=' + len + ' (max ' + max + ')');
+  });
+  doc.querySelectorAll('.bench-impact').forEach(function(el, i) {
+    var len = el.textContent.trim().length;
+    if (len > 130) problemas.push('bench-impact[' + i + ']=' + len + ' (max 130)');
+  });
+  doc.querySelectorAll('.d-body').forEach(function(el, i) {
+    var len = el.textContent.trim().length;
+    if (len > 150) problemas.push('d-body[' + i + ']=' + len + ' (max 150)');
+  });
+  return problemas;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// EXECUÇÃO
+// ════════════════════════════════════════════════════════════════════
+function log(msg, level) {
+  var el = document.getElementById('global-log');
+  var line = document.createElement('div');
+  line.className = 'L-' + (level || 'info');
+  line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+function planejarPaginas(d) {
+  var canais = (d.canais || '').split(',').map(function(c){ return c.trim(); }).filter(Boolean);
+  var paginas = ['cover', 'problems-1'];
+  if (canais.length >= 3) paginas.push('problems-2');
+  paginas.push('mercado', 'mercado-cont', 'verticais');
+  var temSiteSeo = d.tem_site === 'Sim, tem site' && d.site && /site.*seo|seo/i.test(d.canais || '');
+  if (temSiteSeo) paginas.push('seo');
+  if (d.com_proposta === 'Sim' && d.plano) {
+    paginas.push('investimento');
+    paginas.push('contrato');
+  }
+  paginas.push('modulos', 'hub-why');
+  return paginas;
+}
+
+async function rodarCenario(scn) {
+  var btn = document.querySelector('[data-scn="' + scn.id + '"] button');
+  var status = document.querySelector('[data-scn="' + scn.id + '"] .status');
+  var checks = document.querySelector('[data-scn="' + scn.id + '"] .checks');
+  var card = document.querySelector('[data-scn="' + scn.id + '"]');
+
+  btn.disabled = true;
+  status.innerHTML = '⏳ Pesquisando...';
+  checks.innerHTML = '';
+  log('▶ Cenário "' + scn.id + '" iniciado', 'info');
+
+  try {
+    // FASE 1: research
+    var t0 = Date.now();
+    var rRes = await apiFetch('/api/diagnostico-research', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lead: scn.lead })
+    });
+    if (!rRes.ok) {
+      var err = await rRes.text();
+      throw new Error('Research falhou: ' + err.slice(0, 200));
+    }
+    var resData = await rRes.json();
+    var research = resData.research;
+    var tResearch = Date.now() - t0;
+    log('✓ Research OK em ' + tResearch + 'ms (' + (resData.tokens && resData.tokens.searches) + ' searches)', 'ok');
+    status.innerHTML = '⏳ Pesquisa OK. Gerando páginas...';
+
+    // FASE 2: páginas
+    var paginas = planejarPaginas(scn.lead);
+    var total = paginas.length;
+    log('  Planejou ' + total + ' páginas: ' + paginas.join(','), 'info');
+
+    var t1 = Date.now();
+    var resultados = [];
+    // Sequencial pra não estourar (a UI de produção paraleliza, aqui é teste)
+    for (var i = 0; i < paginas.length; i++) {
+      var page = paginas[i];
+      var pgResp = await apiFetch('/api/diagnostico-page', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page: page, lead: scn.lead, pageNumber: i + 1, totalPages: total, research: research })
+      });
+      if (!pgResp.ok) {
+        var pgErr = await pgResp.text();
+        throw new Error('Página "' + page + '" falhou: ' + pgErr.slice(0, 200));
+      }
+      var pgData = await pgResp.json();
+      resultados.push(pgData);
+      log('  ✓ ' + page + ' (' + pgData.tokens.input + ' in / ' + pgData.tokens.output + ' out)', 'info');
+    }
+    var tPages = Date.now() - t1;
+    log('✓ Páginas OK em ' + tPages + 'ms', 'ok');
+
+    var htmlCompleto = resultados.map(function(r){ return r.html; }).join('\n');
+
+    // ─── VALIDAÇÕES ───
+    var nPages = contaPaginas(htmlCompleto);
+    addCheck(checks, 'Páginas geradas: ' + nPages + ' (esperado ' + scn.espera.paginasMin + '–' + scn.espera.paginasMax + ')',
+      nPages >= scn.espera.paginasMin && nPages <= scn.espera.paginasMax);
+
+    var placeholders = temPlaceholders(htmlCompleto);
+    addCheck(checks, 'Sem placeholders {x} não substituídos' + (placeholders.length ? ': ' + placeholders.slice(0, 3).join(', ') : ''),
+      placeholders.length === 0);
+
+    var inv = htmlCompleto.indexOf('Parte 04 · Investimento') >= 0 || htmlCompleto.indexOf('INVESTIMENTO') >= 0;
+    addCheck(checks, 'Página Investimento ' + (scn.espera.temInvestimento ? 'presente' : 'ausente'),
+      inv === scn.espera.temInvestimento);
+
+    var seo = htmlCompleto.indexOf('Parte 04 · An&aacute;lise de SEO') >= 0 || htmlCompleto.indexOf('SEO') >= 0;
+    addCheck(checks, 'Página SEO ' + (scn.espera.temSeo ? 'presente' : 'ausente'),
+      seo === scn.espera.temSeo);
+
+    var consist = validaConsistenciaInstagram(htmlCompleto, research);
+    addCheck(checks, consist.msg, consist.ok);
+
+    var overflowProblemas = validaCharsCard(htmlCompleto);
+    addCheck(checks, overflowProblemas.length === 0 ? 'Limites de char OK' : 'Overflow: ' + overflowProblemas.slice(0, 3).join('; '),
+      overflowProblemas.length === 0);
+
+    status.innerHTML = '✓ Concluído em ' + ((Date.now() - t0)/1000).toFixed(1) + 's';
+
+    // Preview em iframe
+    var blob = new Blob([
+      '<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300..900;1,300..900&family=Manrope:wght@200..800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet"><title>Preview ' + scn.id + '</title>',
+      document.querySelector('style').outerHTML,
+      '</head><body style="background:#0a1628;margin:0;padding:20px;">',
+      htmlCompleto,
+      '</body></html>'
+    ], { type: 'text/html' });
+    var url = URL.createObjectURL(blob);
+    var existing = card.querySelector('iframe');
+    if (existing) existing.remove();
+    var ifr = document.createElement('iframe');
+    ifr.src = url;
+    card.appendChild(ifr);
+
+    log('✓ Cenário "' + scn.id + '" concluído', 'ok');
+  } catch (err) {
+    status.innerHTML = '✗ Erro';
+    addCheck(checks, err.message, false);
+    log('✗ Cenário "' + scn.id + '" falhou: ' + err.message, 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function addCheck(container, msg, ok) {
+  var d = document.createElement('div');
+  d.className = 'check ' + (ok ? 'ok' : 'err');
+  d.textContent = (ok ? '✓ ' : '✗ ') + msg;
+  container.appendChild(d);
+}
+
+async function runAll() {
+  for (var i = 0; i < SCENARIOS.length; i++) {
+    await rodarCenario(SCENARIOS[i]);
+  }
+  log('═══ TODOS os cenários concluídos ═══', 'ok');
+}
+
+// ─── RENDER ───
+function renderScenarios() {
+  var c = document.getElementById('scenarios');
+  SCENARIOS.forEach(function(scn) {
+    var card = document.createElement('div');
+    card.className = 'scn';
+    card.setAttribute('data-scn', scn.id);
+    card.innerHTML =
+      '<h3>' + scn.nome + '</h3>' +
+      '<div class="desc">' + scn.desc + '</div>' +
+      '<button onclick="rodarCenario(SCENARIOS.find(s=>s.id===\'' + scn.id + '\'))">▶ Rodar</button>' +
+      '<div class="status"></div>' +
+      '<div class="checks"></div>';
+    c.appendChild(card);
+  });
+}
+renderScenarios();
+</script>
+</body>
+</html>
