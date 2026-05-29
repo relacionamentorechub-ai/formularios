@@ -8,6 +8,10 @@ export const config = { maxDuration: 120 };
 
 import { applyCors, requireAuth, rateLimit, readBody } from './_lib.js';
 
+// Modelo único do diagnóstico (mesmo das páginas).
+// Opções: 'claude-sonnet-4-6' ($3/$15) | 'claude-opus-4-8' ($5/$25)
+const MODEL = 'claude-sonnet-4-6';
+
 const RESEARCH_PROMPT = `Você é um analista de dados de mercado digital. Sua missão: coletar dados REAIS e VERIFICADOS sobre um lead.
 
 Você TEM acesso à ferramenta web_search. Use-a OBRIGATORIAMENTE para:
@@ -106,7 +110,7 @@ export default async function handler(req, res) {
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: MODEL,
         max_tokens: 8000, // generoso pq web_search results contam aqui
         system: RESEARCH_PROMPT,
         messages: [{ role: 'user', content: userMessage }],

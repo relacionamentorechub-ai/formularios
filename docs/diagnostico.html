@@ -1314,11 +1314,13 @@ async function chamarClaude(dados) {
     setSubtitle('Gerando ' + total + ' p&aacute;ginas...');
   }
 
-  // FASE 2: páginas com Haiku 4.5 (limite 50k tok/min). Concorrência 6, pausa curta.
-  // 11 páginas × ~4k tok = 44k → cabe num burst. Pausa 5s entre lotes só por segurança.
+  // FASE 2: páginas com modelo único (ver MODEL nos endpoints).
+  // Sonnet 4.6 = 30k input tok/min (tier 1). 11 págs × ~3.5k = burst ~21k < 30k.
+  // Pausa 8s entre lotes (research Sonnet também consome a janela de 60s).
+  // Se trocar p/ Opus 4.8 (TPM menor): CONCURRENCY=3, PAUSE_MS=15000.
   var concluidas = 0;
   var CONCURRENCY = 6;
-  var PAUSE_MS = 5000;
+  var PAUSE_MS = 8000;
   setSubtitle('Gerando ' + total + ' p&aacute;ginas em paralelo...');
 
   var resultados;

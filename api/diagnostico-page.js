@@ -6,6 +6,10 @@ export const config = { maxDuration: 60 };
 
 import { applyCors, requireAuth, rateLimit, readBody } from './_lib.js';
 
+// Modelo único do diagnóstico. Trocar aqui afeta TODAS as páginas.
+// Opções: 'claude-sonnet-4-6' ($3/$15) | 'claude-opus-4-8' ($5/$25)
+const MODEL = 'claude-sonnet-4-6';
+
 // ═══════════════════════════════════════════════════════════════
 // REGRAS UNIVERSAIS — incluídas em TODOS os prompts
 // ═══════════════════════════════════════════════════════════════
@@ -659,7 +663,7 @@ async function callAnthropic(apiKey, pageConfig, userMessage, hint) {
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5',
+      model: MODEL,
       max_tokens: pageConfig.max_tokens,
       system: systemFinal,
       messages: [{ role: 'user', content: userMessage }],
