@@ -102,51 +102,14 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg-base);colo
     <h1 class="card-title">Hub interno <span class="gradient">de soluções</span></h1>
     <p class="card-sub">Ferramentas de diagnóstico, propostas, campanhas e geração de conteúdo. Acesso exclusivo da equipe.</p>
 
-    <div class="tabs">
-      <button class="tab active" id="tab_login" onclick="switchTab('login')">Entrar</button>
-      <button class="tab" id="tab_signup" onclick="switchTab('signup')">Criar conta</button>
-    </div>
-
-    <!-- LOGIN -->
+    <!-- LOGIN POR NOME -->
     <form id="form_login" onsubmit="handleLogin(event)">
       <div class="field">
-        <label class="label" for="login_user">Usuário <span class="req">*</span></label>
-        <input class="input" type="text" id="login_user" autocomplete="username" placeholder="Seu nome de usuário" required>
-      </div>
-      <div class="field">
-        <label class="label" for="login_pass">Senha <span class="req">*</span></label>
-        <input class="input" type="password" id="login_pass" autocomplete="current-password" placeholder="••••••••" required>
+        <label class="label" for="login_nome">Seu nome <span class="req">*</span></label>
+        <input class="input" type="text" id="login_nome" autocomplete="off" autocapitalize="off" placeholder="Digite seu nome" autofocus required>
       </div>
       <button class="btn-primary" type="submit" id="btn_login">Entrar</button>
       <div class="alert" id="alert_login"></div>
-    </form>
-
-    <!-- SIGNUP -->
-    <form id="form_signup" onsubmit="handleSignup(event)" style="display:none;">
-
-      <div id="signup_step_1">
-        <div class="field">
-          <label class="label" for="signup_master">Senha da empresa <span class="req">*</span></label>
-          <input class="input" type="password" id="signup_master" placeholder="Senha que apenas a equipe sabe" required>
-          <div class="hint">Para criar uma conta nova você precisa primeiro confirmar que faz parte da equipe.</div>
-        </div>
-        <button class="btn-primary" type="button" onclick="validarMaster()">Continuar</button>
-        <div class="alert" id="alert_master"></div>
-      </div>
-
-      <div class="signup-step-2" id="signup_step_2">
-        <div class="alert success show" style="margin-bottom:16px;margin-top:0;">✓ Senha da empresa confirmada. Agora crie suas credenciais.</div>
-        <div class="field">
-          <label class="label" for="signup_user">Nome de usuário <span class="req">*</span></label>
-          <input class="input" type="text" id="signup_user" autocomplete="username" placeholder="ex: paola.hub" required minlength="3">
-        </div>
-        <div class="field">
-          <label class="label" for="signup_pass">Sua senha <span class="req">*</span></label>
-          <input class="input" type="password" id="signup_pass" autocomplete="new-password" placeholder="Mínimo 4 caracteres" required minlength="4">
-        </div>
-        <button class="btn-primary" type="submit" id="btn_signup">Criar conta e entrar</button>
-        <div class="alert" id="alert_signup"></div>
-      </div>
     </form>
 
     <div class="foot">Hub Interno · Apenas para uso da <strong>equipe REC HUB</strong></div>
@@ -155,22 +118,6 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg-base);colo
 
 <script>
 var REDIRECT_AFTER_LOGIN = 'index.html';
-var masterValidated = false;
-
-function switchTab(t) {
-  var isLogin = t === 'login';
-  document.getElementById('form_login').style.display  = isLogin ? '' : 'none';
-  document.getElementById('form_signup').style.display = isLogin ? 'none' : '';
-  document.getElementById('tab_login').classList.toggle('active', isLogin);
-  document.getElementById('tab_signup').classList.toggle('active', !isLogin);
-  hideAlerts();
-}
-
-function hideAlerts() {
-  ['alert_login','alert_master','alert_signup'].forEach(function(id){
-    var el = document.getElementById(id); if (el) el.classList.remove('show');
-  });
-}
 
 function showAlert(id, msg, kind) {
   var el = document.getElementById(id);
@@ -186,81 +133,22 @@ function setLoading(btnId, loading, label) {
 
 async function handleLogin(e) {
   e.preventDefault();
-  hideAlerts();
-  var username = document.getElementById('login_user').value.trim();
-  var password = document.getElementById('login_pass').value;
-  if (!username || !password) return;
+  var nome = document.getElementById('login_nome').value.trim();
+  if (!nome) { showAlert('alert_login', 'Digite seu nome'); return; }
   setLoading('btn_login', true, 'Entrando...');
   try {
     var r = await fetch('/api/auth', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ action:'login', username:username, password:password })
+      body: JSON.stringify({ action:'login', nome:nome })
     });
     var data = await r.json();
-    if (!r.ok || !data.ok) { showAlert('alert_login', data.error || 'Falha no login'); setLoading('btn_login', false, 'Entrar'); return; }
+    if (!r.ok || !data.ok) { showAlert('alert_login', data.error || 'Nome não reconhecido'); setLoading('btn_login', false, 'Entrar'); return; }
     localStorage.setItem('rec_hub_token', data.token);
     localStorage.setItem('rec_hub_user', data.username);
     window.location.href = REDIRECT_AFTER_LOGIN;
   } catch (err) {
     showAlert('alert_login', 'Erro de conexão. Tente novamente.');
     setLoading('btn_login', false, 'Entrar');
-  }
-}
-
-async function validarMaster() {
-  var master = document.getElementById('signup_master').value;
-  if (!master) { showAlert('alert_master', 'Digite a senha da empresa'); return; }
-  var btn = document.querySelector('#signup_step_1 .btn-primary');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Verificando...';
-  try {
-    var r = await fetch('/api/auth', {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ action: 'verify_master', masterPassword: master })
-    });
-    var data = await r.json();
-    if (!r.ok || !data.ok) {
-      showAlert('alert_master', 'Senha da empresa incorreta. Verifique com a equipe.');
-      btn.disabled = false;
-      btn.innerHTML = 'Continuar';
-      return;
-    }
-    masterValidated = true;
-    document.getElementById('signup_step_1').style.display = 'none';
-    document.getElementById('signup_step_2').classList.add('show');
-    document.getElementById('signup_user').focus();
-  } catch (err) {
-    showAlert('alert_master', 'Erro de conexão. Tente novamente.');
-    btn.disabled = false;
-    btn.innerHTML = 'Continuar';
-  }
-}
-
-async function handleSignup(e) {
-  e.preventDefault();
-  hideAlerts();
-  var master = document.getElementById('signup_master').value;
-  var username = document.getElementById('signup_user').value.trim();
-  var password = document.getElementById('signup_pass').value;
-  if (!master || !username || !password) return;
-  setLoading('btn_signup', true, 'Criando...');
-  try {
-    var r = await fetch('/api/auth', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ action:'signup', masterPassword:master, username:username, password:password })
-    });
-    var data = await r.json();
-    if (!r.ok || !data.ok) {
-      showAlert('alert_signup', data.error || 'Falha ao criar conta');
-      setLoading('btn_signup', false, 'Criar conta e entrar');
-      return;
-    }
-    localStorage.setItem('rec_hub_token', data.token);
-    localStorage.setItem('rec_hub_user', data.username);
-    window.location.href = REDIRECT_AFTER_LOGIN;
-  } catch (err) {
-    showAlert('alert_signup', 'Erro de conexão. Tente novamente.');
-    setLoading('btn_signup', false, 'Criar conta e entrar');
   }
 }
 
