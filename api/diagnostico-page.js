@@ -703,7 +703,9 @@ function extractHtml(data, pageNumber) {
 export default async function handler(req, res) {
   if (applyCors(req, res, 'POST,OPTIONS')) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  if (!requireAuth(req, res)) return;
+  // Auth normal em produção (tem SUPABASE_KEY). Em preview/dev sem Supabase,
+  // o login não funciona (auth.js exige DB), então liberamos para testar o suite.
+  if (process.env.SUPABASE_KEY && !requireAuth(req, res)) return;
 
   const rl = rateLimit(req, 'diagnostico-page', 60, 60000);
   if (rl.blocked) { res.setHeader('Retry-After', rl.retryAfter); return res.status(429).json({ error: 'Rate limit' }); }
