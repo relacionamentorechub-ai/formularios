@@ -320,7 +320,7 @@ Cada v-card cont&eacute;m:
 REGRA DE TAMANHO PARA v-body — CR&Iacute;TICO (a p&aacute;gina &eacute; A4 fixo, qualquer estouro &eacute; cortado):
 
 v-body NORMAL (verticais 01 a 04):
-EXATAMENTE 2 frases. Total entre 25 e 32 palavras. Cada frase no m&aacute;ximo 16 palavras.
+EXATAMENTE 2 frases. Total entre 22 e 28 palavras. Cada frase no m&aacute;ximo 14 palavras.
 EXEMPLO BOM (28 palavras): "Estrutura de franquia oferece processos prontos e respaldo de marca. Por&eacute;m a opera&ccedil;&atilde;o local limita autonomia para diferencia&ccedil;&atilde;o estrat&eacute;gica frente a concorrentes regionais."
 EXEMPLO RUIM (43 palavras — REJEITAR): "A loja funciona como franquia Italinea com showroom pr&oacute;prio em Canoas, equipe de arquitetura e design, e landing page dedicada. A estrutura franqueada oferece respaldo de marca e processos, mas tamb&eacute;m limita autonomia na diferencia&ccedil;&atilde;o local..."
 
