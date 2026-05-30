@@ -325,8 +325,8 @@ EXEMPLO BOM (28 palavras): "Estrutura de franquia oferece processos prontos e re
 EXEMPLO RUIM (43 palavras — REJEITAR): "A loja funciona como franquia Italinea com showroom pr&oacute;prio em Canoas, equipe de arquitetura e design, e landing page dedicada. A estrutura franqueada oferece respaldo de marca e processos, mas tamb&eacute;m limita autonomia na diferencia&ccedil;&atilde;o local..."
 
 v-body FULL (vertical 05, class="v-card full"):
-EXATAMENTE 2 frases. Total entre 30 e 38 palavras. M&aacute;ximo 18 palavras por frase.
-NUNCA escreva 3 frases. NUNCA passe de 40 palavras.
+EXATAMENTE 2 frases. Total entre 28 e 34 palavras. M&aacute;ximo 16 palavras por frase.
+NUNCA escreva 3 frases. NUNCA passe de 36 palavras.
 
 CHECAGEM ANTES DE FECHAR A TAG: conte mentalmente as palavras. Se passou, REESCREVA mais curto.`,
   },
