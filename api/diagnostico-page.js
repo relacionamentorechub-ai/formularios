@@ -38,6 +38,10 @@ REGRAS DE ESCRITA:
 - LINGUAGEM SIMPLES: escreva como quem explica para um dono de negócio leigo, não para um especialista. Prefira a palavra comum à palavra difícil. EVITE termos rebuscados ou jargão de marketing sem explicar. Exemplos a evitar e o que usar no lugar: "respaldo"→"apoio"; "consolidar"→"firmar"; "atrito de compra"→"barreira para comprar"; "indexação"→"aparecer no Google"; "autoridade de domínio"→"força do site no Google"; "vanity metrics"→"números que não geram venda"; "orgânico"→"sem pagar anúncio". Frases curtas e diretas.
 - TEXTO CURTO: respeite os limites de cada bloco. É MELHOR escrever menos do que estourar — texto que passa do limite é CORTADO no PDF (página A4 fixa). Na dúvida, escreva mais curto.
 - Sem traços como pontuação (—, –). Use vírgula ou reescreva.
+- NOME DA EMPRESA: escreva o nome de UMA ÚNICA forma em TODO o texto, exatamente como aparece no pedido. NUNCA varie acentuação ou grafia, NUNCA adicione/remova cidade ou palavras (ex.: não alterne entre "Italinea", "Italinéa", "Italinea Canoas").
+- AUSÊNCIA DE DADO: quando não houver dado público de uma métrica, NUNCA escreva "não retornou dados", "indisponível", "não identificado" ou "não encontrado". Reescreva como diagnóstico: troque "velocidade indisponível" por "site sem otimização técnica visível"; "backlinks não identificados" por "site ainda sem referências que o Google valorize". Transforme a ausência em oportunidade, sem soar como auditoria que não foi feita.
+- TERMOS EM PORTUGUÊS: nunca deixe palavras em inglês soltas (ex.: escreva "Fragmentada", nunca "Fragmented").
+- ORTOGRAFIA: revise. Correto: "captação" (não "capção"), "rastreável" (não "rastrecável"), "conteúdo" (não "contéudo"), "desnecessariamente" (não "desnecessáriamente").
 - Sem title case em frases corridas.
 - HTML entities para acentos: ã=&atilde; ç=&ccedil; ê=&ecirc; ó=&oacute; á=&aacute; é=&eacute; í=&iacute; ú=&uacute; â=&acirc; ô=&ocirc; õ=&otilde;
 - Tom direto, profissional, embasado em DADOS PESQUISADOS.
@@ -692,6 +696,46 @@ async function callAnthropic(apiKey, pageConfig, userMessage, hint) {
   return upstream.json();
 }
 
+// Correção determinística de erros recorrentes do modelo (ortografia + inglês solto).
+// Roda sempre — garante consistência sem depender do prompt nem gastar API extra.
+const CORRECOES = [
+  [/Capturação/g, 'Captação'], [/capturação/g, 'captação'],
+  [/\bcapção\b/gi, 'captação'],
+  [/rastrecáve(l|is)/gi, 'rastreáve$1'],
+  [/contéudo/g, 'conteúdo'], [/Contéudo/g, 'Conteúdo'],
+  [/desnecessáriamente/gi, 'desnecessariamente'],
+  [/Fragmented/g, 'Fragmentada'], [/FRAGMENTED/g, 'FRAGMENTADA'],
+];
+function corrigirTexto(html) {
+  let out = html;
+  for (const [re, rep] of CORRECOES) out = out.replace(re, rep);
+  return out;
+}
+
+// Página estática de fontes/metodologia (sem chamada de API — custo zero, 100% consistente).
+function paginaFontes() {
+  const grupo = (titulo, itens) => `
+      <div style="margin-bottom:22px;">
+        <div style="font-family:var(--font-num),'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal,#00a198);font-weight:600;margin-bottom:8px;">${titulo}</div>
+        <div style="font-family:var(--font-body),'Manrope',sans-serif;font-size:14px;line-height:1.6;color:var(--blue,#012659);">${itens.join(' &middot; ')}</div>
+      </div>`;
+  return `<div class="pdf-page cream">
+      <div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">ANEXO &middot; FONTES</span></div>
+      <div class="section-intro">
+        <span class="kicker">Anexo &middot; Fontes e metodologia</span>
+        <h2 class="section-title">Fontes e <em>metodologia</em></h2>
+        <p class="section-lead">Este diagn&oacute;stico foi constru&iacute;do a partir de dados p&uacute;blicos dispon&iacute;veis na data da an&aacute;lise, com apoio das ferramentas e fontes de refer&ecirc;ncia abaixo.</p>
+      </div>
+      <div class="content" style="padding-top:8px;">
+        ${grupo('Presen&ccedil;a digital e redes', ['mLabs', 'An&aacute;lise de perfis p&uacute;blicos do Instagram', 'Google Maps / Google Neg&oacute;cios'])}
+        ${grupo('Site e SEO', ['Google Search Central', 'PageSpeed Insights', 'Semrush', 'Ahrefs', 'Ubersuggest'])}
+        ${grupo('Mercado e setor', ['Dados p&uacute;blicos do setor', 'ABComm', 'Cronoshare'])}
+        <p style="font-family:var(--font-body),'Manrope',sans-serif;font-size:12px;line-height:1.6;color:var(--muted,#64748b);max-width:620px;margin:22px 0 0;border-top:1px solid rgba(0,0,0,.08);padding-top:16px;">Os n&uacute;meros de mercado refletem refer&ecirc;ncias p&uacute;blicas e podem variar conforme a fonte e o per&iacute;odo. As recomenda&ccedil;&otilde;es s&atilde;o an&aacute;lise do time REC HUB de Neg&oacute;cios.</p>
+      </div>
+      <div class="page-footer"><span>Diagn&oacute;stico digital</span><span class="pf-handle">@somosrecoficial &middot; somosrecoficial.com.br</span></div>
+    </div>`;
+}
+
 function extractHtml(data, pageNumber) {
   let html = '';
   if (Array.isArray(data.content)) {
@@ -707,7 +751,7 @@ function extractHtml(data, pageNumber) {
   if (firstDiv > 0) html = html.slice(firstDiv);
   const pageNumStr = String(pageNumber || 1).padStart(2, '0');
   html = html.replace(/\{NN\}/g, pageNumStr);
-  return html;
+  return corrigirTexto(html);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -726,6 +770,14 @@ export default async function handler(req, res) {
 
   const body = readBody(req);
   const { page, lead, pageNumber, totalPages, research } = body;
+
+  // Página estática: não consome API
+  if (page === 'fontes') {
+    return res.status(200).json({
+      page, html: paginaFontes(), stop_reason: 'end_turn',
+      attempts: 0, tokens: { input: 0, output: 0 },
+    });
+  }
 
   if (!page || !PAGES[page]) {
     return res.status(400).json({ error: `Page "${page}" inválida. Válidas: ${Object.keys(PAGES).join(', ')}` });
