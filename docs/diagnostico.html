@@ -1315,13 +1315,20 @@ async function chamarClaude(dados) {
   }
 
   // FASE 2: páginas com modelo único (ver MODEL nos endpoints).
-  // Sonnet 4.6 = 30k input tok/min (tier 1). 11 págs × ~3.5k = burst ~21k < 30k.
-  // Pausa 8s entre lotes (research Sonnet também consome a janela de 60s).
-  // Se trocar p/ Opus 4.8 (TPM menor): CONCURRENCY=3, PAUSE_MS=15000.
+  // ATENÇÃO tier-1: research (Sonnet) + páginas (Sonnet) dividem o MESMO balde
+  // de 30k input tok/min. Research com web_search come ~15-20k. Por isso:
+  //  1) espera ~45s após research liberar a janela de 60s
+  //  2) lotes pequenos (3) com pausa 20s → ~25k/min, abaixo de 30k
+  // chamarUmaPagina já faz retry/backoff em 429 como rede de segurança.
+  // Se subir o tier da Anthropic (Sonnet 80k+/min): CONCURRENCY=6, PAUSE_MS=5000, delay=0.
   var concluidas = 0;
-  var CONCURRENCY = 6;
-  var PAUSE_MS = 8000;
-  setSubtitle('Gerando ' + total + ' p&aacute;ginas em paralelo...');
+  var CONCURRENCY = 3;
+  var PAUSE_MS = 20000;
+  if (research) {
+    setSubtitle('Organizando dados, aguarde...');
+    await new Promise(function(r){ setTimeout(r, 45000); });
+  }
+  setSubtitle('Gerando ' + total + ' p&aacute;ginas...');
 
   var resultados;
   try {
