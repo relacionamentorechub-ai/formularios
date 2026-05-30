@@ -35,6 +35,8 @@ USE ESSES NÚMEROS EXATOS em qualquer métrica que você citar.
 - Mantenha consistência: TODAS as páginas usarão o mesmo JSON, números devem bater
 
 REGRAS DE ESCRITA:
+- LINGUAGEM SIMPLES: escreva como quem explica para um dono de negócio leigo, não para um especialista. Prefira a palavra comum à palavra difícil. EVITE termos rebuscados ou jargão de marketing sem explicar. Exemplos a evitar e o que usar no lugar: "respaldo"→"apoio"; "consolidar"→"firmar"; "atrito de compra"→"barreira para comprar"; "indexação"→"aparecer no Google"; "autoridade de domínio"→"força do site no Google"; "vanity metrics"→"números que não geram venda"; "orgânico"→"sem pagar anúncio". Frases curtas e diretas.
+- TEXTO CURTO: respeite os limites de cada bloco. É MELHOR escrever menos do que estourar — texto que passa do limite é CORTADO no PDF (página A4 fixa). Na dúvida, escreva mais curto.
 - Sem traços como pontuação (—, –). Use vírgula ou reescreva.
 - Sem title case em frases corridas.
 - HTML entities para acentos: ã=&atilde; ç=&ccedil; ê=&ecirc; ó=&oacute; á=&aacute; é=&eacute; í=&iacute; ú=&uacute; â=&acirc; ô=&ocirc; õ=&otilde;
@@ -137,10 +139,12 @@ CARDS devem cobrir DIFERENTES canais informados. Se houver 3+ canais, distribua:
 Estrutura de cada p-card:
 <div class="p-card {canal}">
 <div class="p-card-head"><span class="p-card-channel {canal}">{Canal}</span><span class="p-card-num">{NN}</span></div>
-<div class="p-card-title">{título do problema específico, ≤75}</div>
-<p class="p-card-body">{2-3 frases concretas, com dados, ≤230}</p>
+<div class="p-card-title">{título do problema específico, ≤70 char}</div>
+<p class="p-card-body">{EXATAMENTE 2 frases curtas e simples, com 1 dado concreto, ≤160 char no total}</p>
 <div class="p-card-tags"><span class="p-tag dado">{dado quantitativo, ≤35}</span><span class="p-tag impacto">{consequência, ≤35}</span></div>
 </div>
+
+CHECAGEM CRÍTICA: p-card-body NUNCA pode passar de 160 caracteres (cerca de 26 palavras). Conte antes de fechar a tag. Se passar, REESCREVA mais curto. Texto longo demais é CORTADO no PDF.
 
 Classes {canal} (use lowercase): instagram, facebook, google, meta, tiktok, site, linkedin, youtube.`,
   },
@@ -169,7 +173,7 @@ ESTRUTURA OBRIGATÓRIA:
 <div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
 </div>
 
-Mesma estrutura de p-card que problems-1. Aborde aspectos diferentes dos canais (funil de conversão, criativos, retargeting, SEO, etc).`,
+Mesma estrutura de p-card que problems-1, COM O MESMO LIMITE: p-card-body = EXATAMENTE 2 frases curtas e simples, ≤160 caracteres (cerca de 26 palavras). NUNCA passe disso — texto longo é cortado no PDF. Aborde aspectos diferentes dos canais (funil de conversão, criativos, retargeting, SEO, etc).`,
   },
 
   // ════════════════════════ MERCADO ════════════════════════
@@ -393,11 +397,22 @@ ESTRUTURA OBRIGATÓRIA:
 <div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
 </div>
 
-PLANOS FIXOS DO REC (use APENAS estes valores):
+TABELA DE REFERÊNCIA (valores corretos de cada plano — isto NÃO é o que você deve gerar, é só consulta):
 Plano 1 — R$ 1.500/mês: Social Media + Captação de Conteúdo
 Plano 2 — R$ 2.500/mês: Plano 1 + Tráfego Pago Meta
 Plano 3 — R$ 2.900/mês: Plano 2 + Google Empresa (+R$300 add-on TikTok)
 Plano 4 — R$ 3.800/mês: Plano 3 + Suporte Comercial (+R$300 add-on TikTok)
+
+╔═══════════════════════════════════════════════════════════╗
+║  REGRA CRÍTICA — QUAIS PLANOS MOSTRAR                      ║
+╚═══════════════════════════════════════════════════════════╝
+Gere um plan-box SOMENTE para os planos que aparecem em "PLANO INDICADO" (no fim da mensagem do usuário).
+Os planos vêm separados por " | ". Conte-os:
+- Se PLANO INDICADO traz 1 plano, gere EXATAMENTE 1 plan-box.
+- Se traz 2 planos, gere 2. E assim por diante.
+- NUNCA gere planos que não estão em PLANO INDICADO. É PROIBIDO mostrar o catálogo completo.
+Exemplo: PLANO INDICADO = "Plano 2 — ..." → gere SOMENTE o plan-box do Plano 2 (com o valor R$ 2.500 da tabela acima).
+"Personalizado — {descrição}" conta como 1 plano: use o nome "Personalizado" e o valor/escopo descrito.
 
 Estrutura plan-box (LIMITE: até 6 itens por plano para caber):
 <div class="plan-box">
@@ -410,8 +425,6 @@ Estrutura plan-box (LIMITE: até 6 itens por plano para caber):
 {até 6 itens, cada ≤45 char}
 </ul>
 </div>
-
-Conte quantos planos vêm em PLANO INDICADO (separados por " | "). Gere um plan-box por plano. Personalizado conta como 1 plano.
 
 REGRA: NÃO inclua contract-clause. Ela vai em página separada (page=contrato).`,
   },

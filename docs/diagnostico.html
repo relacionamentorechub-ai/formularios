@@ -796,26 +796,6 @@ footer strong { color:var(--cyan); }
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     API KEY MODAL
-════════════════════════════════════════════ -->
-<div class="modal-overlay" id="api_modal">
-  <div class="modal-card">
-    <div class="modal-icon">🔑</div>
-    <div class="modal-title">Configurar IA</div>
-    <div class="modal-sub">Cole sua chave da API Anthropic (Claude). Ela fica salva apenas no seu navegador e nunca é compartilhada.</div>
-    <div class="modal-input-wrap">
-      <label>Chave da API Anthropic</label>
-      <input type="password" id="api_key_input" placeholder="sk-ant-api03-..." style="font-family:monospace">
-    </div>
-    <div class="modal-actions">
-      <button class="btn-modal-cancel" onclick="fecharModalApi()">Cancelar</button>
-      <button class="btn-modal-primary" onclick="salvarApiKey()">Salvar e ativar</button>
-    </div>
-    <div class="modal-note">A chave é usada diretamente do seu navegador para chamar a API da Anthropic.<br>Nunca é enviada para servidores do REC HUB.</div>
-  </div>
-</div>
-
 <script src="_hub.js"></script>
 <script src="_rec_logo.js"></script>
 <script>
@@ -993,18 +973,13 @@ body{font-family:var(--font-body);background:#D1D5DB;color:var(--ink);line-heigh
 </style></head><body>`;
 var PDF_HTML_FOOTER = '</body></html>';
 
-/* ═══════════════════════════════════════════
-   API KEY MANAGEMENT (Vercel Serverless)
-═══════════════════════════════════════════ */
-function getApiKey() { return 'vercel-serverless'; }
-function salvarApiKey() { }
-function abrirModalApi() { }
-function fecharModalApi() { }
-function atualizarStatusApi() {
-  document.getElementById('api_dot').className = 'api-status-dot ok';
-  document.getElementById('api_btn_label').textContent = '✓ IA ativa';
-}
-atualizarStatusApi();
+/* IA roda 100% server-side (Vercel Functions). Sem chave no navegador. */
+(function ativarStatusIA() {
+  var dot = document.getElementById('api_dot');
+  var label = document.getElementById('api_btn_label');
+  if (dot) dot.className = 'api-status-dot ok';
+  if (label) label.textContent = '✓ IA ativa';
+})();
 
 /* ═══════════════════════════════════════════
    FETCH ANTHROPIC CREDITS (via Vercel)
