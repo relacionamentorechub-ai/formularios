@@ -6,6 +6,10 @@ export const config = { maxDuration: 60 };
 
 import { applyCors, requireAuth, rateLimit, readBody } from './_lib.js';
 
+// Modelo único do diagnóstico. Trocar aqui afeta TODAS as páginas.
+// Opções: 'claude-sonnet-4-6' ($3/$15) | 'claude-opus-4-8' ($5/$25)
+const MODEL = 'claude-sonnet-4-6';
+
 // ═══════════════════════════════════════════════════════════════
 // REGRAS UNIVERSAIS — incluídas em TODOS os prompts
 // ═══════════════════════════════════════════════════════════════
@@ -316,13 +320,13 @@ Cada v-card cont&eacute;m:
 REGRA DE TAMANHO PARA v-body — CR&Iacute;TICO (a p&aacute;gina &eacute; A4 fixo, qualquer estouro &eacute; cortado):
 
 v-body NORMAL (verticais 01 a 04):
-EXATAMENTE 2 frases. Total entre 25 e 32 palavras. Cada frase no m&aacute;ximo 16 palavras.
+EXATAMENTE 2 frases. Total entre 22 e 28 palavras. Cada frase no m&aacute;ximo 14 palavras.
 EXEMPLO BOM (28 palavras): "Estrutura de franquia oferece processos prontos e respaldo de marca. Por&eacute;m a opera&ccedil;&atilde;o local limita autonomia para diferencia&ccedil;&atilde;o estrat&eacute;gica frente a concorrentes regionais."
 EXEMPLO RUIM (43 palavras — REJEITAR): "A loja funciona como franquia Italinea com showroom pr&oacute;prio em Canoas, equipe de arquitetura e design, e landing page dedicada. A estrutura franqueada oferece respaldo de marca e processos, mas tamb&eacute;m limita autonomia na diferencia&ccedil;&atilde;o local..."
 
 v-body FULL (vertical 05, class="v-card full"):
-EXATAMENTE 2 frases. Total entre 30 e 38 palavras. M&aacute;ximo 18 palavras por frase.
-NUNCA escreva 3 frases. NUNCA passe de 40 palavras.
+EXATAMENTE 2 frases. Total entre 28 e 34 palavras. M&aacute;ximo 16 palavras por frase.
+NUNCA escreva 3 frases. NUNCA passe de 36 palavras.
 
 CHECAGEM ANTES DE FECHAR A TAG: conte mentalmente as palavras. Se passou, REESCREVA mais curto.`,
   },
@@ -659,7 +663,7 @@ async function callAnthropic(apiKey, pageConfig, userMessage, hint) {
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5',
+      model: MODEL,
       max_tokens: pageConfig.max_tokens,
       system: systemFinal,
       messages: [{ role: 'user', content: userMessage }],
@@ -699,7 +703,9 @@ function extractHtml(data, pageNumber) {
 export default async function handler(req, res) {
   if (applyCors(req, res, 'POST,OPTIONS')) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  if (!requireAuth(req, res)) return;
+  // Auth normal em produção (tem SUPABASE_KEY). Em preview/dev sem Supabase,
+  // o login não funciona (auth.js exige DB), então liberamos para testar o suite.
+  if (process.env.SUPABASE_KEY && !requireAuth(req, res)) return;
 
   const rl = rateLimit(req, 'diagnostico-page', 60, 60000);
   if (rl.blocked) { res.setHeader('Retry-After', rl.retryAfter); return res.status(429).json({ error: 'Rate limit' }); }

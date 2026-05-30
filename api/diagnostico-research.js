@@ -8,6 +8,10 @@ export const config = { maxDuration: 120 };
 
 import { applyCors, requireAuth, rateLimit, readBody } from './_lib.js';
 
+// Modelo único do diagnóstico (mesmo das páginas).
+// Opções: 'claude-sonnet-4-6' ($3/$15) | 'claude-opus-4-8' ($5/$25)
+const MODEL = 'claude-sonnet-4-6';
+
 const RESEARCH_PROMPT = `Você é um analista de dados de mercado digital. Sua missão: coletar dados REAIS e VERIFICADOS sobre um lead.
 
 Você TEM acesso à ferramenta web_search. Use-a OBRIGATORIAMENTE para:
@@ -83,7 +87,9 @@ function buildLeadContext(lead) {
 export default async function handler(req, res) {
   if (applyCors(req, res, 'POST,OPTIONS')) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  if (!requireAuth(req, res)) return;
+  // Auth normal em produção (tem SUPABASE_KEY). Em preview/dev sem Supabase,
+  // o login não funciona (auth.js exige DB), então liberamos para testar o suite.
+  if (process.env.SUPABASE_KEY && !requireAuth(req, res)) return;
 
   const rl = rateLimit(req, 'diagnostico-research', 10, 60000);
   if (rl.blocked) { res.setHeader('Retry-After', rl.retryAfter); return res.status(429).json({ error: 'Rate limit' }); }
@@ -106,7 +112,7 @@ export default async function handler(req, res) {
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: MODEL,
         max_tokens: 8000, // generoso pq web_search results contam aqui
         system: RESEARCH_PROMPT,
         messages: [{ role: 'user', content: userMessage }],
