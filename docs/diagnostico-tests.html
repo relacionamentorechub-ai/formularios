@@ -281,20 +281,32 @@ async function rodarCenario(scn) {
     var total = paginas.length;
     log('  Planejou ' + total + ' páginas: ' + paginas.join(','), 'info');
 
+    // Tier-1: research (Sonnet+web_search ~15-25k) e paginas (Sonnet) dividem
+    // o balde de 30k input tok/min. Espera a janela de 60s liberar.
+    log('  Aguardando 45s pos-research (rate limit 30k/min compartilhado)...', 'warn');
+    await new Promise(function(r){ setTimeout(r, 45000); });
+
     var t1 = Date.now();
     var resultados = [];
-    // Sequencial pra não estourar (a UI de produção paraleliza, aqui é teste)
+    // Sequencial + retry em 429 (sequencial sozinho ~19k/min, abaixo de 30k)
     for (var i = 0; i < paginas.length; i++) {
       var page = paginas[i];
-      var pgResp = await apiFetch('/api/diagnostico-page', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ page: page, lead: scn.lead, pageNumber: i + 1, totalPages: total, research: research })
-      });
-      if (!pgResp.ok) {
+      var pgData = null;
+      for (var tent = 1; tent <= 4; tent++) {
+        var pgResp = await apiFetch('/api/diagnostico-page', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ page: page, lead: scn.lead, pageNumber: i + 1, totalPages: total, research: research })
+        });
+        if (pgResp.ok) { pgData = await pgResp.json(); break; }
         var pgErr = await pgResp.text();
+        var isRL = pgResp.status === 429 || pgErr.indexOf('rate_limit') >= 0;
+        if (isRL && tent < 4) {
+          log('  "' + page + '" rate limit, aguardando 35s (tent ' + tent + ')...', 'warn');
+          await new Promise(function(r){ setTimeout(r, 35000); });
+          continue;
+        }
         throw new Error('Página "' + page + '" falhou: ' + pgErr.slice(0, 200));
       }
-      var pgData = await pgResp.json();
       resultados.push(pgData);
       var attemptStr = pgData.attempts > 1 ? ' [' + pgData.attempts + ' tent.]' : '';
       var warnStr = pgData.validation_warnings ? ' ⚠ ' + pgData.validation_warnings.join(', ') : '';
