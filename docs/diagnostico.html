@@ -796,26 +796,6 @@ footer strong { color:var(--cyan); }
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     API KEY MODAL
-════════════════════════════════════════════ -->
-<div class="modal-overlay" id="api_modal">
-  <div class="modal-card">
-    <div class="modal-icon">🔑</div>
-    <div class="modal-title">Configurar IA</div>
-    <div class="modal-sub">Cole sua chave da API Anthropic (Claude). Ela fica salva apenas no seu navegador e nunca é compartilhada.</div>
-    <div class="modal-input-wrap">
-      <label>Chave da API Anthropic</label>
-      <input type="password" id="api_key_input" placeholder="sk-ant-api03-..." style="font-family:monospace">
-    </div>
-    <div class="modal-actions">
-      <button class="btn-modal-cancel" onclick="fecharModalApi()">Cancelar</button>
-      <button class="btn-modal-primary" onclick="salvarApiKey()">Salvar e ativar</button>
-    </div>
-    <div class="modal-note">A chave é usada diretamente do seu navegador para chamar a API da Anthropic.<br>Nunca é enviada para servidores do REC HUB.</div>
-  </div>
-</div>
-
 <script src="_hub.js"></script>
 <script src="_rec_logo.js"></script>
 <script>
@@ -853,7 +833,7 @@ body{font-family:var(--font-body);background:#D1D5DB;color:var(--ink);line-heigh
 .page-footer{display:flex;align-items:center;justify-content:space-between;padding:0 56px 28px;font-family:var(--font-num);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-soft);flex-shrink:0;margin-top:auto;}
 .dark .page-footer{color:rgba(184,224,221,.5);}
 .page-footer .pf-handle{font-family:var(--font-num);font-weight:500;}
-.kicker{font-family:var(--font-num);font-size:11px;letter-spacing:.28em;text-transform:uppercase;font-weight:600;color:var(--teal);margin-bottom:24px;display:block;}
+.kicker{font-family:var(--font-num);font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--teal);margin-bottom:24px;display:block;}
 .dark .kicker{color:var(--teal-soft);}
 .cover{flex:1;padding:60px 56px;display:flex;flex-direction:column;}
 .cover-decoration{position:absolute;top:0;right:-200px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(0,161,152,.15),transparent 70%);pointer-events:none;}
@@ -863,7 +843,7 @@ body{font-family:var(--font-body);background:#D1D5DB;color:var(--ink);line-heigh
 .cover-rec-logo .cover-brand{font-family:var(--font-display);font-style:italic;font-weight:300;font-size:22px;color:var(--white);line-height:1;}
 .cover-rec-logo .cover-brand em{color:var(--teal);font-style:italic;}
 .cover-body{flex:1;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2;}
-.cover-eyebrow{font-family:var(--font-num);font-size:11.5px;letter-spacing:.32em;text-transform:uppercase;font-weight:600;color:var(--teal-soft);margin-bottom:32px;}
+.cover-eyebrow{font-family:var(--font-num);font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:var(--teal-soft);margin-bottom:32px;}
 .cover-title{font-family:var(--font-display);font-weight:200;font-size:60px;line-height:.98;letter-spacing:-.025em;color:var(--white);margin-bottom:16px;max-width:580px;}
 .cover-title em{font-style:italic;font-weight:300;color:var(--teal-soft);}
 .cover-sub{font-family:var(--font-body);font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.65);max-width:480px;font-weight:300;margin-bottom:42px;}
@@ -993,18 +973,13 @@ body{font-family:var(--font-body);background:#D1D5DB;color:var(--ink);line-heigh
 </style></head><body>`;
 var PDF_HTML_FOOTER = '</body></html>';
 
-/* ═══════════════════════════════════════════
-   API KEY MANAGEMENT (Vercel Serverless)
-═══════════════════════════════════════════ */
-function getApiKey() { return 'vercel-serverless'; }
-function salvarApiKey() { }
-function abrirModalApi() { }
-function fecharModalApi() { }
-function atualizarStatusApi() {
-  document.getElementById('api_dot').className = 'api-status-dot ok';
-  document.getElementById('api_btn_label').textContent = '✓ IA ativa';
-}
-atualizarStatusApi();
+/* IA roda 100% server-side (Vercel Functions). Sem chave no navegador. */
+(function ativarStatusIA() {
+  var dot = document.getElementById('api_dot');
+  var label = document.getElementById('api_btn_label');
+  if (dot) dot.className = 'api-status-dot ok';
+  if (label) label.textContent = '✓ IA ativa';
+})();
 
 /* ═══════════════════════════════════════════
    FETCH ANTHROPIC CREDITS (via Vercel)
@@ -1195,21 +1170,13 @@ function planejarPaginas(d) {
   var canais = (d.canais || '').split(',').map(function(c){ return c.trim(); }).filter(Boolean);
   var nCanais = canais.length;
 
-  var paginas = ['cover', 'problems-1'];
+  // VERSÃO ENXUTA (CEO pediu análise mais curta + economia de tokens):
+  // capa, 1 pág de problemas, 1 pág de mercado, verticais, [proposta], módulos, fechamento.
+  // Cortadas: problems-2, mercado-cont, seo, contrato e fontes (re-adicionáveis aqui se precisar).
+  var paginas = ['cover', 'problems-1', 'mercado', 'verticais'];
 
-  if (nCanais >= 3) paginas.push('problems-2');
-
-  paginas.push('mercado', 'mercado-cont', 'verticais');
-
-  // SEO: só se tem site e Site/SEO está nos canais
-  var temSiteSeo = d.tem_site === 'Sim, tem site' && d.site && /site.*seo|seo/i.test(d.canais || '');
-  if (temSiteSeo) paginas.push('seo');
-
-  // Investimento + Contrato (separado): só se com_proposta = Sim
-  if (d.com_proposta === 'Sim' && d.plano) {
-    paginas.push('investimento');
-    paginas.push('contrato'); // cláusula em página própria pra não cortar
-  }
+  // Investimento: só se com_proposta = Sim (cláusula contratual foi enxugada pra fora)
+  if (d.com_proposta === 'Sim' && d.plano) paginas.push('investimento');
 
   paginas.push('modulos', 'hub-why');
 

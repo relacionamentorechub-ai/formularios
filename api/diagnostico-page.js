@@ -7,8 +7,12 @@ export const config = { maxDuration: 60 };
 import { applyCors, requireAuth, rateLimit, readBody } from './_lib.js';
 
 // Modelo único do diagnóstico. Trocar aqui afeta TODAS as páginas.
-// Opções: 'claude-sonnet-4-6' ($3/$15) | 'claude-opus-4-8' ($5/$25)
-const MODEL = 'claude-sonnet-4-6';
+// Haiku 4.5 ($1/$5) + extended thinking = barato, mas "pensa" antes de escrever
+// (segue limites e estrutura melhor). Opções: 'claude-haiku-4-5-20251001' |
+// 'claude-sonnet-4-6' ($3/$15) | 'claude-opus-4-8' ($5/$25)
+const MODEL = 'claude-haiku-4-5-20251001';
+// Orçamento de raciocínio interno por página. Sai do max_tokens; não vira HTML.
+const THINKING_BUDGET = 1500;
 
 // ═══════════════════════════════════════════════════════════════
 // REGRAS UNIVERSAIS — incluídas em TODOS os prompts
@@ -29,13 +33,21 @@ O usuário fornecerá um objeto JSON "DADOS PESQUISADOS" com fatos verificados.
 USE ESSES NÚMEROS EXATOS em qualquer métrica que você citar.
 - Se "instagram.followers" não for null, use ESSE número exato (jamais invente)
 - Se for null, use linguagem qualitativa: "base ainda em crescimento", "presença modesta", etc
+- Se "gmb.nota" e "gmb.num_avaliacoes" não forem null, use ESSES números exatos (ex: "5,0 ★ em 63 avaliações")
+- Se "gmb.tem_ficha" for false ou null, escreva "ficha não localizada publicamente" — NUNCA assuma que não existe
 - Para benchmarks de setor, use "setor.engajamento_medio_pct_brasil" e cite "fonte_engajamento"
 - Para ticket, use o range de "setor.ticket_medio_brl_min" a "setor.ticket_medio_brl_max"
 - Para concorrentes, use APENAS nomes do array "concorrentes" (são reais e pesquisados)
 - Mantenha consistência: TODAS as páginas usarão o mesmo JSON, números devem bater
 
 REGRAS DE ESCRITA:
+- LINGUAGEM SIMPLES: escreva como quem explica para um dono de negócio leigo, não para um especialista. Prefira a palavra comum à palavra difícil. EVITE termos rebuscados ou jargão de marketing sem explicar. Exemplos a evitar e o que usar no lugar: "respaldo"→"apoio"; "consolidar"→"firmar"; "atrito de compra"→"barreira para comprar"; "indexação"→"aparecer no Google"; "autoridade de domínio"→"força do site no Google"; "vanity metrics"→"números que não geram venda"; "orgânico"→"sem pagar anúncio". Frases curtas e diretas.
+- TEXTO CURTO: respeite os limites de cada bloco. É MELHOR escrever menos do que estourar — texto que passa do limite é CORTADO no PDF (página A4 fixa). Na dúvida, escreva mais curto.
 - Sem traços como pontuação (—, –). Use vírgula ou reescreva.
+- NOME DA EMPRESA: escreva o nome de UMA ÚNICA forma em TODO o texto, exatamente como aparece no pedido. NUNCA varie acentuação ou grafia, NUNCA adicione/remova cidade ou palavras (ex.: não alterne entre "Italinea", "Italinéa", "Italinea Canoas").
+- AUSÊNCIA DE DADO: quando não houver dado público de uma métrica, NUNCA escreva "não retornou dados", "indisponível", "não identificado" ou "não encontrado". Reescreva como diagnóstico: troque "velocidade indisponível" por "site sem otimização técnica visível"; "backlinks não identificados" por "site ainda sem referências que o Google valorize". Transforme a ausência em oportunidade, sem soar como auditoria que não foi feita.
+- TERMOS EM PORTUGUÊS: nunca deixe palavras em inglês soltas (ex.: escreva "Fragmentada", nunca "Fragmented").
+- ORTOGRAFIA: revise. Correto: "captação" (não "capção"), "rastreável" (não "rastrecável"), "conteúdo" (não "contéudo"), "desnecessariamente" (não "desnecessáriamente").
 - Sem title case em frases corridas.
 - HTML entities para acentos: ã=&atilde; ç=&ccedil; ê=&ecirc; ó=&oacute; á=&aacute; é=&eacute; í=&iacute; ú=&uacute; â=&acirc; ô=&ocirc; õ=&otilde;
 - Tom direto, profissional, embasado em DADOS PESQUISADOS.
@@ -137,10 +149,12 @@ CARDS devem cobrir DIFERENTES canais informados. Se houver 3+ canais, distribua:
 Estrutura de cada p-card:
 <div class="p-card {canal}">
 <div class="p-card-head"><span class="p-card-channel {canal}">{Canal}</span><span class="p-card-num">{NN}</span></div>
-<div class="p-card-title">{título do problema específico, ≤75}</div>
-<p class="p-card-body">{2-3 frases concretas, com dados, ≤230}</p>
+<div class="p-card-title">{título do problema específico, ≤70 char}</div>
+<p class="p-card-body">{EXATAMENTE 2 frases curtas e simples, com 1 dado concreto, ≤160 char no total}</p>
 <div class="p-card-tags"><span class="p-tag dado">{dado quantitativo, ≤35}</span><span class="p-tag impacto">{consequência, ≤35}</span></div>
 </div>
+
+CHECAGEM CRÍTICA: p-card-body NUNCA pode passar de 160 caracteres (cerca de 26 palavras). Conte antes de fechar a tag. Se passar, REESCREVA mais curto. Texto longo demais é CORTADO no PDF.
 
 Classes {canal} (use lowercase): instagram, facebook, google, meta, tiktok, site, linkedin, youtube.`,
   },
@@ -169,7 +183,7 @@ ESTRUTURA OBRIGATÓRIA:
 <div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
 </div>
 
-Mesma estrutura de p-card que problems-1. Aborde aspectos diferentes dos canais (funil de conversão, criativos, retargeting, SEO, etc).`,
+Mesma estrutura de p-card que problems-1, COM O MESMO LIMITE: p-card-body = EXATAMENTE 2 frases curtas e simples, ≤160 caracteres (cerca de 26 palavras). NUNCA passe disso — texto longo é cortado no PDF. Aborde aspectos diferentes dos canais (funil de conversão, criativos, retargeting, SEO, etc).`,
   },
 
   // ════════════════════════ MERCADO ════════════════════════
@@ -393,11 +407,22 @@ ESTRUTURA OBRIGATÓRIA:
 <div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
 </div>
 
-PLANOS FIXOS DO REC (use APENAS estes valores):
+TABELA DE REFERÊNCIA (valores corretos de cada plano — isto NÃO é o que você deve gerar, é só consulta):
 Plano 1 — R$ 1.500/mês: Social Media + Captação de Conteúdo
 Plano 2 — R$ 2.500/mês: Plano 1 + Tráfego Pago Meta
 Plano 3 — R$ 2.900/mês: Plano 2 + Google Empresa (+R$300 add-on TikTok)
 Plano 4 — R$ 3.800/mês: Plano 3 + Suporte Comercial (+R$300 add-on TikTok)
+
+╔═══════════════════════════════════════════════════════════╗
+║  REGRA CRÍTICA — QUAIS PLANOS MOSTRAR                      ║
+╚═══════════════════════════════════════════════════════════╝
+Gere um plan-box SOMENTE para os planos que aparecem em "PLANO INDICADO" (no fim da mensagem do usuário).
+Os planos vêm separados por " | ". Conte-os:
+- Se PLANO INDICADO traz 1 plano, gere EXATAMENTE 1 plan-box.
+- Se traz 2 planos, gere 2. E assim por diante.
+- NUNCA gere planos que não estão em PLANO INDICADO. É PROIBIDO mostrar o catálogo completo.
+Exemplo: PLANO INDICADO = "Plano 2 — ..." → gere SOMENTE o plan-box do Plano 2 (com o valor R$ 2.500 da tabela acima).
+"Personalizado — {descrição}" conta como 1 plano: use o nome "Personalizado" e o valor/escopo descrito.
 
 Estrutura plan-box (LIMITE: até 6 itens por plano para caber):
 <div class="plan-box">
@@ -410,8 +435,6 @@ Estrutura plan-box (LIMITE: até 6 itens por plano para caber):
 {até 6 itens, cada ≤45 char}
 </ul>
 </div>
-
-Conte quantos planos vêm em PLANO INDICADO (separados por " | "). Gere um plan-box por plano. Personalizado conta como 1 plano.
 
 REGRA: NÃO inclua contract-clause. Ela vai em página separada (page=contrato).`,
   },
@@ -664,7 +687,9 @@ async function callAnthropic(apiKey, pageConfig, userMessage, hint) {
     },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: pageConfig.max_tokens,
+      // max_tokens precisa cobrir o thinking + a saída HTML real
+      max_tokens: pageConfig.max_tokens + THINKING_BUDGET,
+      thinking: { type: 'enabled', budget_tokens: THINKING_BUDGET },
       system: systemFinal,
       messages: [{ role: 'user', content: userMessage }],
       stream: false,
@@ -677,6 +702,46 @@ async function callAnthropic(apiKey, pageConfig, userMessage, hint) {
     throw error;
   }
   return upstream.json();
+}
+
+// Correção determinística de erros recorrentes do modelo (ortografia + inglês solto).
+// Roda sempre — garante consistência sem depender do prompt nem gastar API extra.
+const CORRECOES = [
+  [/Capturação/g, 'Captação'], [/capturação/g, 'captação'],
+  [/\bcapção\b/gi, 'captação'],
+  [/rastrecáve(l|is)/gi, 'rastreáve$1'],
+  [/contéudo/g, 'conteúdo'], [/Contéudo/g, 'Conteúdo'],
+  [/desnecessáriamente/gi, 'desnecessariamente'],
+  [/Fragmented/g, 'Fragmentada'], [/FRAGMENTED/g, 'FRAGMENTADA'],
+];
+function corrigirTexto(html) {
+  let out = html;
+  for (const [re, rep] of CORRECOES) out = out.replace(re, rep);
+  return out;
+}
+
+// Página estática de fontes/metodologia (sem chamada de API — custo zero, 100% consistente).
+function paginaFontes() {
+  const grupo = (titulo, itens) => `
+      <div style="margin-bottom:22px;">
+        <div style="font-family:var(--font-num),'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal,#00a198);font-weight:600;margin-bottom:8px;">${titulo}</div>
+        <div style="font-family:var(--font-body),'Manrope',sans-serif;font-size:14px;line-height:1.6;color:var(--blue,#012659);">${itens.join(' &middot; ')}</div>
+      </div>`;
+  return `<div class="pdf-page cream">
+      <div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">ANEXO &middot; FONTES</span></div>
+      <div class="section-intro">
+        <span class="kicker">Anexo &middot; Fontes e metodologia</span>
+        <h2 class="section-title">Fontes e <em>metodologia</em></h2>
+        <p class="section-lead">Este diagn&oacute;stico foi constru&iacute;do a partir de dados p&uacute;blicos dispon&iacute;veis na data da an&aacute;lise, com apoio das ferramentas e fontes de refer&ecirc;ncia abaixo.</p>
+      </div>
+      <div class="content" style="padding-top:8px;">
+        ${grupo('Presen&ccedil;a digital e redes', ['mLabs', 'An&aacute;lise de perfis p&uacute;blicos do Instagram', 'Google Maps / Google Neg&oacute;cios'])}
+        ${grupo('Site e SEO', ['Google Search Central', 'PageSpeed Insights', 'Semrush', 'Ahrefs', 'Ubersuggest'])}
+        ${grupo('Mercado e setor', ['Dados p&uacute;blicos do setor', 'ABComm', 'Cronoshare'])}
+        <p style="font-family:var(--font-body),'Manrope',sans-serif;font-size:12px;line-height:1.6;color:var(--muted,#64748b);max-width:620px;margin:22px 0 0;border-top:1px solid rgba(0,0,0,.08);padding-top:16px;">Os n&uacute;meros de mercado refletem refer&ecirc;ncias p&uacute;blicas e podem variar conforme a fonte e o per&iacute;odo. As recomenda&ccedil;&otilde;es s&atilde;o an&aacute;lise do time REC HUB de Neg&oacute;cios.</p>
+      </div>
+      <div class="page-footer"><span>Diagn&oacute;stico digital</span><span class="pf-handle">@somosrecoficial &middot; somosrecoficial.com.br</span></div>
+    </div>`;
 }
 
 function extractHtml(data, pageNumber) {
@@ -694,7 +759,7 @@ function extractHtml(data, pageNumber) {
   if (firstDiv > 0) html = html.slice(firstDiv);
   const pageNumStr = String(pageNumber || 1).padStart(2, '0');
   html = html.replace(/\{NN\}/g, pageNumStr);
-  return html;
+  return corrigirTexto(html);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -703,9 +768,7 @@ function extractHtml(data, pageNumber) {
 export default async function handler(req, res) {
   if (applyCors(req, res, 'POST,OPTIONS')) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  // Auth normal em produção (tem SUPABASE_KEY). Em preview/dev sem Supabase,
-  // o login não funciona (auth.js exige DB), então liberamos para testar o suite.
-  if (process.env.SUPABASE_KEY && !requireAuth(req, res)) return;
+  if (!requireAuth(req, res)) return;
 
   const rl = rateLimit(req, 'diagnostico-page', 60, 60000);
   if (rl.blocked) { res.setHeader('Retry-After', rl.retryAfter); return res.status(429).json({ error: 'Rate limit' }); }
@@ -715,6 +778,14 @@ export default async function handler(req, res) {
 
   const body = readBody(req);
   const { page, lead, pageNumber, totalPages, research } = body;
+
+  // Página estática: não consome API
+  if (page === 'fontes') {
+    return res.status(200).json({
+      page, html: paginaFontes(), stop_reason: 'end_turn',
+      attempts: 0, tokens: { input: 0, output: 0 },
+    });
+  }
 
   if (!page || !PAGES[page]) {
     return res.status(400).json({ error: `Page "${page}" inválida. Válidas: ${Object.keys(PAGES).join(', ')}` });

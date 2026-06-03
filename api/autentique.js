@@ -89,8 +89,6 @@ export default async function handler(req, res) {
   });
 
   const autText = await autRes.text();
-  console.log('autentique status:', autRes.status);
-  console.log('autentique body:', autText.slice(0, 2000));
 
   let autJson;
   try { autJson = JSON.parse(autText); } catch {
