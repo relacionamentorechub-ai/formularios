@@ -535,12 +535,12 @@ ESTRUTURA OBRIGATÓRIA:
 
 <div class="pdf-page dark">
 <div class="cover-decoration"></div>
-<div class="hw-content">
+<div class="hw-content" style="padding:44px 56px;">
 <div class="hw-eyebrow">Por que com o R.E.C.</div>
 <h2 class="hw-title">{título institucional com <em>destaque</em>, ≤80}</h2>
-<p class="hw-sub">{1-2 frases tom da marca REC, ≤240}</p>
+<p class="hw-sub">{1-2 frases tom da marca REC, ≤200}</p>
 <div class="hw-benefits">
-{EXATAMENTE 5 hw-benefits}
+{EXATAMENTE 4 hw-benefits — NÃO COLOQUE 5, o quinto estoura a página}
 </div>
 <div class="hw-tagline">"{tagline italic curta, ≤60}"</div>
 <div class="hw-footer">
@@ -555,16 +555,15 @@ Estrutura hw-benefit:
 <div class="hw-b-num">{NN}</div>
 <div>
 <div class="hw-b-title">{título, ≤50}</div>
-<p class="hw-b-desc">{descrição, ≤130}</p>
+<p class="hw-b-desc">{descrição, ≤110}</p>
 </div>
 </div>
 
-5 BENEFÍCIOS típicos do REC HUB (personalize um pouco mas mantenha esta linha):
+4 BENEFÍCIOS típicos do REC HUB (personalize um pouco mas mantenha esta linha):
 01 Estratégia personalizada por nicho
 02 Time dedicado, não freelancer rotativo
 03 Captação mensal in-loco (não banco de imagens)
 04 Relatórios mensais com métricas reais
-05 Foco em ROI, não vanity metrics
 
 A img src="" será preenchida pelo sistema.`,
   },
