@@ -33,6 +33,8 @@ O usuário fornecerá um objeto JSON "DADOS PESQUISADOS" com fatos verificados.
 USE ESSES NÚMEROS EXATOS em qualquer métrica que você citar.
 - Se "instagram.followers" não for null, use ESSE número exato (jamais invente)
 - Se for null, use linguagem qualitativa: "base ainda em crescimento", "presença modesta", etc
+- Se "gmb.nota" e "gmb.num_avaliacoes" não forem null, use ESSES números exatos (ex: "5,0 ★ em 63 avaliações")
+- Se "gmb.tem_ficha" for false ou null, escreva "ficha não localizada publicamente" — NUNCA assuma que não existe
 - Para benchmarks de setor, use "setor.engajamento_medio_pct_brasil" e cite "fonte_engajamento"
 - Para ticket, use o range de "setor.ticket_medio_brl_min" a "setor.ticket_medio_brl_max"
 - Para concorrentes, use APENAS nomes do array "concorrentes" (são reais e pesquisados)

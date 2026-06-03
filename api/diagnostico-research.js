@@ -16,9 +16,14 @@ const RESEARCH_PROMPT = `Você é um analista de dados de mercado digital. Sua m
 
 Você TEM acesso à ferramenta web_search. Use-a OBRIGATORIAMENTE para:
 1. Buscar o Instagram do lead: "instagram.com/{handle}" — tente extrair followers, posting frequency
-2. Buscar benchmarks reais do setor: "engajamento médio instagram {segmento} brasil 2025", "ticket médio {segmento} {cidade}"
-3. Buscar concorrentes na cidade: "{segmento} {cidade} instagram" — encontre nomes REAIS
-4. Se houver site, buscar dados sobre ele: "{dominio} reviews", "{dominio} seo"
+2. Buscar Google Meu Negócio (GMB) do lead — faça AS 3 QUERIES ABAIXO EM SEQUÊNCIA e leia os snippets:
+   a. "{nome_empresa}" site:google.com/maps OR "avaliações do Google" — snippets de Maps trazem nota + nº avaliações
+   b. "{nome_empresa} {cidade} avaliações" — snippet com estrelas e contagem aparece aqui
+   c. "{nome_empresa} {segmento} {cidade} google" — fallback se nome indexado for diferente
+   Se alguma retornar nota e avaliações, use como dado real. Se nenhuma retornar, marque gmb como null.
+3. Buscar benchmarks reais do setor: "engajamento médio instagram {segmento} brasil 2025", "ticket médio {segmento} {cidade}"
+4. Buscar concorrentes na cidade: "{segmento} {cidade} instagram" — encontre nomes REAIS
+5. Se houver site, buscar dados sobre ele: "{dominio} reviews", "{dominio} seo"
 
 RETORNE EXCLUSIVAMENTE UM JSON VÁLIDO (sem texto antes ou depois, sem markdown, sem comentários):
 
@@ -52,6 +57,12 @@ RETORNE EXCLUSIVAMENTE UM JSON VÁLIDO (sem texto antes ou depois, sem markdown,
   "concorrentes": [
     {"nome": "Nome Real Encontrado", "instagram": "@handle se encontrou", "followers": número OU null, "obs": "1 frase do que faz"}
   ],
+  "gmb": {
+    "tem_ficha": true/false/null,
+    "nota": número com uma casa decimal OU null,
+    "num_avaliacoes": número inteiro OU null,
+    "obs": "1 frase sobre a ficha (ex: '5,0 estrelas em 63 avaliações — ponto forte não explorado')"
+  },
   "site": {
     "url": "string ou null",
     "tem_ssl": true/false/null,
@@ -119,7 +130,7 @@ export default async function handler(req, res) {
           {
             type: 'web_search_20250305',
             name: 'web_search',
-            max_uses: 4,
+            max_uses: 8,
           },
         ],
       }),
