@@ -7,8 +7,12 @@ export const config = { maxDuration: 60 };
 import { applyCors, requireAuth, rateLimit, readBody } from './_lib.js';
 
 // Modelo único do diagnóstico. Trocar aqui afeta TODAS as páginas.
-// Opções: 'claude-sonnet-4-6' ($3/$15) | 'claude-opus-4-8' ($5/$25)
-const MODEL = 'claude-sonnet-4-6';
+// Haiku 4.5 ($1/$5) + extended thinking = barato, mas "pensa" antes de escrever
+// (segue limites e estrutura melhor). Opções: 'claude-haiku-4-5-20251001' |
+// 'claude-sonnet-4-6' ($3/$15) | 'claude-opus-4-8' ($5/$25)
+const MODEL = 'claude-haiku-4-5-20251001';
+// Orçamento de raciocínio interno por página. Sai do max_tokens; não vira HTML.
+const THINKING_BUDGET = 1500;
 
 // ═══════════════════════════════════════════════════════════════
 // REGRAS UNIVERSAIS — incluídas em TODOS os prompts
@@ -681,7 +685,9 @@ async function callAnthropic(apiKey, pageConfig, userMessage, hint) {
     },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: pageConfig.max_tokens,
+      // max_tokens precisa cobrir o thinking + a saída HTML real
+      max_tokens: pageConfig.max_tokens + THINKING_BUDGET,
+      thinking: { type: 'enabled', budget_tokens: THINKING_BUDGET },
       system: systemFinal,
       messages: [{ role: 'user', content: userMessage }],
       stream: false,

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>R.E.C. HUB · Teste de Layout (custo zero)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300..900;1,300..900&family=Manrope:wght@200..800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+<style id="rec-css-placeholder">/* CSS real do diagnostico.html injetado em runtime */</style>
+<style>
+  .lt-bar{position:fixed;top:0;left:0;right:0;z-index:9999;background:#0a1628;color:#e2e8f0;font-family:-apple-system,sans-serif;padding:10px 18px;display:flex;gap:14px;align-items:center;font-size:13px;box-shadow:0 2px 12px rgba(0,0,0,.4);}
+  .lt-bar b{color:#fff;}
+  .lt-bar .ok{color:#4ade80;}
+  .lt-bar .bad{color:#f87171;font-weight:700;}
+  .lt-bar button{background:#1e3a5f;color:#fff;border:0;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:12px;}
+  .lt-bar button:hover{background:#2a4a73;}
+  .lt-wrap{padding:64px 0 40px;}
+  .lt-page-tag{font-family:-apple-system,sans-serif;color:#fff;background:#0a1628;max-width:794px;margin:24px auto 0;padding:8px 14px;border-radius:8px 8px 0 0;font-size:12px;display:flex;justify-content:space-between;}
+  .lt-page-tag .h{font-size:11px;}
+  /* Marca de overflow: linha vermelha na altura A4 + borda */
+  .pdf-page.lt-overflow{outline:3px solid #f87171;}
+  .pdf-page .lt-cutline{position:absolute;left:0;right:0;top:1123px;height:0;border-top:2px dashed #f87171;z-index:50;pointer-events:none;}
+  .pdf-page .lt-cutline::after{content:'↑ tudo abaixo desta linha é CORTADO no PDF';position:absolute;right:8px;top:4px;background:#f87171;color:#fff;font-family:-apple-system,sans-serif;font-size:10px;padding:2px 8px;border-radius:4px;}
+</style>
+</head>
+<body style="background:#D1D5DB;margin:0;">
+
+<div class="lt-bar">
+  <b>Teste de Layout</b> <span id="lt-summary">carregando CSS real...</span>
+  <button onclick="location.reload()">↻ Recarregar</button>
+  <button onclick="scrollToNext()">▼ Próximo corte</button>
+  <span style="opacity:.6;font-size:11px;">Pior caso (texto no limite máximo) · CSS real · custo ZERO de API</span>
+</div>
+
+<div class="lt-wrap" id="lt-wrap"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// Gera conteúdo de PIOR CASO (texto no limite máximo de cada bloco) para
+// detectar overflow ANTES de gastar API. Se cabe aqui, cabe na geração real.
+// ════════════════════════════════════════════════════════════════════
+var LOREM = 'Texto de preenchimento no limite máximo permitido para este bloco simulando o pior caso real de conteúdo gerado pela inteligência artificial do diagnóstico.';
+function chars(n){ return LOREM.length >= n ? LOREM.slice(0, n) : (LOREM + ' ' + LOREM + ' ' + LOREM).slice(0, n); }
+function words(n){ var w = (LOREM + ' ' + LOREM + ' ' + LOREM).split(' '); return w.slice(0, n).join(' '); }
+
+function header(nn, label){ return '<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">'+nn+' · '+label+'</span></div>'; }
+function footer(){ return '<div class="page-footer"><span>Diagnóstico digital · Empresa Exemplo Nome Longo Canoas</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>'; }
+function intro(kicker, titulo){ return '<div class="section-intro"><span class="kicker">'+kicker+'</span><h2 class="section-title">'+titulo+'</h2><p class="section-lead">'+chars(220)+'</p></div>'; }
+
+// p-card pior caso: title 70 char, body 160 char, 2 tags
+function pCard(canal, n){
+  return '<div class="p-card '+canal+'"><div class="p-card-head"><span class="p-card-channel '+canal+'">'+canal+'</span><span class="p-card-num">'+n+'</span></div>'
+    + '<div class="p-card-title">'+chars(70)+'</div>'
+    + '<p class="p-card-body">'+chars(160)+'</p>'
+    + '<div class="p-card-tags"><span class="p-tag dado">'+chars(35)+'</span><span class="p-tag impacto">'+chars(35)+'</span></div></div>';
+}
+// bench-card pior caso
+function benchCard(){
+  return '<div class="bench-card"><div class="bench-label">'+words(8)+'</div>'
+    + '<div class="bench-compare">'
+    + '<div class="bench-col market"><div class="bench-col-label">Mercado</div><div class="bench-col-value">3.857<small> méd</small></div><div class="bench-col-sub">'+words(6)+'</div></div>'
+    + '<div class="bench-col you"><div class="bench-col-label">Você</div><div class="bench-col-value">n.d.</div><div class="bench-col-sub">'+words(6)+'</div></div>'
+    + '</div><p class="bench-impact">'+words(18)+'</p></div>';
+}
+function vCard(full){
+  return '<div class="v-card'+(full?' full':'')+'"><div class="v-head"><span class="v-name">'+chars(28)+'</span><span class="v-status warn">'+chars(18)+'</span></div>'
+    + '<div class="v-title">'+chars(60)+'</div>'
+    + '<p class="v-body">'+(full?words(34):words(28))+'</p></div>';
+}
+function dCard(){
+  return '<div class="d-card"><div class="d-head"><div class="d-icon">◐</div><div class="d-head-text"><div class="d-title">'+chars(45)+'</div><span class="d-plan-tag">Plano 2+</span></div></div>'
+    + '<p class="d-body">'+chars(140)+'</p>'
+    + '<div class="d-items">'+Array(4).fill('<div class="d-item"><span class="d-bullet">▸</span>'+chars(55)+'</div>').join('')+'</div></div>';
+}
+function planBox(){
+  return '<div class="plan-box"><div><span class="plan-box-badge">Plano 3 · Recomendado</span><div class="plan-box-name">'+chars(80)+'</div><div class="plan-box-price">R$ 2.900<small>/mês</small></div></div>'
+    + '<ul class="plan-box-items">'+Array(6).fill('<li>'+chars(45)+'</li>').join('')+'</ul></div>';
+}
+function clause(){
+  return '<div class="contract-clause"><div class="contract-clause-label">'+words(3)+'</div><div class="contract-clause-text">'+chars(280)+'</div></div>';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// PÁGINAS DE PIOR CASO
+// ════════════════════════════════════════════════════════════════════
+var PAGINAS = [
+  { id:'problems-1 (6 cards, 2 canais)', html:
+    '<div class="pdf-page cream">'+header('02','DIAGNÓSTICO')
+    + intro('Parte 01 · Pontos identificados', 'O que está <em>travando</em> o crescimento digital da empresa')
+    + '<div class="content"><div class="problems-grid">'+ [ 'instagram','site','google','meta','facebook','youtube' ].map(function(c,i){return pCard(c,'0'+(i+1));}).join('') +'</div></div>'+ footer() +'</div>' },
+
+  { id:'problems-1 (4 cards, 3+ canais cols-2)', html:
+    '<div class="pdf-page cream">'+header('02','DIAGNÓSTICO')
+    + intro('Parte 01 · Pontos identificados', 'O que está <em>travando</em> o crescimento digital da empresa')
+    + '<div class="content"><div class="problems-grid cols-2">'+ [ 'instagram','site','google','meta' ].map(function(c,i){return pCard(c,'0'+(i+1));}).join('') +'</div></div>'+ footer() +'</div>' },
+
+  { id:'problems-2 (4 cards cols-2)', html:
+    '<div class="pdf-page cream">'+header('03','DIAGNÓSTICO')
+    + intro('Parte 01 · Pontos identificados · Continuação', 'Funil, SEO e criativos: onde o <em>dinheiro investido</em> se perde')
+    + '<div class="content"><div class="problems-grid cols-2">'+ [ 'meta','site','meta','instagram' ].map(function(c,i){return pCard(c,'0'+(i+5));}).join('') +'</div></div>'+ footer() +'</div>' },
+
+  { id:'mercado (4 bench-cards)', html:
+    '<div class="pdf-page cream">'+header('04','MERCADO')
+    + intro('Parte 02 · Análise de mercado', 'Como o <em>mercado</em> se comporta no nicho')
+    + '<div class="content"><div class="bench-grid">'+ Array(4).fill(0).map(benchCard).join('') +'</div></div>'+ footer() +'</div>' },
+
+  { id:'mercado-cont (2 bench + opp-strip)', html:
+    '<div class="pdf-page cream">'+header('05','MERCADO')
+    + intro('Parte 02 · Análise de mercado · Continuação', 'E como o <em>público</em> se comporta')
+    + '<div class="content"><div class="bench-grid">'+ Array(2).fill(0).map(benchCard).join('') +'</div>'
+    + '<div class="opp-strip"><div class="opp-strip-icon">◆</div><div class="opp-strip-body"><h3>'+chars(60)+'</h3><p>'+chars(220)+'</p></div></div></div>'+ footer() +'</div>' },
+
+  { id:'verticais (4 + 1 full)', html:
+    '<div class="pdf-page cream">'+header('06','VERTICAIS')
+    + intro('Parte 03 · Diagnóstico por vertical', 'O negócio em <em>5 dimensões</em>')
+    + '<div class="content"><div class="vertical-grid">'+ vCard()+vCard()+vCard()+vCard()+vCard(true) +'</div></div>'+ footer() +'</div>' },
+
+  { id:'seo (4 bench-cards)', html:
+    '<div class="pdf-page cream">'+header('07','SEO')
+    + intro('Parte 04 · Análise de SEO', 'Como o <em>Google</em> enxerga orcamento.tudonovomoveis.com.br')
+    + '<div class="content"><div class="bench-grid">'+ Array(4).fill(0).map(benchCard).join('') +'</div></div>'+ footer() +'</div>' },
+
+  { id:'investimento (1 plano)', html:
+    '<div class="pdf-page cream">'+header('08','INVESTIMENTO')
+    + intro('Parte 04 · Investimento sugerido', 'O que <em>solucionamos</em> e quanto custa')
+    + '<div class="content"><div class="plan-grid">'+ planBox() +'</div></div>'+ footer() +'</div>' },
+
+  { id:'investimento (2 planos — limite)', html:
+    '<div class="pdf-page cream">'+header('08','INVESTIMENTO')
+    + intro('Parte 04 · Investimento sugerido', 'O que <em>solucionamos</em> e quanto custa')
+    + '<div class="content"><div class="plan-grid">'+ planBox()+planBox() +'</div></div>'+ footer() +'</div>' },
+
+  { id:'contrato (3 cláusulas)', html:
+    '<div class="pdf-page cream">'+header('09','CONTRATO')
+    + intro('Parte 04 · Condições comerciais', 'Como funciona a <em>parceria</em>')
+    + '<div class="content">'+ clause()+clause()+clause() +'</div>'+ footer() +'</div>' },
+
+  { id:'modulos (4 d-cards)', html:
+    '<div class="pdf-page cream">'+header('10','MÓDULOS')
+    + intro('Parte 05 · Módulos de trabalho', 'Como <em>entregamos</em> resultado')
+    + '<div class="content"><div class="deliverable-grid">'+ dCard()+dCard()+dCard()+dCard() +'</div></div>'+ footer() +'</div>' },
+];
+
+var overflowEls = [];
+
+async function init(){
+  // 1) Puxa o CSS real do diagnostico.html para garantir fidelidade total
+  try {
+    var r = await fetch('diagnostico.html');
+    var txt = await r.text();
+    // pega TODOS os blocos <style> (o CSS do PDF está no header injetado)
+    var styles = txt.match(/<style[^>]*>[\s\S]*?<\/style>/gi) || [];
+    var css = styles.map(function(s){ return s.replace(/<\/?style[^>]*>/gi,''); }).join('\n');
+    document.getElementById('rec-css-placeholder').innerHTML = css;
+  } catch(e) {
+    document.getElementById('lt-summary').innerHTML = '<span class="bad">ERRO ao carregar CSS de diagnostico.html — abra via servidor (não file://)</span>';
+    return;
+  }
+
+  // 2) Renderiza cada página
+  var wrap = document.getElementById('lt-wrap');
+  PAGINAS.forEach(function(p, i){
+    var tag = document.createElement('div');
+    tag.className = 'lt-page-tag';
+    tag.innerHTML = '<span>'+(i+1)+'. '+p.id+'</span><span class="h" id="lt-status-'+i+'">medindo...</span>';
+    wrap.appendChild(tag);
+    var holder = document.createElement('div');
+    holder.innerHTML = p.html;
+    var page = holder.firstChild;
+    wrap.appendChild(page);
+    p._el = page; p._idx = i;
+  });
+
+  // 3) Mede overflow (espera fontes carregarem)
+  await (document.fonts ? document.fonts.ready : Promise.resolve());
+  setTimeout(medir, 300);
+}
+
+function medir(){
+  overflowEls = [];
+  var bad = 0;
+  PAGINAS.forEach(function(p, i){
+    var el = p._el;
+    var alturaReal = el.scrollHeight;       // altura do conteúdo
+    var limite = 1123;                       // altura A4 fixa
+    var estoura = alturaReal > limite + 2;   // tolerância 2px
+    var st = document.getElementById('lt-status-'+i);
+    if (estoura) {
+      bad++;
+      overflowEls.push(el);
+      el.classList.add('lt-overflow');
+      var cut = document.createElement('div');
+      cut.className = 'lt-cutline';
+      el.appendChild(cut);
+      st.innerHTML = '<span style="color:#f87171;font-weight:700;">✗ CORTA — '+alturaReal+'px (+'+(alturaReal-limite)+'px além do A4)</span>';
+    } else {
+      var folga = limite - alturaReal;
+      st.innerHTML = '<span style="color:#4ade80;">✓ cabe — folga de '+folga+'px</span>';
+    }
+  });
+  var sum = document.getElementById('lt-summary');
+  if (bad === 0) sum.innerHTML = '<span class="ok">✓ TODAS as '+PAGINAS.length+' páginas cabem no pior caso</span>';
+  else sum.innerHTML = '<span class="bad">✗ '+bad+' de '+PAGINAS.length+' páginas CORTAM no pior caso</span> (role para ver, marcadas em vermelho)';
+}
+
+var nextIdx = 0;
+function scrollToNext(){
+  if (!overflowEls.length) return;
+  var el = overflowEls[nextIdx % overflowEls.length];
+  el.scrollIntoView({ behavior:'smooth', block:'start' });
+  nextIdx++;
+}
+
+init();
+</script>
+</body>
+</html>

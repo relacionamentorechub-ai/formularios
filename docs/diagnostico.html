@@ -1170,23 +1170,15 @@ function planejarPaginas(d) {
   var canais = (d.canais || '').split(',').map(function(c){ return c.trim(); }).filter(Boolean);
   var nCanais = canais.length;
 
-  var paginas = ['cover', 'problems-1'];
+  // VERSÃO ENXUTA (CEO pediu análise mais curta + economia de tokens):
+  // capa, 1 pág de problemas, 1 pág de mercado, verticais, [proposta], módulos, fechamento.
+  // Cortadas: problems-2, mercado-cont, seo, contrato e fontes (re-adicionáveis aqui se precisar).
+  var paginas = ['cover', 'problems-1', 'mercado', 'verticais'];
 
-  if (nCanais >= 3) paginas.push('problems-2');
+  // Investimento: só se com_proposta = Sim (cláusula contratual foi enxugada pra fora)
+  if (d.com_proposta === 'Sim' && d.plano) paginas.push('investimento');
 
-  paginas.push('mercado', 'mercado-cont', 'verticais');
-
-  // SEO: só se tem site e Site/SEO está nos canais
-  var temSiteSeo = d.tem_site === 'Sim, tem site' && d.site && /site.*seo|seo/i.test(d.canais || '');
-  if (temSiteSeo) paginas.push('seo');
-
-  // Investimento + Contrato (separado): só se com_proposta = Sim
-  if (d.com_proposta === 'Sim' && d.plano) {
-    paginas.push('investimento');
-    paginas.push('contrato'); // cláusula em página própria pra não cortar
-  }
-
-  paginas.push('modulos', 'hub-why', 'fontes');
+  paginas.push('modulos', 'hub-why');
 
   return paginas;
 }
