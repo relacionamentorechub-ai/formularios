@@ -1460,7 +1460,7 @@ async function enviarSolicitacao() {
     if (!ok) return;
   }
 
-  var temApi = !!getApiKey();
+  var temApi = true; // API key está no servidor (Vercel env), sempre disponível
   var btn = document.getElementById('btn_enviar');
   btn.disabled = true;
 
