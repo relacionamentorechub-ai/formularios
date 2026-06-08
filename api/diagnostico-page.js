@@ -403,6 +403,10 @@ ESTRUTURA OBRIGATÓRIA:
 <div class="plan-grid">
 {plan-boxes conforme PLANO INDICADO}
 </div>
+<div class="contract-clause">
+<div class="contract-clause-label">&#128203; Fidelidade e prazo</div>
+<div class="contract-clause-text">Fidelidade m&iacute;nima de <strong>12 meses</strong> para garantir o ciclo completo de planejamento, execu&ccedil;&atilde;o e otimiza&ccedil;&atilde;o. Contrato de 6 meses dispon&iacute;vel com acr&eacute;scimo de <em>20%</em> sobre o valor mensal do plano escolhido.</div>
+</div>
 </div>
 <div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
 </div>
@@ -424,6 +428,22 @@ Os planos vêm separados por " | ". Conte-os:
 Exemplo: PLANO INDICADO = "Plano 2 — ..." → gere SOMENTE o plan-box do Plano 2 (com o valor R$ 2.500 da tabela acima).
 "Personalizado — {descrição}" conta como 1 plano: use o nome "Personalizado" e o valor/escopo descrito.
 
+╔═══════════════════════════════════════════════════════════╗
+║  ITENS PADRÃO POR SERVIÇO (para planos Personalizados)     ║
+╚═══════════════════════════════════════════════════════════╝
+Quando o plano é "Personalizado" e a descrição menciona um serviço pelo nome, use estes itens
+como base do plan-box (ajuste à descrição, mantenha o conteúdo). NÃO invente escopo fora desta lista.
+- Tráfego Pago / Meta Ads (gatilhos: "tráfego pago", "meta ads", "anúncios", "facebook ads", "instagram ads"):
+  • Criação, gestão e otimização de campanhas no Meta Ads (Face e Instagram)
+  • Campanhas ilimitadas
+  • Acompanhamento e análise de resultados
+  • Estratégias para geração de leads
+  • OBS OBRIGATÓRIA: investimento em anúncios recomendado conforme a estratégia, pago direto ao Meta (não incluso na mensalidade). Inclua essa obs como último item do plan-box.
+- Social Media / Gestão de Instagram: planejamento mensal; até 3 posts/semana; organização do perfil; interação; relatório mensal.
+- Captação de Conteúdo: captação de fotos e vídeos 1x/mês; edição; banco de criativos.
+- Google Empresa (GMB): otimização do perfil; atualização de fotos; gestão de avaliações; posicionamento local.
+- Suporte Comercial: estratégia comercial e follow-up; apoio no atendimento de leads.
+
 Estrutura plan-box (LIMITE: até 6 itens por plano para caber):
 <div class="plan-box">
 <div>
@@ -436,7 +456,7 @@ Estrutura plan-box (LIMITE: até 6 itens por plano para caber):
 </ul>
 </div>
 
-REGRA: NÃO inclua contract-clause. Ela vai em página separada (page=contrato).`,
+REGRA CONTRACT-CLAUSE: inclua SEMPRE a contract-clause logo abaixo do plan-grid, com o texto FIXO mostrado na estrutura acima (12 meses / 6 meses com +20%). NÃO altere os valores nem invente outras condições.`,
   },
 
   // ════════════════════════ CONTRATO (separado quando há planos) ════════════════════════
@@ -645,7 +665,7 @@ const REQUIRED_CLASSES = {
   'mercado-cont': ['bench-grid', 'bench-card', 'opp-strip'],
   'verticais': ['vertical-grid', 'v-card'],
   'seo': ['bench-grid', 'bench-card'],
-  'investimento': ['plan-grid', 'plan-box'],
+  'investimento': ['plan-grid', 'plan-box', 'contract-clause'],
   'contrato': ['contract-clause'],
   'modulos': ['deliverable-grid', 'd-card'],
   'hub-why': ['hw-content', 'hw-benefits', 'hw-benefit'],

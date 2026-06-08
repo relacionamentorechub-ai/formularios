@@ -719,7 +719,7 @@ footer strong { color:var(--cyan); }
           </div>
           <div style="flex:2;min-width:180px;">
             <label style="font-size:11px;color:#64748B;font-weight:600;display:block;margin-bottom:5px;">Nome do plano</label>
-            <input type="text" id="custom_nome_plano" placeholder="Ex: Tráfego Pago Meta Ads" style="width:100%;background:rgba(6,15,35,.8);border:1.5px solid rgba(6,182,212,.15);border-radius:8px;padding:9px 12px;color:#F0F6FF;font-family:inherit;font-size:13px;outline:none;">
+            <input type="text" id="custom_nome_plano" placeholder="Ex: Tráfego Pago Meta Ads" onblur="autoPreencherIncluso()" style="width:100%;background:rgba(6,15,35,.8);border:1.5px solid rgba(6,182,212,.15);border-radius:8px;padding:9px 12px;color:#F0F6FF;font-family:inherit;font-size:13px;outline:none;">
           </div>
         </div>
         <label style="font-size:11px;color:#64748B;font-weight:600;display:block;margin-bottom:5px;">O que está incluso <span style="font-weight:400;opacity:.7">(um item por linha)</span></label>
@@ -1620,6 +1620,22 @@ function togglePropPlan(inp, itemId) {
 }
 
 function syncPropIg(val) { /* só sincroniza o campo — verificarInstagram cuida do resto */ }
+
+/* Itens padrão por serviço — auto-preenche o "O que está incluso" do plano personalizado
+   quando a CEO escreve o nome do serviço (ex: "Tráfego Pago"). Questão informativa:
+   ela não precisa decorar o escopo. Só preenche se o campo estiver vazio. */
+var SERVICO_ITENS = {
+  // A nota "investimento em mídia não incluso" é adicionada automaticamente pelo customPlanBox.
+  meta: 'Criação, gestão e otimização de campanhas no Meta Ads (Face e Instagram)\nCampanhas ilimitadas\nAcompanhamento e análise de resultados\nEstratégias para geração de leads'
+};
+function autoPreencherIncluso() {
+  var nome = ((document.getElementById('custom_nome_plano')||{}).value || '').toLowerCase();
+  var ta = document.getElementById('custom_incluso');
+  if (!ta || ta.value.trim()) return; // não sobrescreve o que ela já digitou
+  if (/tr[áa]fego|meta ads|an[úu]ncio|facebook ads|instagram ads/.test(nome)) {
+    ta.value = SERVICO_ITENS.meta;
+  }
+}
 
 /* ═══════════════════════════════════════════
    PROPOSTA — DADOS DOS PLANOS
