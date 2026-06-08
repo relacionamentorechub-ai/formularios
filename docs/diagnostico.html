@@ -1711,6 +1711,16 @@ function buildPropostaHtml(dados) {
   var customDados = dados.customDados || null;
   var maxPlano = planos.length ? Math.max.apply(null, planos) : (customDados ? 2 : 1);
 
+  /* Normaliza valor do plano personalizado: garante prefixo "R$" mesmo se a captadora digitar só o número */
+  function formatValor(v) {
+    v = (v || '').trim();
+    if (!v) return v;
+    if (/r\$/i.test(v)) return v;            // já tem R$
+    if (/^\d/.test(v)) return 'R$ ' + v;     // começa com número -> prefixa
+    return v;                                 // texto livre (ex: "Sob consulta")
+  }
+  if (customDados) customDados.valor = formatValor(customDados.valor);
+
   /* ───── PÁGINA 1: CAPA (dark, design da análise) ───── */
   var coverSub = seg ? seg + (cid ? ', ' + cid : '') : (cid || '');
   var precoBase = planos.length ? PLANOS_INFO[Math.min.apply(null,planos)].price : (customDados ? customDados.valor : 'Personalizado');
