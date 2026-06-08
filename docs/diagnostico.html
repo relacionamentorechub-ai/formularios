@@ -728,6 +728,12 @@ footer strong { color:var(--cyan); }
       </div>
     </div>
     <div class="prop-hint">Pode selecionar mais de um plano. Cada plano selecionado gera um bloco comparativo no PDF.</div>
+
+    <div style="margin-top:18px;">
+      <label style="font-size:11px;color:#64748B;font-weight:600;display:block;margin-bottom:5px;">Observa&ccedil;&otilde;es <span style="font-weight:400;opacity:.7">(opcional &mdash; uma por linha. Ex: + R$ 100 de deslocamento)</span></label>
+      <textarea id="prop_observacoes" placeholder="Ex:&#10;+ R$ 100 de deslocamento por captação fora de Porto Alegre&#10;Primeiro mês com captação dobrada" style="width:100%;background:rgba(6,15,35,.8);border:1.5px solid rgba(6,182,212,.15);border-radius:8px;padding:9px 12px;color:#F0F6FF;font-family:inherit;font-size:13px;min-height:70px;resize:vertical;outline:none;"></textarea>
+      <div style="margin-top:6px;font-size:11px;color:#4A5A72;">💡 Aparece em um bloco logo acima das condi&ccedil;&otilde;es de contrato no PDF.</div>
+    </div>
   </div>
 
   <!-- PROPOSTA SUBMIT -->
@@ -946,6 +952,11 @@ body{font-family:var(--font-body);background:#D1D5DB;color:var(--ink);line-heigh
 .plan-box-items{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:7px 24px;align-content:start;}
 .plan-box-items li{font-family:var(--font-body);font-size:11.5px;color:rgba(255,255,255,.85);display:flex;gap:8px;line-height:1.5;font-weight:400;}
 .plan-box-items li::before{content:'✓';color:var(--teal-soft);font-weight:700;flex-shrink:0;font-size:11px;}
+.obs-clause{margin-top:18px;background:var(--teal-faint);border:1px solid var(--teal-soft);border-radius:12px;padding:16px 22px;}
+.obs-clause-label{font-family:var(--font-num);font-size:9.5px;font-weight:700;color:var(--teal-dark);letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px;}
+.obs-clause ul{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.obs-clause li{font-family:var(--font-body);font-size:12px;color:var(--blue);line-height:1.5;font-weight:400;display:flex;gap:8px;}
+.obs-clause li::before{content:'+';color:var(--teal-dark);font-weight:700;flex-shrink:0;}
 .contract-clause{margin-top:18px;background:var(--cream-deep);border:1px solid var(--line);border-radius:12px;padding:16px 22px;}
 .contract-clause-label{font-family:var(--font-num);font-size:9.5px;font-weight:700;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-bottom:6px;}
 .contract-clause-text{font-family:var(--font-body);font-size:12px;color:var(--blue);line-height:1.6;font-weight:400;}
@@ -1700,170 +1711,149 @@ function buildPropostaHtml(dados) {
   var customDados = dados.customDados || null;
   var maxPlano = planos.length ? Math.max.apply(null, planos) : (customDados ? 2 : 1);
 
-  /* CHANNEL TAGS — tags de plano para o hero */
-  var tagMap = { 1:'Social Media', 2:'Social + Meta Ads', 3:'Social + Meta + Google', 4:'Plano Completo' };
-  var channelTags = planos.map(function(n) {
-    return '<span class="ch-tag ch-google">' + tagMap[n] + '</span>';
-  }).join('');
-  if (customDados) channelTags += '<span class="ch-tag ch-google">Personalizado</span>';
+  /* ───── PÁGINA 1: CAPA (dark, design da análise) ───── */
+  var coverSub = seg ? seg + (cid ? ', ' + cid : '') : (cid || '');
+  var precoBase = planos.length ? PLANOS_INFO[Math.min.apply(null,planos)].price : (customDados ? customDados.valor : 'Personalizado');
+  var qtdPlanos = planos.length + (customDados ? 1 : 0);
+  var canais = maxPlano >= 3 ? '3+' : maxPlano >= 2 ? '2' : '1';
+  var page1 = '<div class="pdf-page dark">'
+    + '<div class="cover-decoration"></div><div class="cover-decoration-2"></div>'
+    + '<div class="cover">'
+    + '<div class="cover-rec-logo"><span class="cover-brand">R.E.C. <em>HUB</em></span></div>'
+    + '<div class="cover-body">'
+    + '<div class="cover-eyebrow">Proposta comercial &middot; Servi&ccedil;os digitais</div>'
+    + '<h1 class="cover-title">' + nome + ': <em>proposta</em> de servi&ccedil;os digitais</h1>'
+    + '<p class="cover-sub">Plano e investimento sugeridos para ' + nome + ' crescer no digital com estrat&eacute;gia, execu&ccedil;&atilde;o e acompanhamento do R.E.C. HUB.</p>'
+    + '<div class="cover-kpis">'
+    + '<div class="cover-kpi"><div class="cover-kpi-label">Planos</div><div class="cover-kpi-value">' + qtdPlanos + '</div><div class="cover-kpi-desc">Selecionado(s) para voc&ecirc;</div><div class="cover-kpi-bar"><span style="width:40%"></span></div></div>'
+    + '<div class="cover-kpi"><div class="cover-kpi-label">Investimento a partir de</div><div class="cover-kpi-value" style="font-size:24px">' + precoBase + '<small>/m&ecirc;s</small></div><div class="cover-kpi-desc">Conforme plano escolhido</div><div class="cover-kpi-bar"><span style="width:70%"></span></div></div>'
+    + '<div class="cover-kpi"><div class="cover-kpi-label">Canais cobertos</div><div class="cover-kpi-value">' + canais + '</div><div class="cover-kpi-desc">Integrados em uma estrat&eacute;gia</div><div class="cover-kpi-bar"><span style="width:90%"></span></div></div>'
+    + '</div>'
+    + '<div class="cover-meta">'
+    + (cid ? '<div><span>Cidade</span><strong>' + cid + '</strong></div>' : '')
+    + '<div><span>Instagram</span><strong>@' + ig + '</strong></div>'
+    + '<div><span>Emitido em</span><strong>' + mesAno + '</strong></div>'
+    + (seg ? '<div><span>Segmento</span><strong>' + seg + '</strong></div>' : '')
+    + '<div><span>Validade</span><strong>7 dias</strong></div>'
+    + '</div>'
+    + '<div class="cover-contact">'
+    + '<div class="cover-contact-label">Fale com o R.E.C. HUB</div>'
+    + '<div class="cover-contact-row">'
+    + '<span class="cc-item"><span class="cc-icon">&#9742;</span>51 98463-2545</span>'
+    + '<span class="cc-sep">&middot;</span>'
+    + '<span class="cc-item"><span class="cc-icon">&#9678;</span>@somosrecoficial</span>'
+    + '<span class="cc-sep">&middot;</span>'
+    + '<span class="cc-item"><span class="cc-icon">&#8984;</span>somosrecoficial.com.br</span>'
+    + '</div></div>'
+    + '</div></div></div>';
 
-  /* PLAN-BOXES */
+  /* PLAN-BOX (design da análise) */
   function planBox(n) {
     var p = PLANOS_INFO[n];
     var itensHtml = p.items.map(function(it){ return '<li>' + it + '</li>'; }).join('');
-    var addonHtml = (n >= 3)
-      ? '<div class="plan-addon">'
-        + '<span class="plan-addon-icon">&#127925;</span>'
-        + '<div class="plan-addon-body">'
-        + '<span class="plan-addon-label">Add-on dispon&iacute;vel</span>'
-        + '<span class="plan-addon-text">Gest&atilde;o TikTok &mdash; Planejamento, cria&ccedil;&atilde;o e postagem de conte&uacute;dos &middot; <strong>+ R$ 300/m&ecirc;s</strong></span>'
-        + '</div></div>'
-      : '';
-    var metaNoteHtml = (n >= 2)
-      ? '<li style="color:#94A3B8;font-size:11px;border-top:1px solid rgba(255,255,255,0.1);margin-top:8px;padding-top:8px;grid-column:1/-1;list-style:none;">* Investimento em m&iacute;dia (verba Meta Ads) n&atilde;o incluso no plano</li>'
-      : '';
-    return '<div class="plan-box" style="margin-bottom:16px;">'
-      + '<div class="plan-box-left">'
-      + '<div class="plan-box-badge">' + p.badge + '</div>'
+    if (n >= 2) itensHtml += '<li style="grid-column:1/-1;color:rgba(255,255,255,.55);font-size:10.5px;">* Verba de an&uacute;ncios (Meta Ads) paga direto ao Meta, fora da mensalidade</li>';
+    if (n >= 3) itensHtml += '<li style="grid-column:1/-1;color:var(--teal-soft);font-size:10.5px;">Add-on TikTok dispon&iacute;vel &middot; + R$ 300/m&ecirc;s</li>';
+    return '<div class="plan-box"><div>'
+      + '<span class="plan-box-badge">' + p.badge + '</span>'
       + '<div class="plan-box-name">' + p.name + '</div>'
-      + '<div class="plan-box-price">' + p.price + '<span>/m&ecirc;s</span></div>'
+      + '<div class="plan-box-price">' + p.price + '<small>/m&ecirc;s</small></div>'
       + '</div>'
-      + '<div class="plan-box-right"><ul class="plan-box-items">' + itensHtml + metaNoteHtml + '</ul>' + addonHtml + '</div>'
+      + '<ul class="plan-box-items">' + itensHtml + '</ul>'
       + '</div>';
   }
 
-  /* DEL-CARDS */
-  function delCard(key) {
-    var c = DEL_CARDS[key] || DEL_CARDS['relatorios'];
-    var itensDel = c.items.map(function(it){
-      return '<div class="del-item"><span class="del-bullet">&#10003;</span>' + it + '</div>';
-    }).join('');
-    return '<div class="del-card">'
-      + '<div class="del-header">'
-      + '<div class="del-icon ' + c.cls + '">' + c.icon + '</div>'
-      + '<div><div class="del-title">' + c.title + '</div><span class="del-plan-tag">' + c.tag + '</span></div>'
-      + '</div>'
-      + '<div class="del-body">' + c.body + '</div>'
-      + '<div class="del-items">' + itensDel + '</div>'
-      + '</div>';
-  }
-
-  /* ───── PÁGINA 1: HERO DARK ───── */
-  var heroSub = seg ? seg + (cid ? ' &mdash; ' + cid : '') : (cid || '');
-  var page1 = '<div class="pdf-page dark">'
-    + '<div class="topbar"></div>'
-    + '<header><div class="logo">R.E.C. &middot; HUB de Neg&oacute;cios</div><div class="date-badge">Proposta Comercial &middot; ' + mesAno + '</div></header>'
-    + '<section class="hero">'
-    + '<div class="alert-badge">&#128203; PROPOSTA COMERCIAL</div>'
-    + '<h1>' + nome + '<br><span>proposta de servi&ccedil;os digitais</span></h1>'
-    + (heroSub ? '<p class="hero-sub">' + heroSub + '</p>' : '')
-    + '<div class="hero-meta"><strong>@' + ig + '</strong></div>'
-    + '<div style="margin-top:12px;margin-bottom:16px;font-size:11px;color:#64748B;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:5px 16px;border-radius:20px;display:inline-block;">&#9201; Proposta v&aacute;lida por 7 dias a partir da emiss&atilde;o</div>'
-    + '<div class="channels">' + channelTags + '</div>'
-    + '<div class="kpi-grid">'
-    + '<div class="kpi-card"><span class="kpi-label">Planos apresentados</span><span class="kpi-value">' + planos.length + '</span><span class="kpi-verdict ok">Selecionados</span></div>'
-    + '<div class="kpi-card"><span class="kpi-label">Investimento a partir de</span><span class="kpi-value">' + (planos.length ? PLANOS_INFO[Math.min.apply(null,planos)].price : (customDados ? customDados.valor : 'Personalizado')) + '</span><span class="kpi-verdict ok">Por m&ecirc;s</span></div>'
-    + '<div class="kpi-card"><span class="kpi-label">Canais cobertos</span><span class="kpi-value">' + (maxPlano >= 3 ? '3+' : maxPlano >= 2 ? '2' : '1') + '</span><span class="kpi-verdict ok">Integrados</span></div>'
-    + '</div>'
-    + '</section>'
-    + '</div>';
-
-  /* PLAN-BOX PERSONALIZADO */
+  /* PLAN-BOX PERSONALIZADO (design da análise) */
   function customPlanBox(cd) {
     var incluso = (cd.incluso || '').trim();
     var itens = incluso ? incluso.split('\n').filter(function(l){ return l.trim(); }) : ['Servi&ccedil;os conforme combinado'];
     var itensHtml = itens.map(function(it){ return '<li>' + it.trim() + '</li>'; }).join('');
     var temMeta = /meta|tr.?fego|ads/i.test(incluso + cd.nome);
-    var metaNoteHtml = temMeta ? '<li style="color:#94A3B8;font-size:11px;border-top:1px solid rgba(255,255,255,0.1);margin-top:8px;padding-top:8px;grid-column:1/-1;list-style:none;">* Investimento em m&iacute;dia (verba Meta Ads) n&atilde;o incluso no plano</li>' : '';
-    return '<div class="plan-box" style="margin-bottom:16px;">'
-      + '<div class="plan-box-left">'
-      + '<div class="plan-box-badge">PERSONALIZADO</div>'
+    if (temMeta) itensHtml += '<li style="grid-column:1/-1;color:rgba(255,255,255,.55);font-size:10.5px;">* Verba de an&uacute;ncios (Meta Ads) paga direto ao Meta, fora da mensalidade</li>';
+    return '<div class="plan-box"><div>'
+      + '<span class="plan-box-badge">Personalizado</span>'
       + '<div class="plan-box-name">' + cd.nome + '</div>'
-      + '<div class="plan-box-price">' + cd.valor + '<span>/m&ecirc;s</span></div>'
+      + '<div class="plan-box-price">' + cd.valor + '<small>/m&ecirc;s</small></div>'
       + '</div>'
-      + '<div class="plan-box-right"><ul class="plan-box-items">' + itensHtml + metaNoteHtml + '</ul></div>'
+      + '<ul class="plan-box-items">' + itensHtml + '</ul>'
       + '</div>';
   }
 
-  /* ───── PÁGINA 2: PLAN-BOXES ───── */
+  /* BLOCO DE OBSERVAÇÕES (acima da cláusula) */
+  var obsLista = (dados.observacoes || '').split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+  var obsHtml = obsLista.length
+    ? '<div class="obs-clause"><div class="obs-clause-label">&#9998; Observa&ccedil;&otilde;es</div><ul>'
+      + obsLista.map(function(o){ return '<li>' + o + '</li>'; }).join('')
+      + '</ul></div>'
+    : '';
+
+  /* ───── PÁGINA 2: INVESTIMENTO ───── */
   var planBoxesHtml = planos.map(planBox).join('');
   if (customDados) planBoxesHtml += customPlanBox(customDados);
-  var page2 = '<div class="pdf-page">'
-    + '<div class="inner">'
-    + '<div class="section-header" style="margin-bottom:24px;">'
-    + '<div class="section-icon" style="background:#D1FAE5;">&#128176;</div>'
-    + '<div><div class="section-label green">Investimento</div><div class="section-title">Op&ccedil;&otilde;es de plano para ' + nome + '</div></div>'
+  var page2 = '<div class="pdf-page cream">'
+    + '<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">02 &middot; INVESTIMENTO</span></div>'
+    + '<div class="section-intro">'
+    + '<span class="kicker">Parte 01 &middot; Investimento sugerido</span>'
+    + '<h2 class="section-title">Op&ccedil;&otilde;es de <em>plano</em> e investimento</h2>'
+    + '<p class="section-lead">O que o R.E.C. HUB entrega para ' + nome + ' e quanto custa por m&ecirc;s.</p>'
     + '</div>'
-    + planBoxesHtml
-    + '<div style="margin-top:20px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px 20px;">'
-    + '<div style="font-size:10px;font-weight:700;color:#64748B;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;">&#128203; Condi&ccedil;&otilde;es de contrato</div>'
-    + '<div style="font-size:12px;color:#374151;line-height:1.6;">Fidelidade m&iacute;nima de <strong style="color:#111827;">12 meses</strong>. Contrato de 6 meses dispon&iacute;vel com acr&eacute;scimo de <strong style="color:#D97706;">20%</strong> sobre o valor mensal do plano escolhido.</div>'
+    + '<div class="content">'
+    + '<div class="plan-grid">' + planBoxesHtml + '</div>'
+    + obsHtml
+    + '<div class="contract-clause">'
+    + '<div class="contract-clause-label">&#128203; Fidelidade e prazo</div>'
+    + '<div class="contract-clause-text">Fidelidade m&iacute;nima de <strong>12 meses</strong> para garantir o ciclo completo de planejamento, execu&ccedil;&atilde;o e otimiza&ccedil;&atilde;o. Contrato de 6 meses dispon&iacute;vel com acr&eacute;scimo de <em>20%</em> sobre o valor mensal do plano escolhido. Proposta v&aacute;lida por <strong>7 dias</strong>.</div>'
     + '</div>'
     + '</div>'
+    + '<div class="page-footer"><span>Proposta comercial &middot; ' + nome + '</span><span class="pf-handle">@somosrecoficial &middot; somosrecoficial.com.br</span></div>'
     + '</div>';
 
-  /* ───── PÁGINA 3: DEL-CARDS ───── */
-  var delKeys = getDelCards(maxPlano);
-  // se 6 del-cards, divide em 2 páginas de 4; se 4, uma página
-  var delPages = '';
-  if (delKeys.length <= 4) {
-    var delGrid = delKeys.map(delCard).join('');
-    delPages = '<div class="pdf-page">'
-      + '<div class="inner">'
-      + '<div class="section-header" style="margin-bottom:24px;">'
-      + '<div class="section-icon green">&#127919;</div>'
-      + '<div><div class="section-label green">Entregas</div><div class="section-title">O que o REC HUB desenvolve para ' + nome + '</div></div>'
-      + '</div>'
-      + '<div class="deliverable-grid">' + delGrid + '</div>'
-      + '</div>'
-      + '</div>';
-  } else {
-    // 6 cards: página 3 com 4, página 4 com 2
-    var del1 = delKeys.slice(0,4).map(delCard).join('');
-    var del2 = delKeys.slice(4).map(delCard).join('');
-    delPages = '<div class="pdf-page">'
-      + '<div class="inner">'
-      + '<div class="section-header" style="margin-bottom:24px;">'
-      + '<div class="section-icon green">&#127919;</div>'
-      + '<div><div class="section-label green">Entregas</div><div class="section-title">O que o REC HUB desenvolve para ' + nome + '</div></div>'
-      + '</div>'
-      + '<div class="deliverable-grid">' + del1 + '</div>'
-      + '</div>'
-      + '</div>'
-      + '<div class="pdf-page">'
-      + '<div class="inner">'
-      + '<div class="page-cont">Entregas &mdash; continua&ccedil;&atilde;o</div>'
-      + '<div class="deliverable-grid">' + del2 + '</div>'
-      + '</div>'
+  /* ───── PÁGINA 3: MÓDULOS (d-cards, design da análise) ───── */
+  var circIcons = ['&#9680;','&#9681;','&#9682;','&#9683;'];
+  function dCard(key, i) {
+    var c = DEL_CARDS[key] || DEL_CARDS['relatorios'];
+    var itensDel = c.items.map(function(it){
+      return '<div class="d-item"><span class="d-bullet">&#9656;</span>' + it + '</div>';
+    }).join('');
+    return '<div class="d-card">'
+      + '<div class="d-head"><div class="d-icon">' + circIcons[i % 4] + '</div>'
+      + '<div class="d-head-text"><div class="d-title">' + c.title + '</div><span class="d-plan-tag">' + c.tag + '</span></div></div>'
+      + '<p class="d-body">' + c.body + '</p>'
+      + '<div class="d-items">' + itensDel + '</div>'
       + '</div>';
   }
-
-  /* ───── ÚLTIMA PÁGINA: HUB-WHY DARK ───── */
-  var pageHub = '<div class="pdf-page dark">'
-    + '<div class="inner" style="justify-content:center;">'
-    + '<section class="hub-why-section" style="padding:0;background:none;">'
-    + '<div class="hub-why-inner" style="max-width:100%;padding:0;">'
-    + '<div class="hub-why-tag">REC HUB DE NEG&Oacute;CIOS</div>'
-    + '<h2 class="hub-why-title">Por que fechar com o REC HUB?</h2>'
-    + '<p class="hub-why-sub">N&atilde;o somos uma ag&ecirc;ncia tradicional. Somos um ecossistema estrat&eacute;gico que ajuda empres&aacute;rios a pensar, estruturar e escalar seus neg&oacute;cios, com conex&otilde;es reais, estrutura completa e resultados concretos.</p>'
-    + '<div class="hub-benefits">'
-    + '<div class="hub-benefit"><div class="hub-b-num">01</div><div><div class="hub-b-title">Conte&uacute;do com estrat&eacute;gia</div><div class="hub-b-desc">Planejamento, roteiro e produ&ccedil;&atilde;o orientados a autoridade e vendas. N&atilde;o postamos por postar, cada pe&ccedil;a tem um objetivo claro.</div></div></div>'
-    + '<div class="hub-benefit"><div class="hub-b-num">02</div><div><div class="hub-b-title">Tr&aacute;fego pago integrado</div><div class="hub-b-desc">Campanhas no Meta Ads e Google constru&iacute;das em cima do posicionamento da marca, para gerar leads qualificados.</div></div></div>'
-    + '<div class="hub-benefit"><div class="hub-b-num">03</div><div><div class="hub-b-title">Estrutura comercial</div><div class="hub-b-desc">Marketing e vendas trabalhando juntos. Do primeiro contato &agrave; convers&atilde;o, com processos que se repetem e escalam o faturamento.</div></div></div>'
-    + '<div class="hub-benefit"><div class="hub-b-num">04</div><div><div class="hub-b-title">Ecossistema de conex&otilde;es</div><div class="hub-b-desc">Acesso a uma comunidade ativa de empreendedores no RS com mais de 38 mil seguidores, grupos segmentados e eventos presenciais.</div></div></div>'
-    + '<div class="hub-benefit"><div class="hub-b-num">05</div><div><div class="hub-b-title">Acompanhamento estrat&eacute;gico cont&iacute;nuo</div><div class="hub-b-desc">Reuni&atilde;o mensal de alinhamento, relat&oacute;rios de resultado e ajuste de estrat&eacute;gia conforme o desempenho. O trabalho evolui junto com o neg&oacute;cio, sem contratos engessados.</div></div></div>'
+  var delKeys = getDelCards(maxPlano).slice(0, 4); // grid 2x2: máx 4
+  var page3 = '<div class="pdf-page cream">'
+    + '<div class="page-header"><span class="h-logo">R.E.C. <em>HUB</em></span><span class="page-number">03 &middot; M&Oacute;DULOS</span></div>'
+    + '<div class="section-intro">'
+    + '<span class="kicker">Parte 02 &middot; M&oacute;dulos de trabalho</span>'
+    + '<h2 class="section-title">O que <em>entregamos</em> para ' + nome + '</h2>'
+    + '<p class="section-lead">Cada m&oacute;dulo &eacute; um fluxo testado de produ&ccedil;&atilde;o, otimiza&ccedil;&atilde;o e gest&atilde;o.</p>'
     + '</div>'
-    + '<div class="hub-why-bottom"><span class="hub-why-tagline">&ldquo;Movimento gera movimento.&rdquo;</span><span class="hub-why-handle">recolaborativo.com.br &middot; @somosrecoficial</span></div>'
-    + '</div>'
-    + '</section>'
-    + '<footer style="background:none;border-top:1px solid rgba(255,255,255,0.08);margin-top:24px;padding-top:20px;text-align:center;font-size:12px;color:var(--gray-400);">'
-    + 'Proposta elaborada por <strong style="color:var(--cyan);">R.E.C. &middot; Ecossistema de Conex&otilde;es e Solu&ccedil;&otilde;es Empresariais</strong><br>'
-    + '<span style="margin-top:4px;display:block;">recolaborativo.com.br &middot; @somosrecoficial</span>'
-    + '</footer>'
-    + '</div>'
+    + '<div class="content"><div class="deliverable-grid">' + delKeys.map(dCard).join('') + '</div></div>'
+    + '<div class="page-footer"><span>Proposta comercial &middot; ' + nome + '</span><span class="pf-handle">@somosrecoficial &middot; somosrecoficial.com.br</span></div>'
     + '</div>';
 
-  return PDF_HTML_HEADER + page1 + page2 + pageHub + PDF_HTML_FOOTER;
+  /* ───── PÁGINA 4: POR QUE O REC (hw-content dark) ───── */
+  var pageHub = '<div class="pdf-page dark">'
+    + '<div class="cover-decoration"></div>'
+    + '<div class="hw-content" style="padding:44px 56px;">'
+    + '<div class="hw-eyebrow">Por que com o R.E.C.</div>'
+    + '<h2 class="hw-title">A parceria certa para transformar <em>presen&ccedil;a digital</em> em vendas</h2>'
+    + '<p class="hw-sub">N&atilde;o somos uma ag&ecirc;ncia tradicional. Somos um ecossistema que ajuda empres&aacute;rios a estruturar e escalar o neg&oacute;cio, com estrat&eacute;gia, execu&ccedil;&atilde;o e acompanhamento real.</p>'
+    + '<div class="hw-benefits">'
+    + '<div class="hw-benefit"><div class="hw-b-num">01</div><div><div class="hw-b-title">Conte&uacute;do com estrat&eacute;gia</div><p class="hw-b-desc">Planejamento, roteiro e produ&ccedil;&atilde;o orientados a autoridade e vendas. Cada pe&ccedil;a tem um objetivo claro.</p></div></div>'
+    + '<div class="hw-benefit"><div class="hw-b-num">02</div><div><div class="hw-b-title">Tr&aacute;fego pago integrado</div><p class="hw-b-desc">Campanhas no Meta Ads constru&iacute;das sobre o posicionamento da marca, para gerar leads qualificados.</p></div></div>'
+    + '<div class="hw-benefit"><div class="hw-b-num">03</div><div><div class="hw-b-title">Time dedicado, n&atilde;o freelancer rotativo</div><p class="hw-b-desc">Captação mensal presencial, edi&ccedil;&atilde;o e gest&atilde;o feitas por um time que conhece o seu neg&oacute;cio.</p></div></div>'
+    + '<div class="hw-benefit"><div class="hw-b-num">04</div><div><div class="hw-b-title">Acompanhamento cont&iacute;nuo</div><p class="hw-b-desc">Reuni&atilde;o mensal de alinhamento e relat&oacute;rios com m&eacute;tricas reais. O trabalho evolui junto com o neg&oacute;cio.</p></div></div>'
+    + '</div>'
+    + '<div class="hw-tagline">&ldquo;Movimento gera movimento.&rdquo;</div>'
+    + '<div class="hw-footer">'
+    + '<span class="h-logo" style="font-family:var(--font-display);font-style:italic;font-size:18px;color:#fff;">R.E.C. <em style="color:var(--teal)">HUB</em></span>'
+    + '<span class="hw-footer-handle">somosrecoficial.com.br<br>@somosrecoficial</span>'
+    + '</div>'
+    + '</div></div>';
+
+  return PDF_HTML_HEADER + page1 + page2 + page3 + pageHub + PDF_HTML_FOOTER;
 }
 
 /* ═══════════════════════════════════════════
@@ -1933,7 +1923,8 @@ async function gerarProposta() {
       segmento: segmento,
       cidade: cidade.trim(),
       planos: planos,
-      customDados: customDados
+      customDados: customDados,
+      observacoes: (document.getElementById('prop_observacoes')||{}).value || ''
     });
     setStep('step_4', 'done');
     setStep('step_5', 'active');
