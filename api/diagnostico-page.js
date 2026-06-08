@@ -405,7 +405,7 @@ ESTRUTURA OBRIGATÓRIA:
 </div>
 <div class="contract-clause">
 <div class="contract-clause-label">&#128203; Fidelidade e prazo</div>
-<div class="contract-clause-text">Fidelidade m&iacute;nima de <strong>12 meses</strong> para garantir o ciclo completo de planejamento, execu&ccedil;&atilde;o e otimiza&ccedil;&atilde;o. Contrato de 6 meses dispon&iacute;vel com acr&eacute;scimo de <em>20%</em> sobre o valor mensal do plano escolhido.</div>
+<div class="contract-clause-text">Fidelidade m&iacute;nima de <strong>12 meses</strong> para garantir o ciclo completo de planejamento, execu&ccedil;&atilde;o e otimiza&ccedil;&atilde;o. Contrato de 6 meses dispon&iacute;vel com acr&eacute;scimo de <em>20%</em> sobre o valor mensal do plano escolhido. Proposta v&aacute;lida por <strong>7 dias</strong>.</div>
 </div>
 </div>
 <div class="page-footer"><span>Diagn&oacute;stico digital · {nome empresa}</span><span class="pf-handle">@somosrecoficial · somosrecoficial.com.br</span></div>
@@ -478,7 +478,7 @@ ESTRUTURA OBRIGATÓRIA:
 <div class="content">
 <div class="contract-clause">
 <div class="contract-clause-label">&#128203; Fidelidade e prazo</div>
-<div class="contract-clause-text">Fidelidade m&iacute;nima de <strong>12 meses</strong> para garantir o ciclo completo de planejamento, execu&ccedil;&atilde;o e otimiza&ccedil;&atilde;o. Contrato de 6 meses dispon&iacute;vel com acr&eacute;scimo de <em>20%</em> sobre o valor mensal do plano escolhido.</div>
+<div class="contract-clause-text">Fidelidade m&iacute;nima de <strong>12 meses</strong> para garantir o ciclo completo de planejamento, execu&ccedil;&atilde;o e otimiza&ccedil;&atilde;o. Contrato de 6 meses dispon&iacute;vel com acr&eacute;scimo de <em>20%</em> sobre o valor mensal do plano escolhido. Proposta v&aacute;lida por <strong>7 dias</strong>.</div>
 </div>
 <div class="contract-clause">
 <div class="contract-clause-label">&#128184; Verba de m&iacute;dia paga</div>
