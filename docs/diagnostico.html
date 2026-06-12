@@ -1616,6 +1616,12 @@ function switchTab(tab) {
   document.getElementById('tab_proposta_content').style.display   = isDiag ? 'none' : '';
   document.getElementById('tab_btn_diag').className = 'tab-btn' + (isDiag ? ' tab-active' : '');
   document.getElementById('tab_btn_prop').className = 'tab-btn tab-btn-green' + (!isDiag ? ' tab-active' : '');
+  if (!isDiag) {
+    var nomeEl = document.getElementById('prop_nome');
+    var igEl   = document.getElementById('prop_instagram');
+    if (nomeEl && !nomeEl.value.trim()) nomeEl.value = getVal('nome');
+    if (igEl   && !igEl.value.trim())   igEl.value   = getVal('instagram');
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
