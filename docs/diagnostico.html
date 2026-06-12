@@ -371,6 +371,16 @@ footer strong { color:var(--cyan); }
     </div>
     <div class="two-col">
       <div class="field-group">
+        <label class="field-label" for="instagram_seguidores">Seguidores no Instagram <span style="font-weight:400;opacity:.6">(opcional)</span></label>
+        <input type="number" id="instagram_seguidores" placeholder="Ex: 1240" min="0">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="instagram_posts">Posts publicados <span style="font-weight:400;opacity:.6">(opcional)</span></label>
+        <input type="number" id="instagram_posts" placeholder="Ex: 87" min="0">
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="field-group">
         <label class="field-label" for="segmento">Segmento / Nicho <span class="req">*</span></label>
         <select id="segmento">
           <option value="">Selecione o segmento...</option>
@@ -1110,6 +1120,7 @@ function getRadio(n)   { var e=document.querySelector('input[name="'+n+'"]:check
 function coletarDados() {
   return {
     nome_empresa: getVal('nome')||'(não informado)', instagram: getVal('instagram')||'(não informado)',
+    instagram_seguidores: getVal('instagram_seguidores')||'', instagram_posts: getVal('instagram_posts')||'',
     segmento: getVal('segmento')||'', cidade: getVal('cidade')||'', site: getVal('site')||'',
     tiktok_handle: getVal('tiktok_handle')||'', youtube_handle: getVal('youtube_handle')||'', linkedin_handle: getVal('linkedin_handle')||'',
     responsavel: getRadio('responsavel')||'', origem: getRadio('origem')||'',
@@ -1214,6 +1225,7 @@ async function pesquisarLead(lead) {
 function buildLeadObject(d) {
   return {
     nome_empresa: d.nome_empresa, instagram: d.instagram,
+    instagram_seguidores: d.instagram_seguidores, instagram_posts: d.instagram_posts,
     segmento: d.segmento, cidade: d.cidade, site: d.site,
     canais: d.canais,
     tiktok_handle: d.tiktok_handle, youtube_handle: d.youtube_handle, linkedin_handle: d.linkedin_handle,

@@ -14,28 +14,26 @@ const MODEL = 'claude-sonnet-4-6';
 
 const RESEARCH_PROMPT = `Você é um analista de dados de mercado digital. Sua missão: coletar dados REAIS e VERIFICADOS sobre um lead.
 
-Você TEM acesso à ferramenta web_search. Use-a OBRIGATORIAMENTE para:
-1. Buscar seguidores REAIS do Instagram do lead — faça AS 4 QUERIES ABAIXO para cruzar fontes:
-   a. "{handle} site:socialblade.com" — Social Blade rastreia contagens atualizadas de seguidores
-   b. "{handle} instagram seguidores" — snippets em português costumam ter dados recentes
-   c. "instagram.com/{handle}" — página oficial pode aparecer com contagem no snippet do Google
-   d. "@{handle}" seguidores — artigos e menções com número específico
-   REGRA: se múltiplas fontes divergirem, use a mais recente e cite-a. Se nenhuma retornar número confiável, use null (melhor null do que número errado). NÃO ARREDONDE nem invente — use o número exato que aparece na fonte.
-2. Buscar Google Meu Negócio (GMB) do lead — faça AS 3 QUERIES ABAIXO EM SEQUÊNCIA e leia os snippets:
-   a. "{nome_empresa}" site:google.com/maps OR "avaliações do Google" — snippets de Maps trazem nota + nº avaliações
-   b. "{nome_empresa} {cidade} avaliações" — snippet com estrelas e contagem aparece aqui
-   c. "{nome_empresa} {segmento} {cidade} google" — fallback se nome indexado for diferente
+IMPORTANTE — SE o contexto do lead incluir SEGUIDORES_INSTAGRAM e POSTS_INSTAGRAM, use esses valores DIRETAMENTE no JSON (campos instagram.followers e instagram.posts_count) sem fazer nenhuma busca de seguidores do Instagram. Isso economiza buscas para dados mais úteis.
+
+Você TEM acesso à ferramenta web_search. Limite-se a NO MÁXIMO 5 buscas no total. Priorize nesta ordem:
+1. Google Meu Negócio (GMB) do lead — faça ATÉ 2 QUERIES e leia os snippets:
+   a. "{nome_empresa} {cidade} avaliações" — snippet com estrelas e contagem aparece aqui
+   b. "{nome_empresa} {segmento} {cidade} google" — fallback se nome indexado for diferente
    Se alguma retornar nota e avaliações, use como dado real. Se nenhuma retornar, marque gmb como null.
-3. Buscar benchmarks reais do setor: "engajamento médio instagram {segmento} brasil 2025", "ticket médio {segmento} {cidade}"
-4. Buscar concorrentes na cidade: "{segmento} {cidade} instagram" — encontre nomes REAIS
-5. Se houver site, buscar dados sobre ele: "{dominio} reviews", "{dominio} seo"
+2. SE seguidores NÃO foram fornecidos, buscar Instagram do lead — 1 QUERY:
+   a. "{handle} instagram seguidores" — snippets em português costumam ter dados recentes
+   Se não retornar número confiável, use null.
+3. Benchmarks do setor (1 QUERY): "engajamento médio instagram {segmento} brasil 2025"
+4. Concorrentes na cidade (1 QUERY): "{segmento} {cidade} instagram" — encontre nomes REAIS
 
 RETORNE EXCLUSIVAMENTE UM JSON VÁLIDO (sem texto antes ou depois, sem markdown, sem comentários):
 
 {
   "instagram": {
     "handle": "string sem @",
-    "followers": número se encontrou OU null,
+    "followers": número se encontrou ou foi fornecido OU null,
+    "posts_count": número se foi fornecido ou encontrado OU null,
     "posting_frequency_obs": "string descritiva curta (ex: 'irregular', 'até 3x/semana')",
     "engajamento_estimado_pct": número com decimais OU null,
     "obs": "1-2 frases observações específicas DESTE perfil"
@@ -101,6 +99,8 @@ function buildLeadContext(lead) {
     `SEGMENTO: ${lead.segmento || 'Não informado'}`,
     `CIDADE: ${lead.cidade || 'Não informada'}`,
   ];
+  if (lead.instagram_seguidores) linhas.push(`SEGUIDORES_INSTAGRAM: ${lead.instagram_seguidores}`);
+  if (lead.instagram_posts) linhas.push(`POSTS_INSTAGRAM: ${lead.instagram_posts}`);
   if (lead.site) linhas.push(`SITE: ${lead.site}`);
   if (lead.canais) linhas.push(`CANAIS: ${lead.canais}`);
   if (lead.observacoes) linhas.push(`OBSERVAÇÕES: ${lead.observacoes}`);
@@ -142,7 +142,7 @@ export default async function handler(req, res) {
           {
             type: 'web_search_20250305',
             name: 'web_search',
-            max_uses: 12,
+            max_uses: 5,
           },
         ],
       }),
