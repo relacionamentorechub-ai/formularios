@@ -15,7 +15,12 @@ const MODEL = 'claude-sonnet-4-6';
 const RESEARCH_PROMPT = `Você é um analista de dados de mercado digital. Sua missão: coletar dados REAIS e VERIFICADOS sobre um lead.
 
 Você TEM acesso à ferramenta web_search. Use-a OBRIGATORIAMENTE para:
-1. Buscar o Instagram do lead: "instagram.com/{handle}" — tente extrair followers, posting frequency
+1. Buscar seguidores REAIS do Instagram do lead — faça AS 4 QUERIES ABAIXO para cruzar fontes:
+   a. "{handle} site:socialblade.com" — Social Blade rastreia contagens atualizadas de seguidores
+   b. "{handle} instagram seguidores" — snippets em português costumam ter dados recentes
+   c. "instagram.com/{handle}" — página oficial pode aparecer com contagem no snippet do Google
+   d. "@{handle}" seguidores — artigos e menções com número específico
+   REGRA: se múltiplas fontes divergirem, use a mais recente e cite-a. Se nenhuma retornar número confiável, use null (melhor null do que número errado). NÃO ARREDONDE nem invente — use o número exato que aparece na fonte.
 2. Buscar Google Meu Negócio (GMB) do lead — faça AS 3 QUERIES ABAIXO EM SEQUÊNCIA e leia os snippets:
    a. "{nome_empresa}" site:google.com/maps OR "avaliações do Google" — snippets de Maps trazem nota + nº avaliações
    b. "{nome_empresa} {cidade} avaliações" — snippet com estrelas e contagem aparece aqui
@@ -130,7 +135,7 @@ export default async function handler(req, res) {
           {
             type: 'web_search_20250305',
             name: 'web_search',
-            max_uses: 8,
+            max_uses: 12,
           },
         ],
       }),
