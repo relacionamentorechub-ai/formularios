@@ -229,11 +229,13 @@ EXEMPLO RUIM (28 palavras — REJEITAR): "Sem volume de posts e seguidores rastr
 
 CHECAGEM: conte palavras antes de fechar </div>. Se &gt; 18, REESCREVA.
 
-Métricas obrigatórias (uma por bench-card):
-1. Seguidores médios do nicho vs lead (use research.instagram.followers)
-2. Engajamento médio (use research.setor.engajamento_medio_pct_brasil + research.instagram.engajamento_estimado_pct)
-3. Presença concorrentes locais (use research.concorrentes)
-4. Ticket médio ou CAC (use research.setor.ticket_medio_brl_central ou cac_estimado)`,
+REGRA ABSOLUTA — bench-col-value: AMBAS as colunas (Mercado e lead) devem ter n&uacute;mero real confirmado pela pesquisa. NUNCA escreva "a medir", "a posicionar", "sem dado", "n/d" ou qualquer texto qualitativo como bench-col-value. Se n&atilde;o tiver o n&uacute;mero da lead para uma m&eacute;trica, TROQUE a m&eacute;trica por uma onde voc&ecirc; tenha n&uacute;mero real nos dois lados. M&eacute;tricas seguras: seguidores (research.instagram.followers vs concorrente), posts publicados, avalia&ccedil;&otilde;es Google (0 &eacute; n&uacute;mero real), nota GMB.
+
+M&eacute;tricas prefer&ecirc;nciais (use se ambos os lados tiverem n&uacute;mero real):
+1. Seguidores m&eacute;dios do nicho vs lead (use research.instagram.followers)
+2. Engajamento m&eacute;dio (use research.setor.engajamento_medio_pct_brasil + research.instagram.engajamento_estimado_pct) — s&oacute; use se tiver engajamento real da lead, sen&atilde;o troque
+3. Presen&ccedil;a concorrentes locais (use research.concorrentes)
+4. Ticket m&eacute;dio ou avalia&ccedil;&otilde;es Google (use research.setor.ticket_medio_brl_central ou research.gmb.num_avaliacoes vs concorrente GMB)`,
   },
 
   // ════════════════════════ MERCADO-CONT ════════════════════════
