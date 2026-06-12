@@ -533,7 +533,7 @@ Estrutura d-card (LIMITES APERTADOS para caber 4 em 2x2):
 <div class="d-icon">{ícone}</div>
 <div class="d-head-text">
 <div class="d-title">{nome módulo, ≤45 char}</div>
-<span class="d-plan-tag">{Plano N+}</span>
+<span class="d-plan-tag">{Plano A no 1º card, Plano B no 2º, Plano C no 3º, Plano D no 4º}</span>
 </div>
 </div>
 <p class="d-body">{COMO trabalhamos, ≤140 char}</p>

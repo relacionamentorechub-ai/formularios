@@ -85,12 +85,19 @@ REGRAS ABSOLUTAS:
 
 NÃO escreva NADA além do JSON puro. Começe com { e termine com }.`;
 
+function normalizeInstagram(val) {
+  if (!val) return '';
+  const m = val.match(/instagram\.com\/([^/?#]+)/);
+  if (m) return '@' + m[1];
+  return val.startsWith('@') ? val : '@' + val;
+}
+
 function buildLeadContext(lead) {
   const linhas = [
     `Pesquise os seguintes dados para o lead:`,
     '',
     `EMPRESA: ${lead.nome_empresa || 'Não informada'}`,
-    `INSTAGRAM: ${lead.instagram || ''}`,
+    `INSTAGRAM: ${normalizeInstagram(lead.instagram)}`,
     `SEGMENTO: ${lead.segmento || 'Não informado'}`,
     `CIDADE: ${lead.cidade || 'Não informada'}`,
   ];
