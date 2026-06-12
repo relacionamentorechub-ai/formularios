@@ -1372,6 +1372,13 @@ async function abrirDiagnostico(htmlRaw, instagram) {
     });
   }
 
+  // Substitui {@handle} literal — Haiku às vezes não preenche o placeholder
+  // (research.instagram.handle vem sem @ no JSON; este garante que o @ apareça)
+  if (instagram) {
+    var igWithAt = instagram.startsWith('@') ? instagram : '@' + instagram;
+    html = html.replace(/\{@handle\}/g, igWithAt);
+  }
+
   // Claude agora gera só os divs — envolver com template completo se necessário
   if (!html.startsWith('<!DOCTYPE') && !html.startsWith('<html')) {
     html = PDF_HTML_HEADER + html + PDF_HTML_FOOTER;
