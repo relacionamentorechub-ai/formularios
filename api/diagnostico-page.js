@@ -824,21 +824,19 @@ export default async function handler(req, res) {
     let html = extractHtml(data, pageNumber);
     let tokensTotal = { input: data.usage?.input_tokens || 0, output: data.usage?.output_tokens || 0 };
 
-    if (!html || !html.startsWith('<div class="pdf-page')) {
-      return res.status(500).json({
-        error: 'Resposta da IA não começa com <div class="pdf-page">',
-        preview: html.slice(0, 200), page,
-      });
-    }
-
     // Validação estrutural — checa classes obrigatórias, tamanho mínimo e v-card.full count
     let erros = validaEstrutura(page, html);
+    // HTML sem o div raiz = erro estrutural grave, trata como qualquer outro erro para retry
+    if (!html || !html.startsWith('<div class="pdf-page')) {
+      erros = ['html não começa com div.pdf-page (resposta fora do padrão)'].concat(erros);
+    }
     let attempt = 1;
 
     if (erros.length) {
       console.warn(`[diagnostico-page] "${page}" tent.${attempt} falhou: ${erros.join('; ')} — retentando`);
       const hint = 'A resposta anterior teve estes problemas: ' + erros.join('; ') +
         '. Refaça a página seguindo EXATAMENTE a estrutura HTML do prompt. ' +
+        'Comece DIRETAMENTE com <div class="pdf-page ..." — sem texto antes, sem markdown. ' +
         'NÃO omita classes obrigatórias. NÃO retorne HTML vazio ou só com header.';
       data = await callAnthropic(apiKey, pageConfig, userMessage, hint);
       html = extractHtml(data, pageNumber);
@@ -846,6 +844,9 @@ export default async function handler(req, res) {
       tokensTotal.output += data.usage?.output_tokens || 0;
       attempt = 2;
       erros = validaEstrutura(page, html);
+      if (!html || !html.startsWith('<div class="pdf-page')) {
+        erros = ['html não começa com div.pdf-page (tent.2)'].concat(erros);
+      }
       if (erros.length) {
         console.error(`[diagnostico-page] "${page}" tent.2 TAMBÉM falhou: ${erros.join('; ')}`);
         // Retorna mesmo assim com warning — melhor que quebrar o PDF inteiro
