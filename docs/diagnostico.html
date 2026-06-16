@@ -1239,15 +1239,29 @@ async function chamarUmaPagina(page, lead, pageNumber, totalPages, research) {
   // Retry com backoff em 429 (rate limit do Anthropic) ou 529 (overloaded).
   var maxAttempts = 4;
   for (var attempt = 1; attempt <= maxAttempts; attempt++) {
-    var resp = await apiFetch('/api/diagnostico-page', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        page: page, lead: lead,
-        pageNumber: pageNumber, totalPages: totalPages,
-        research: research,
-      }),
-    });
+    var resp;
+    try {
+      resp = await apiFetch('/api/diagnostico-page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          page: page, lead: lead,
+          pageNumber: pageNumber, totalPages: totalPages,
+          research: research,
+        }),
+      });
+    } catch (netErr) {
+      // fetch rejeitou no nível de rede (ex: "Load failed" no Safari mobile,
+      // conexão instável, função estourou tempo). Trata como transitório e retenta.
+      if (attempt < maxAttempts) {
+        var netWait = 6000 * attempt;
+        console.warn('[chamarUmaPagina] "' + page + '" tentativa ' + attempt + ' falhou na rede (' + netErr.message + '), aguardando ' + (netWait/1000) + 's...');
+        setSubtitle('Conex&atilde;o inst&aacute;vel, tentando de novo...');
+        await new Promise(function(r){ setTimeout(r, netWait); });
+        continue;
+      }
+      throw new Error('Página "' + page + '": rede inst&aacute;vel (' + netErr.message + ')');
+    }
     if (resp.ok) return resp.json();
 
     var errJson = await resp.json().catch(function(){ return {}; });
