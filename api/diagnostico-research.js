@@ -1,7 +1,7 @@
 // Pesquisa REAL ÚNICA antes da geração das páginas.
 // Usa web_search pra coletar dados verificados sobre o lead.
 // Retorna JSON estruturado que será passado para TODAS as chamadas de página,
-// garantindo consistência (mesmo número de seguidores, mesmo ticket, mesmos concorrentes
+// garantindo consistência (mesmo número de seguidores, mesmos concorrentes
 // em todas as páginas).
 
 export const config = { maxDuration: 120 };
@@ -20,7 +20,10 @@ Você TEM acesso à ferramenta web_search. Limite-se a NO MÁXIMO 5 buscas no to
 1. Google Meu Negócio (GMB) do lead — faça ATÉ 2 QUERIES e leia os snippets:
    a. "{nome_empresa} {cidade} avaliações" — snippet com estrelas e contagem aparece aqui
    b. "{nome_empresa} {segmento} {cidade} google" — fallback se nome indexado for diferente
-   Se alguma retornar nota e avaliações, use como dado real. Se nenhuma retornar, marque gmb como null.
+   Se alguma retornar nota e avaliações, use como dado real. SE NENHUMA RETORNAR DADO, marque
+   tem_ficha como null (NUNCA false) — ausência na busca não comprova ausência da ficha. Já
+   aconteceu de a ficha existir e a busca não achar; afirmar "não tem Google" quando tem destrói
+   a credibilidade da análise.
 2. SE seguidores NÃO foram fornecidos, buscar Instagram do lead — 1 QUERY:
    a. "{handle} instagram seguidores" — snippets em português costumam ter dados recentes
    Se não retornar número confiável, use null.
@@ -42,10 +45,6 @@ RETORNE EXCLUSIVAMENTE UM JSON VÁLIDO (sem texto antes ou depois, sem markdown,
     "nome": "string",
     "engajamento_medio_pct_brasil": número (ex: 0.6 para 0,6%),
     "fonte_engajamento": "string (ex: 'mLabs Social Media Trends 2024')",
-    "ticket_medio_brl_min": número,
-    "ticket_medio_brl_max": número,
-    "ticket_medio_brl_central": número (média entre min e max),
-    "fonte_ticket": "string fonte (ex: 'Cronoshare 2024')",
     "cac_estimado_min": número,
     "cac_estimado_max": número,
     "fonte_cac": "string",
@@ -78,7 +77,9 @@ REGRAS ABSOLUTAS:
 - NÃO INVENTE NÚMEROS. Se a busca não retornar dado confiável, use null. Melhor null do que dado errado.
 - Para concorrentes: cite no MÁXIMO 4 nomes REAIS. Se não encontrou concorrente local específico, inclua redes nacionais conhecidas do setor que atuam na região (Tok&Stok, Etna, etc para móveis; O Boticário, Eudora para beleza, etc).
 - Para Instagram followers: SÓ inclua se a busca retornou número específico. Se não, null.
-- Para ticket médio: pesquise faixas reais publicadas. Use ranges sempre que possível.
+- NÃO pesquise nem inclua ticket médio do setor. Esse dado varia demais entre buscas
+  (mesma pesquisa, mesmo nicho, retorna valores diferentes) — não é confiável o suficiente
+  para uma análise que se vende como dado real.
 - Cite SEMPRE a fonte do número (mLabs, Cronoshare, ABComm, Resultados Digitais, etc).
 
 NÃO escreva NADA além do JSON puro. Começe com { e termine com }.`;

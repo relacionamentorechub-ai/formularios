@@ -34,9 +34,9 @@ USE ESSES NÚMEROS EXATOS em qualquer métrica que você citar.
 - Se "instagram.followers" não for null, use ESSE número exato (jamais invente)
 - Se for null, use linguagem qualitativa: "base ainda em crescimento", "presença modesta", etc
 - Se "gmb.nota" e "gmb.num_avaliacoes" não forem null, use ESSES números exatos (ex: "5,0 ★ em 63 avaliações")
-- Se "gmb.tem_ficha" for false ou null, escreva "ficha não localizada publicamente" — NUNCA assuma que não existe
+- Se "gmb.tem_ficha" for false ou null, escreva "ficha não localizada nas buscas públicas" (NUNCA "não tem Google" categórico) — a busca pode ter falhado mesmo a ficha existindo, e afirmar ausência errada destrói a credibilidade da análise
 - Para benchmarks de setor, use "setor.engajamento_medio_pct_brasil" e cite "fonte_engajamento"
-- Para ticket, use o range de "setor.ticket_medio_brl_min" a "setor.ticket_medio_brl_max"
+- NÃO mencione ticket médio do setor em nenhuma página — esse dado foi removido da pesquisa por ser inconsistente entre buscas. Se precisar falar de valor de procedimento/serviço, use só linguagem qualitativa.
 - Para concorrentes, use APENAS nomes do array "concorrentes" (são reais e pesquisados)
 - Mantenha consistência: TODAS as páginas usarão o mesmo JSON, números devem bater
 
@@ -107,10 +107,10 @@ ESTRUTURA OBRIGATÓRIA — copie exatamente, preenchendo {placeholders}:
 </div>
 </div>
 
-KPIs OBRIGATÓRIOS (use dados do setor brasileiro do nicho informado):
+KPIs OBRIGATÓRIOS (use dados reais e confirmados — NUNCA ticket médio, é instável demais entre buscas):
 1. Engajamento médio do Instagram no nicho (% ou número)
 2. Concorrência local ativa (quantidade de perfis fortes ou concorrentes notórios)
-3. Ticket médio do nicho (R$ ou faixa) — escolha o KPI mais relevante para o segmento
+3. Um terceiro KPI real do lead ou do nicho: seguidores do lead, posts publicados, nota/avaliações no Google (se confirmado), ou frequência de publicação do setor — escolha o que tiver dado mais sólido
 
 A cover-contact-row é FIXA — não altere os contatos.
 A img src="" será preenchida pelo sistema.`,
@@ -235,7 +235,8 @@ M&eacute;tricas prefer&ecirc;nciais (use se ambos os lados tiverem n&uacute;mero
 1. Seguidores m&eacute;dios do nicho vs lead (use research.instagram.followers)
 2. Engajamento m&eacute;dio (use research.setor.engajamento_medio_pct_brasil + research.instagram.engajamento_estimado_pct) — s&oacute; use se tiver engajamento real da lead, sen&atilde;o troque
 3. Presen&ccedil;a concorrentes locais (use research.concorrentes)
-4. Ticket m&eacute;dio ou avalia&ccedil;&otilde;es Google (use research.setor.ticket_medio_brl_central ou research.gmb.num_avaliacoes vs concorrente GMB)`,
+4. Avalia&ccedil;&otilde;es Google (use research.gmb.num_avaliacoes vs concorrente GMB, 0 confirmado &eacute; n&uacute;mero real)
+NUNCA use ticket m&eacute;dio em bench-card. Esse dado foi removido da pesquisa por ser inconsistente entre buscas.`,
   },
 
   // ════════════════════════ MERCADO-CONT ════════════════════════
@@ -299,7 +300,7 @@ ESTRUTURA OBRIGATÓRIA:
 5 VERTICAIS (na ordem exata):
 01 · Gest&atilde;o de Neg&oacute;cios — estrutura operacional, processos, eficiência
 02 · Cultura e Lideran&ccedil;a — posicionamento, identidade, presença do líder
-03 · Vendas — canais, funil, ticket médio, recorrência
+03 · Vendas — canais, funil, recorrência (NÃO mencione ticket médio)
 04 · Experi&ecirc;ncia do Cliente — avaliações, atendimento, NPS estimado
 05 · Crescimento &amp; Aquisi&ccedil;&atilde;o — presença digital, escala
 
