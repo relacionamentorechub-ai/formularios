@@ -139,7 +139,8 @@
       '<a href="index.html" class="hub-nav-link" data-page="dashboard">🏠 Hub</a>',
       '<div class="hub-nav-divider"></div>',
       '<a href="diagnostico.html" class="hub-nav-link" data-page="diagnostico">🔍 Diagnóstico</a>',
-      '<a href="campanha.html" class="hub-nav-link" data-page="campanha">📊 Campanha</a>',
+      '<a href="campanha.html" class="hub-nav-link" data-page="campanha">📊 Campanha Meta</a>',
+      '<a href="campanha-google.html" class="hub-nav-link" data-page="campanha-google">🔎 Campanha Google</a>',
       '<a href="conteudo.html" class="hub-nav-link" data-page="conteudo">✍️ Conteúdo</a>',
       '<a href="briefing.html" class="hub-nav-link" data-page="briefing">📋 Briefing</a>',
       '<a href="reunioes.html" class="hub-nav-link" data-page="reunioes">📅 Reuniões</a>',
@@ -185,7 +186,7 @@
 
     var navLabels = {
       dashboard:'Dashboard', diagnostico:'Diagnóstico Digital',
-      campanha:'Briefing de Campanha', conteudo:'Geração de Conteúdo',
+      campanha:'Briefing de Campanha (Meta)', 'campanha-google':'Campanha Google Ads', conteudo:'Geração de Conteúdo',
       briefing:'Briefing de Reunião', reunioes:'Reuniões'
     };
 

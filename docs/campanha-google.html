@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Campanha Google Ads · R.E.C. HUB de Negócios</title>
+<meta name="description" content="Gerador de campanha estratégica para Google Ads — R.E.C. HUB de Negócios">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cyan:#06B6D4; --cyan-light:#22D3EE; --cyan-dark:#0E7490; --cyan-glow:rgba(6,182,212,0.35);
+  --blue-deep:#0284C7; --purple:#7C3AED; --purple-soft:#8B5CF6;
+  --green:#10B981; --green-dark:#065F46; --orange:#F97316; --red:#EF4444;
+  --bg-base:#050B18; --bg-card:rgba(8,18,38,0.75); --bg-input:rgba(6,15,35,0.8);
+  --border:rgba(6,182,212,0.15); --border-hover:rgba(6,182,212,0.4);
+  --text-primary:#F0F6FF; --text-secondary:#94A3B8; --text-muted:#4A5A72;
+  --shadow-glow:0 0 40px rgba(6,182,212,0.12); --radius:16px; --radius-sm:10px;
+}
+html { scroll-behavior:smooth; }
+body { font-family:'Inter',-apple-system,sans-serif; background:var(--bg-base); color:var(--text-primary); line-height:1.6; -webkit-font-smoothing:antialiased; min-height:100vh; overflow-x:hidden; }
+.aurora-bg { position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+.aurora-bg::before,.aurora-bg::after { content:''; position:absolute; border-radius:50%; filter:blur(80px); opacity:.18; animation:aurora-drift 18s ease-in-out infinite alternate; }
+.aurora-bg::before { width:700px; height:500px; background:radial-gradient(ellipse,#1A73E8,#06B6D4,transparent); top:-150px; left:-200px; }
+.aurora-bg::after  { width:600px; height:450px; background:radial-gradient(ellipse,#34A853,#0284C7,transparent); bottom:-100px; right:-150px; animation-delay:-9s; animation-direction:alternate-reverse; }
+.aurora-mid { position:fixed; width:500px; height:400px; background:radial-gradient(ellipse,rgba(6,182,212,.1),transparent 70%); border-radius:50%; top:40%; left:50%; transform:translate(-50%,-50%); filter:blur(60px); animation:aurora-pulse 12s ease-in-out infinite; pointer-events:none; z-index:0; }
+.grid-overlay { position:fixed; inset:0; z-index:0; pointer-events:none; background-image:linear-gradient(rgba(6,182,212,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(6,182,212,.03) 1px,transparent 1px); background-size:60px 60px; }
+@keyframes aurora-drift { 0%{transform:translate(0,0) scale(1)} 50%{transform:translate(80px,40px) scale(1.1)} 100%{transform:translate(-40px,80px) scale(.95)} }
+@keyframes aurora-pulse { 0%,100%{opacity:.06;transform:translate(-50%,-50%) scale(1)} 50%{opacity:.14;transform:translate(-50%,-50%) scale(1.15)} }
+.progress-bar-track { position:fixed; top:0; left:0; right:0; height:3px; background:rgba(255,255,255,.05); z-index:1000; }
+.progress-bar-fill  { height:100%; width:0%; background:linear-gradient(90deg,#1A73E8,#06B6D4,#34A853,#8B5CF6); background-size:200% 100%; transition:width .4s cubic-bezier(.4,0,.2,1); animation:shimmer-bg 3s linear infinite; box-shadow:0 0 10px rgba(6,182,212,.6); }
+@keyframes shimmer-bg { 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
+.header { position:relative; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:18px 32px; background:rgba(5,11,24,.85); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid rgba(6,182,212,.1); gap:12px; flex-wrap:wrap; }
+.logo-wrap { display:flex; align-items:center; gap:10px; }
+.logo-dot  { width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 10px var(--cyan),0 0 20px rgba(6,182,212,.5); animation:pulse-dot 2s ease-in-out infinite; }
+.logo-text { font-size:13px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; background:linear-gradient(135deg,#22D3EE,#06B6D4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+@keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.4);opacity:.7} }
+.header-right { display:flex; align-items:center; gap:10px; }
+.header-badge { font-size:11px; font-weight:600; color:var(--text-muted); background:rgba(6,182,212,.06); border:1px solid rgba(6,182,212,.12); padding:5px 14px; border-radius:20px; letter-spacing:.04em; }
+.btn-settings { background:rgba(6,182,212,.08); border:1px solid rgba(6,182,212,.15); color:var(--text-secondary); border-radius:8px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:6px; font-family:inherit; }
+.api-status-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.api-status-dot.ok { background:#10B981; box-shadow:0 0 6px rgba(16,185,129,.6); }
+.hero { position:relative; z-index:10; padding:70px 32px 60px; text-align:center; overflow:hidden; }
+.hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(6,182,212,.08),transparent); pointer-events:none; }
+.hero-eyebrow { display:inline-flex; align-items:center; gap:8px; background:rgba(6,182,212,.08); border:1px solid rgba(6,182,212,.25); color:var(--cyan-light); font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; padding:7px 18px; border-radius:50px; margin-bottom:28px; animation:fade-up .6s ease-out both; }
+.hero-eyebrow .dot-pulse { width:6px; height:6px; border-radius:50%; background:var(--cyan); animation:pulse-dot 1.5s ease-in-out infinite; }
+.hero-title { font-size:clamp(28px,5vw,52px); font-weight:900; line-height:1.15; letter-spacing:-.02em; margin-bottom:18px; animation:fade-up .6s ease-out .1s both; }
+.hero-title .white    { color:var(--text-primary); }
+.hero-title .gradient { background:linear-gradient(135deg,#1A73E8 0%,#06B6D4 40%,#34A853 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.hero-sub   { font-size:clamp(14px,2vw,16px); color:var(--text-secondary); max-width:560px; margin:0 auto 32px; line-height:1.7; animation:fade-up .6s ease-out .2s both; }
+.hero-stats { display:inline-flex; align-items:center; gap:24px; padding:14px 28px; background:rgba(6,182,212,.05); border:1px solid rgba(6,182,212,.12); border-radius:50px; animation:fade-up .6s ease-out .3s both; flex-wrap:wrap; justify-content:center; }
+.hero-stat  { display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-secondary); font-weight:500; }
+.hero-stat .stat-icon { width:20px; height:20px; border-radius:50%; background:rgba(6,182,212,.15); display:flex; align-items:center; justify-content:center; font-size:10px; }
+.hero-divider { width:1px; height:16px; background:rgba(6,182,212,.2); }
+@keyframes fade-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.container { position:relative; z-index:10; max-width:820px; margin:0 auto; padding:0 20px 80px; }
+.form-section { background:var(--bg-card); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); border:1px solid var(--border); border-radius:var(--radius); padding:32px; margin-bottom:20px; transition:border-color .3s,box-shadow .3s; opacity:0; transform:translateY(24px); position:relative; overflow:hidden; }
+.form-section::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(6,182,212,.4),transparent); opacity:0; transition:opacity .3s; }
+.form-section:hover::before { opacity:1; }
+.form-section:hover { border-color:rgba(6,182,212,.25); box-shadow:var(--shadow-glow),0 20px 60px rgba(0,0,0,.3); }
+.form-section.visible { opacity:1; transform:translateY(0); transition:opacity .5s,transform .5s cubic-bezier(.23,1,.32,1); }
+.section-header { display:flex; align-items:center; gap:14px; margin-bottom:28px; padding-bottom:20px; border-bottom:1px solid rgba(6,182,212,.08); }
+.section-num { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; }
+.section-num.cyan   { background:linear-gradient(135deg,#0E7490,#06B6D4); color:#fff; box-shadow:0 4px 16px rgba(6,182,212,.4); }
+.section-num.blue   { background:linear-gradient(135deg,#0B5FBF,#1A73E8); color:#fff; box-shadow:0 4px 16px rgba(26,115,232,.4); }
+.section-num.green  { background:linear-gradient(135deg,#065F46,#34A853); color:#fff; box-shadow:0 4px 16px rgba(52,168,83,.4); }
+.section-num.orange { background:linear-gradient(135deg,#C2410C,#F97316); color:#fff; box-shadow:0 4px 16px rgba(249,115,22,.4); }
+.section-num.purple { background:linear-gradient(135deg,#5B21B6,#7C3AED); color:#fff; box-shadow:0 4px 16px rgba(124,58,237,.4); }
+.section-title { font-size:16px; font-weight:700; color:var(--text-primary); }
+.section-desc  { font-size:12px; color:var(--text-muted); margin-top:3px; }
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.field-group { margin-bottom:20px; }
+.field-group:last-child { margin-bottom:0; }
+.field-label { display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:8px; letter-spacing:.03em; text-transform:uppercase; }
+.field-label .req { color:var(--cyan); margin-left:3px; }
+input[type="text"],input[type="url"],input[type="number"],textarea,select { width:100%; padding:12px 16px; background:var(--bg-input); border:1.5px solid rgba(6,182,212,.12); border-radius:var(--radius-sm); font-size:14px; color:var(--text-primary); font-family:inherit; outline:none; transition:border-color .25s,box-shadow .25s,background .25s; -webkit-appearance:none; }
+input::placeholder,textarea::placeholder { color:var(--text-muted); }
+input:focus,textarea:focus,select:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(6,182,212,.1),0 0 20px rgba(6,182,212,.08); background:rgba(6,182,212,.04); }
+select { cursor:pointer; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2306B6D4' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:40px; }
+select option { background:#0A1628; color:var(--text-primary); }
+textarea { resize:vertical; min-height:80px; line-height:1.6; }
+.field-hint { font-size:11.5px; color:var(--text-muted); margin-top:6px; line-height:1.5; }
+.choice-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.choice-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+.choice-item   { display:flex; align-items:flex-start; gap:12px; background:rgba(6,15,35,.6); border:1.5px solid rgba(6,182,212,.1); border-radius:var(--radius-sm); padding:13px 16px; cursor:pointer; transition:all .2s; user-select:none; position:relative; overflow:hidden; }
+.choice-item::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(6,182,212,.06),transparent); opacity:0; transition:opacity .2s; }
+.choice-item:hover { border-color:rgba(6,182,212,.35); transform:translateY(-1px); }
+.choice-item:hover::before { opacity:1; }
+.choice-item input { width:auto; padding:0; border:none; background:transparent; flex-shrink:0; margin-top:1px; cursor:pointer; accent-color:var(--cyan); }
+.choice-label { font-size:13.5px; font-weight:600; color:var(--text-primary); line-height:1.3; }
+.choice-sub   { font-size:11.5px; color:var(--text-muted); margin-top:2px; font-weight:400; }
+.budget-display { text-align:center; margin-bottom:10px; }
+.budget-value { font-size:28px; font-weight:900; color:var(--cyan); }
+.budget-label { font-size:12px; color:var(--text-muted); margin-top:2px; }
+input[type="range"] { -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:99px; background:linear-gradient(90deg,var(--cyan-dark),var(--cyan)); outline:none; cursor:pointer; border:none; padding:0; box-shadow:none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%; background:var(--cyan); cursor:pointer; box-shadow:0 0 10px rgba(6,182,212,.5); border:2px solid #fff; }
+input[type="range"]::-moz-range-thumb { width:22px; height:22px; border-radius:50%; background:var(--cyan); cursor:pointer; box-shadow:0 0 10px rgba(6,182,212,.5); border:2px solid #fff; }
+.conditional-block { display:none; margin-top:16px; padding:18px; background:rgba(6,182,212,.04); border:1px solid rgba(6,182,212,.12); border-radius:12px; animation:fade-up .3s ease; }
+.conditional-block.visible { display:block; }
+.chip-input-row { display:flex; gap:10px; }
+.chip-input-row input { flex:1; }
+.btn-chip-add { background:rgba(6,182,212,.12); border:1.5px solid rgba(6,182,212,.3); color:var(--cyan-light); border-radius:var(--radius-sm); padding:0 18px; font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; font-family:inherit; flex-shrink:0; }
+.btn-chip-add:hover { background:rgba(6,182,212,.22); }
+.chip-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+.chip { display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; padding:6px 8px 6px 14px; border-radius:99px; background:rgba(6,182,212,.1); border:1px solid rgba(6,182,212,.25); color:var(--cyan-light); }
+.chip-x { width:18px; height:18px; border-radius:50%; background:rgba(239,68,68,.15); border:none; color:#FCA5A5; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; flex-shrink:0; transition:background .2s; }
+.chip-x:hover { background:rgba(239,68,68,.35); }
+.submit-area { text-align:center; padding:12px 0 6px; }
+.btn-generate { position:relative; display:inline-flex; align-items:center; gap:12px; background:linear-gradient(135deg,#0B5FBF 0%,#1A73E8 50%,#06B6D4 100%); color:#fff; border:none; border-radius:14px; padding:18px 52px; font-size:16px; font-weight:800; cursor:pointer; letter-spacing:.02em; overflow:hidden; transition:transform .2s,box-shadow .2s; box-shadow:0 0 40px rgba(26,115,232,.4),0 4px 20px rgba(0,0,0,.3); }
+.btn-generate::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent); transition:left .5s; }
+.btn-generate:hover::before { left:100%; }
+.btn-generate:hover { transform:translateY(-3px); box-shadow:0 0 60px rgba(26,115,232,.55),0 8px 32px rgba(0,0,0,.35); }
+.btn-generate:active { transform:translateY(0); }
+.btn-generate:disabled { opacity:.5; cursor:not-allowed; transform:none; box-shadow:none; }
+.submit-hint { font-size:12px; color:var(--text-muted); margin-top:12px; }
+.loading-overlay { position:fixed; inset:0; z-index:9999; background:rgba(5,11,24,.97); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); display:none; align-items:center; justify-content:center; }
+.loading-overlay.active { display:flex; animation:fade-in .3s ease; }
+@keyframes fade-in { from{opacity:0} to{opacity:1} }
+.loading-card { max-width:460px; width:92%; background:rgba(8,18,38,.95); border:1px solid rgba(26,115,232,.2); border-radius:28px; padding:48px 40px; text-align:center; box-shadow:0 0 100px rgba(26,115,232,.15),0 40px 80px rgba(0,0,0,.6); position:relative; overflow:hidden; }
+.loading-card::before { content:''; position:absolute; top:-1px; left:15%; right:15%; height:2px; background:linear-gradient(90deg,transparent,#1A73E8,#34A853,transparent); animation:border-glow 2s ease-in-out infinite; }
+@keyframes border-glow { 0%,100%{opacity:.4} 50%{opacity:1} }
+.loading-orbit { position:relative; width:80px; height:80px; margin:0 auto 32px; }
+.loading-orbit-ring { position:absolute; inset:0; border-radius:50%; border:2px solid transparent; border-top-color:#1A73E8; animation:spin 1.2s linear infinite; }
+.loading-orbit-ring:nth-child(2) { inset:8px; border-top-color:#34A853; animation-duration:1.8s; animation-direction:reverse; }
+.loading-orbit-ring:nth-child(3) { inset:16px; border-top-color:#06B6D4; animation-duration:2.4s; }
+.loading-orbit-center { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+.loading-orbit-dot { width:16px; height:16px; border-radius:50%; background:radial-gradient(circle,#1A73E8,#0B5FBF); box-shadow:0 0 16px rgba(26,115,232,.8); animation:pulse-dot 1.5s ease-in-out infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.loading-title { font-size:18px; font-weight:800; color:var(--text-primary); margin-bottom:8px; }
+.loading-subtitle { font-size:14px; color:var(--text-secondary); margin-bottom:36px; line-height:1.5; }
+.loading-steps { display:flex; flex-direction:column; gap:14px; text-align:left; margin-bottom:36px; }
+.loading-step  { display:flex; align-items:center; gap:14px; padding:12px 16px; border-radius:12px; background:rgba(26,115,232,.04); border:1px solid rgba(26,115,232,.08); transition:all .4s ease; }
+.loading-step.active { background:rgba(26,115,232,.1); border-color:rgba(26,115,232,.3); }
+.loading-step.done   { background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.25); }
+.step-icon { width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; background:rgba(26,115,232,.1); transition:all .3s; }
+.loading-step.active .step-icon { background:rgba(26,115,232,.2); animation:pulse-step .8s ease-in-out infinite; }
+.loading-step.done .step-icon   { background:rgba(16,185,129,.2); }
+@keyframes pulse-step { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+.step-text  { font-size:13.5px; font-weight:600; color:var(--text-secondary); transition:color .3s; flex:1; }
+.loading-step.active .step-text { color:#93C5FD; }
+.loading-step.done .step-text   { color:#6EE7B7; }
+.step-check { font-size:14px; opacity:0; transform:scale(.5); transition:all .3s; }
+.loading-step.done .step-check  { opacity:1; transform:scale(1); }
+.loading-progress-wrap { background:rgba(255,255,255,.05); border-radius:99px; height:4px; overflow:hidden; }
+.loading-progress-bar  { height:100%; background:linear-gradient(90deg,#0B5FBF,#1A73E8,#34A853); background-size:200% 100%; border-radius:99px; transition:width .8s cubic-bezier(.4,0,.2,1); animation:shimmer-bg 2s linear infinite; width:0%; box-shadow:0 0 8px rgba(26,115,232,.5); }
+.result-wrapper { margin-top:32px; display:none; }
+.result-wrapper.visible { display:block; animation:fade-up .5s ease; }
+.result-section { background:var(--bg-card); backdrop-filter:blur(24px); border:1px solid rgba(26,115,232,.15); border-radius:var(--radius); padding:28px; margin-bottom:16px; position:relative; overflow:hidden; }
+.result-section::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,rgba(26,115,232,.5),transparent); }
+.rs-header { display:flex; align-items:center; gap:12px; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid rgba(255,255,255,.06); }
+.rs-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.rs-icon.blue   { background:rgba(26,115,232,.15); }
+.rs-icon.cyan   { background:rgba(6,182,212,.15); }
+.rs-icon.purple { background:rgba(124,58,237,.15); }
+.rs-icon.green  { background:rgba(16,185,129,.15); }
+.rs-icon.orange { background:rgba(249,115,22,.15); }
+.rs-title { font-size:15px; font-weight:800; color:var(--text-primary); }
+.rs-sub   { font-size:11.5px; color:var(--text-muted); margin-top:2px; }
+.rs-content { font-size:14px; color:var(--text-secondary); line-height:1.8; }
+.rs-content h4 { font-size:12px; font-weight:700; color:var(--cyan); text-transform:uppercase; letter-spacing:.1em; margin:18px 0 8px; }
+.rs-content h4:first-child { margin-top:0; }
+.rs-content strong { color:var(--text-primary); font-weight:700; }
+.rs-content ul { padding-left:20px; }
+.rs-content ul li { margin-bottom:6px; }
+.rs-content p { margin-bottom:10px; }
+.rs-content p:last-child { margin-bottom:0; }
+.tag-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.tag-pill { font-size:12px; font-weight:600; padding:5px 14px; border-radius:99px; background:rgba(6,182,212,.1); border:1px solid rgba(6,182,212,.2); color:var(--cyan-light); }
+.tag-pill.orange { background:rgba(249,115,22,.1); border-color:rgba(249,115,22,.2); color:#FDBA74; }
+.tag-pill.green  { background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.2); color:#6EE7B7; }
+.asset-card { background:rgba(6,15,35,.8); border:1px solid rgba(26,115,232,.15); border-radius:12px; padding:16px 18px; margin-bottom:10px; display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+.asset-card:last-child { margin-bottom:0; }
+.asset-card-text { font-size:14px; color:var(--text-primary); font-weight:600; line-height:1.5; flex:1; }
+.asset-card-meta { font-size:11px; font-weight:700; color:var(--text-muted); flex-shrink:0; white-space:nowrap; padding-top:2px; }
+.asset-card-meta.ok { color:#6EE7B7; }
+.asset-card-meta.warn { color:#FCA5A5; }
+.verdict-banner { display:flex; align-items:center; gap:16px; padding:18px 22px; border-radius:12px; margin-bottom:16px; }
+.verdict-banner.good { background:rgba(16,185,129,.08); border:1px solid rgba(16,185,129,.25); }
+.verdict-banner.warn { background:rgba(249,115,22,.08); border:1px solid rgba(249,115,22,.25); }
+.verdict-banner.bad  { background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.25); }
+.verdict-emoji { font-size:24px; flex-shrink:0; }
+.verdict-text { font-size:14px; font-weight:700; color:var(--text-primary); line-height:1.5; }
+.metric-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.metric-card { background:rgba(6,15,35,.8); border:1px solid rgba(6,182,212,.1); border-radius:12px; padding:16px; text-align:center; }
+.metric-value { font-size:22px; font-weight:900; color:var(--cyan); margin-bottom:4px; }
+.metric-label { font-size:11px; color:var(--text-muted); font-weight:500; }
+.tip-card { background:rgba(6,15,35,.8); border:1px solid rgba(16,185,129,.15); border-radius:12px; padding:18px; margin-bottom:10px; border-left:3px solid var(--green); }
+.tip-card:last-child { margin-bottom:0; }
+.tip-label { font-size:12px; font-weight:800; color:#6EE7B7; text-transform:uppercase; letter-spacing:.1em; margin-bottom:8px; }
+.result-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:24px; }
+.btn-copy-all { display:inline-flex; align-items:center; gap:8px; background:rgba(6,182,212,.1); color:var(--cyan); border:1px solid rgba(6,182,212,.25); border-radius:10px; padding:12px 24px; font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; font-family:inherit; }
+.btn-copy-all:hover { background:rgba(6,182,212,.2); transform:translateY(-1px); }
+.btn-nova { display:inline-flex; align-items:center; gap:8px; background:rgba(26,115,232,.08); color:#93C5FD; border:1px solid rgba(26,115,232,.2); border-radius:10px; padding:12px 24px; font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; font-family:inherit; }
+.btn-nova:hover { background:rgba(26,115,232,.15); transform:translateY(-1px); }
+.status-bar { display:none; border-radius:12px; padding:16px 20px; margin-top:18px; font-size:14px; font-weight:600; text-align:center; animation:fade-up .3s ease; }
+.status-bar.loading { display:block; background:rgba(26,115,232,.08); border:1px solid rgba(26,115,232,.2); color:#93C5FD; }
+.status-bar.error   { display:block; background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.25); color:#FCA5A5; }
+footer { position:relative; z-index:10; text-align:center; padding:28px 20px; font-size:12px; color:var(--text-muted); border-top:1px solid rgba(6,182,212,.07); background:rgba(5,11,24,.8); }
+footer strong { color:var(--cyan); }
+@media (max-width:640px) {
+  .header{padding:16px 20px} .hero{padding:48px 20px 40px} .hero-stats{gap:14px} .hero-divider{display:none}
+  .container{padding:0 16px 64px} .form-section{padding:22px 18px}
+  .two-col,.choice-grid-2,.choice-grid-3{grid-template-columns:1fr}
+  .metric-grid{grid-template-columns:1fr 1fr}
+  .btn-generate{padding:16px 32px;font-size:15px} .loading-card{padding:36px 24px}
+}
+::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:var(--bg-base)} ::-webkit-scrollbar-thumb{background:rgba(6,182,212,.25);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="aurora-bg"></div>
+<div class="aurora-mid"></div>
+<div class="grid-overlay"></div>
+<div class="progress-bar-track"><div class="progress-bar-fill" id="progress_fill"></div></div>
+
+<header class="header">
+  <div class="logo-wrap">
+    <div class="logo-dot"></div>
+    <div class="logo-text">R.E.C. · Hub de Negócios</div>
+  </div>
+  <div class="header-right">
+    <div class="header-badge" id="creditos_display">Créditos: —</div>
+    <div class="header-badge">Tráfego Pago · Google Ads</div>
+    <button class="btn-settings" disabled style="opacity:0.7;cursor:default;">
+      <span class="api-status-dot ok" id="api_dot"></span>
+      <span>✓ IA ativa</span>
+    </button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-eyebrow"><span class="dot-pulse"></span>Gerador de Campanha Google Ads</div>
+  <h1 class="hero-title"><span class="white">Campanha de</span><br><span class="gradient">Google Ads com IA</span></h1>
+  <p class="hero-sub">Preencha as informações do negócio e receba títulos, descrições, temas e segmentação pronta para colar direto no fluxo de criação do Google Ads.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="stat-icon">📝</span>4 Títulos + 3 Descrições</div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat"><span class="stat-icon">🔑</span>Temas e Palavras-chave</div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat"><span class="stat-icon">📍</span>Localização e Orçamento</div>
+  </div>
+</section>
+
+<div class="container">
+
+  <!-- BLOCO 1 — IDENTIDADE DO NEGÓCIO -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num cyan">1</div>
+      <div><div class="section-title">Identidade do Negócio</div><div class="section-desc">Informações básicas para identificar e analisar a empresa</div></div>
+    </div>
+    <div class="two-col">
+      <div class="field-group">
+        <label class="field-label" for="nome">Nome da empresa / Estabelecimento <span class="req">*</span></label>
+        <input type="text" id="nome" placeholder="Ex: Clínica Estética Bella" oninput="atualizarProgress()">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="telefone">Telefone de contato (fixo no anúncio) <span class="req">*</span></label>
+        <input type="text" id="telefone" placeholder="Ex: (51) 99999-9999" oninput="atualizarProgress()">
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="field-group">
+        <label class="field-label" for="segmento">Segmento / Nicho <span class="req">*</span></label>
+        <select id="segmento">
+          <option value="">Selecione o segmento...</option>
+          <option>Academia</option><option>Advocacia</option><option>Ag&ecirc;ncia de Turismo</option>
+          <option>Arquitetura</option><option>Barbearia</option><option>Cl&iacute;nica Dermatol&oacute;gica</option>
+          <option>Cl&iacute;nica M&eacute;dica</option><option>Cl&iacute;nica Odontol&oacute;gica</option><option>Cons&oacute;rcios</option>
+          <option>Constru&ccedil;&atilde;o Civil</option><option>Contabilidade</option><option>Corretor de Im&oacute;veis</option>
+          <option>Curso / Escola</option><option>Decora&ccedil;&atilde;o</option><option>Delivery / Lanchonete</option>
+          <option>Design</option><option>E-commerce</option><option>Energia Solar</option><option>Engenharia Civil</option>
+          <option>Espa&ccedil;o de Eventos</option><option>Est&eacute;tica</option><option>Fisioterapia</option>
+          <option>Imobili&aacute;ria</option><option>Massoterapeuta</option><option>M&oacute;veis</option>
+          <option>Nutri&ccedil;&atilde;o</option><option>Paisagismo</option><option>Pet Shop</option><option>Pilates</option>
+          <option>Psicologia</option><option>Recursos Humanos</option><option>Reforma</option><option>Restaurante</option>
+          <option>Sal&atilde;o de Beleza</option><option>Tecnologia</option><option>Terapia</option><option>Transporte</option>
+          <option>Varejo / Loja F&iacute;sica</option><option>Veterin&aacute;ria</option><option>Yoga</option><option>Outros</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="cidade">Cidade e bairro/região da empresa <span class="req">*</span></label>
+        <input type="text" id="cidade" placeholder="Ex: Canoas, RS — Bairro Centro" oninput="atualizarProgress()">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="site">Site (opcional, mas recomendado para Google Ads)</label>
+      <input type="url" id="site" placeholder="Ex: https://www.clinicabella.com.br">
+      <div class="field-hint">Se tiver site, a IA analisa para gerar títulos e descrições mais precisos.</div>
+    </div>
+  </div>
+
+  <!-- BLOCO 2 — CONTEÚDO DO ANÚNCIO -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num blue">2</div>
+      <div><div class="section-title">Conteúdo do Anúncio</div><div class="section-desc">O que o anúncio vai vender e qual seu diferencial</div></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="produto">Produto ou serviço principal a anunciar <span class="req">*</span></label>
+      <input type="text" id="produto" placeholder="Ex: Implante dentário, Extensão de cílios, Consultoria contábil">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="dor_principal">Principal dor ou desejo que esse produto/serviço resolve <span class="req">*</span></label>
+      <input type="text" id="dor_principal" placeholder="Ex: Dor de dente urgente, Quero emagrecer, Preciso regularizar o CNPJ...">
+    </div>
+    <div class="two-col">
+      <div class="field-group">
+        <label class="field-label" for="diferencial">O que te diferencia da concorrência? <span class="req">*</span></label>
+        <textarea id="diferencial" placeholder="Ex: Atendimento no mesmo dia, equipe especializada, preço mais acessível..." style="min-height:72px;"></textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="ticket_medio">Ticket médio do produto/serviço</label>
+        <input type="text" id="ticket_medio" placeholder="Ex: R$ 150 por sessão, R$ 2.000 projeto">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Tem oferta ou promoção ativa agora?</label>
+      <div class="choice-grid-2">
+        <label class="choice-item"><input type="radio" name="tem_oferta" value="sim" onchange="toggleOferta()"><div><div class="choice-label">✅ Sim, tem oferta</div><div class="choice-sub">Desconto, bônus, condição especial...</div></div></label>
+        <label class="choice-item"><input type="radio" name="tem_oferta" value="nao" onchange="toggleOferta()"><div><div class="choice-label">Não, valor normal</div><div class="choice-sub">Sem promoção no momento</div></div></label>
+      </div>
+    </div>
+    <div class="conditional-block" id="bloco_oferta">
+      <div class="field-group" style="margin-bottom:0">
+        <label class="field-label" for="oferta_desc">Descreva a oferta / promoção</label>
+        <input type="text" id="oferta_desc" placeholder="Ex: Avaliação gratuita, 20% de desconto na primeira sessão...">
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOCO 3 — TEMAS E PALAVRAS-CHAVE -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num purple">3</div>
+      <div><div class="section-title">Temas e Palavras-chave</div><div class="section-desc">Termos que vão fazer o anúncio corresponder às pesquisas do cliente</div></div>
+    </div>
+    <div class="field-group" style="margin-bottom:0">
+      <label class="field-label" for="tema_input">Adicione temas / palavras-chave <span class="req">*</span></label>
+      <div class="chip-input-row">
+        <input type="text" id="tema_input" placeholder="Ex: implante dentário, dentista perto de mim..." onkeydown="if(event.key==='Enter'){event.preventDefault();adicionarTema();}">
+        <button type="button" class="btn-chip-add" onclick="adicionarTema()">+ Adicionar</button>
+      </div>
+      <div class="field-hint">Não há limite rígido de quantidade. A IA confirma os seus e sugere outros relacionados ao negócio — sempre em português.</div>
+      <div class="chip-list" id="temas_list"></div>
+    </div>
+  </div>
+
+  <!-- BLOCO 4 — LOCALIZAÇÃO -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num green">4</div>
+      <div><div class="section-title">Onde o anúncio vai aparecer</div><div class="section-desc">Defina a área de alcance da campanha</div></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Modo de segmentação <span class="req">*</span></label>
+      <div class="choice-grid-2">
+        <label class="choice-item"><input type="radio" name="modo_local" value="endereco" onchange="toggleLocal()"><div><div class="choice-label">📍 Perto de um endereço</div><div class="choice-sub">Raio em km a partir de um ponto</div></div></label>
+        <label class="choice-item"><input type="radio" name="modo_local" value="cidades" onchange="toggleLocal()"><div><div class="choice-label">🗺️ Cidades, regiões ou CEPs</div><div class="choice-sub">Várias cidades de uma vez</div></div></label>
+      </div>
+    </div>
+    <div class="conditional-block" id="bloco_endereco">
+      <div class="two-col" style="margin-bottom:0">
+        <div class="field-group">
+          <label class="field-label" for="endereco">Endereço de referência</label>
+          <input type="text" id="endereco" placeholder="Ex: Av. Guilherme Schell, 2000, Canoas, RS">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="raio_km">Raio sugerido (km)</label>
+          <input type="text" id="raio_km" placeholder="A IA sugere com base no nicho e cidade">
+        </div>
+      </div>
+    </div>
+    <div class="conditional-block" id="bloco_cidades">
+      <div class="field-group" style="margin-bottom:0">
+        <label class="field-label" for="cidade_input">Adicione cidades, regiões ou CEPs</label>
+        <div class="chip-input-row">
+          <input type="text" id="cidade_input" placeholder="Ex: Canoas, RS" onkeydown="if(event.key==='Enter'){event.preventDefault();adicionarCidadeAlvo();}">
+          <button type="button" class="btn-chip-add" onclick="adicionarCidadeAlvo()">+ Adicionar</button>
+        </div>
+        <div class="chip-list" id="cidades_list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOCO 5 — ORÇAMENTO -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num orange">5</div>
+      <div><div class="section-title">Orçamento</div><div class="section-desc">Investimento diário disponível para a campanha</div></div>
+    </div>
+    <div class="field-group">
+      <div class="budget-display">
+        <div class="budget-value" id="budget_label">R$ 30</div>
+        <div class="budget-label">por dia de investimento</div>
+      </div>
+      <label class="field-label">Orçamento diário <span class="req">*</span></label>
+      <input type="range" id="budget" min="20" max="100" value="30" step="5" oninput="atualizarBudget(this.value)">
+      <div style="display:flex;justify-content:space-between;margin-top:6px;">
+        <span style="font-size:11px;color:var(--text-muted)">R$ 20/dia</span>
+        <span style="font-size:11px;color:var(--text-muted)">R$ 100/dia</span>
+      </div>
+      <div class="field-hint">A IA vai indicar se esse valor é compatível com o nicho e a cidade, com estimativa de cliques.</div>
+    </div>
+  </div>
+
+  <!-- BLOCO 6 — CONTEXTO EXTRA -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num cyan">6</div>
+      <div><div class="section-title">Contexto e Concorrência</div><div class="section-desc">Ajuda a IA a calibrar o diagnóstico de mercado</div></div>
+    </div>
+    <div class="two-col">
+      <div class="field-group">
+        <label class="field-label" for="concorrentes">Concorrentes diretos na região</label>
+        <textarea id="concorrentes" placeholder="Ex: Clínica X na av. principal, Empresa Y do mesmo bairro..." style="min-height:72px;"></textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Concorrentes já anunciam no Google?</label>
+        <div class="choice-grid-3" style="gap:8px;">
+          <label class="choice-item" style="padding:10px 12px;"><input type="radio" name="concorrentes_anunciam" value="Sim, bastante"><div class="choice-label" style="font-size:12.5px;">Sim, bastante</div></label>
+          <label class="choice-item" style="padding:10px 12px;"><input type="radio" name="concorrentes_anunciam" value="Sim, mas pouco"><div class="choice-label" style="font-size:12.5px;">Pouco</div></label>
+          <label class="choice-item" style="padding:10px 12px;"><input type="radio" name="concorrentes_anunciam" value="Não sei informar"><div class="choice-label" style="font-size:12.5px;">Não sei</div></label>
+        </div>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">A empresa já anunciou no Google Ads antes?</label>
+      <div class="choice-grid-2">
+        <label class="choice-item"><input type="radio" name="historico_anuncio" value="Nunca anunciou"><div><div class="choice-label">Nunca anunciou</div><div class="choice-sub">Primeira vez</div></div></label>
+        <label class="choice-item"><input type="radio" name="historico_anuncio" value="Já anunciou e teve bom resultado"><div><div class="choice-label">Anunciou e funcionou</div></div></label>
+        <label class="choice-item"><input type="radio" name="historico_anuncio" value="Já anunciou mas não teve resultado"><div><div class="choice-label">Anunciou e não funcionou</div></div></label>
+        <label class="choice-item"><input type="radio" name="historico_anuncio" value="Já anunciou, parou, quer retomar"><div><div class="choice-label">Parou, quer retomar</div></div></label>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="obs_extras">Observações livres / contexto adicional</label>
+      <textarea id="obs_extras" placeholder="Ex: Modo especialista, sazonalidade, restrição de orçamento, eventos próximos..." style="min-height:72px;"></textarea>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="submit-area">
+    <button class="btn-generate" id="btn_gerar" onclick="gerarCampanha()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Gerar Campanha Completa
+    </button>
+    <div class="submit-hint">A IA monta <strong style="color:#93C5FD">títulos, descrições, temas, localização e orçamento</strong> prontos para colar no Google Ads</div>
+    <div class="status-bar" id="status_bar"></div>
+  </div>
+
+  <!-- RESULTADO -->
+  <div class="result-wrapper" id="result_wrapper">
+    <div id="result_sections"></div>
+    <div class="result-actions">
+      <button class="btn-copy-all" onclick="copiarTudo()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copiar campanha completa
+      </button>
+      <button class="btn-nova" onclick="novaAnalise()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Nova campanha
+      </button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>Uso interno · <strong>R.E.C. HUB de Negócios</strong> · recolaborativo.com.br</footer>
+
+<div class="loading-overlay" id="loading_overlay">
+  <div class="loading-card">
+    <div class="loading-orbit">
+      <div class="loading-orbit-ring"></div>
+      <div class="loading-orbit-ring"></div>
+      <div class="loading-orbit-ring"></div>
+      <div class="loading-orbit-center"><div class="loading-orbit-dot"></div></div>
+    </div>
+    <div class="loading-title" id="loading_title">Gerando Campanha</div>
+    <div class="loading-subtitle" id="loading_subtitle">Analisando empresa e mercado...</div>
+    <div class="loading-steps">
+      <div class="loading-step" id="step_1"><div class="step-icon">🔍</div><div class="step-text">Analisando empresa e segmento</div><div class="step-check">✓</div></div>
+      <div class="loading-step" id="step_2"><div class="step-icon">📝</div><div class="step-text">Criando títulos e descrições</div><div class="step-check">✓</div></div>
+      <div class="loading-step" id="step_3"><div class="step-icon">🔑</div><div class="step-text">Montando temas e palavras-chave</div><div class="step-check">✓</div></div>
+      <div class="loading-step" id="step_4"><div class="step-icon">📍</div><div class="step-text">Definindo localização</div><div class="step-check">✓</div></div>
+      <div class="loading-step" id="step_5"><div class="step-icon">💰</div><div class="step-text">Avaliando orçamento e cliques</div><div class="step-check">✓</div></div>
+    </div>
+    <div class="loading-progress-wrap"><div class="loading-progress-bar" id="loading_prog"></div></div>
+  </div>
+</div>
+
+<script>
+var CLAUDE_MODEL = 'claude-sonnet-4-6';
+var temas = [];
+var cidadesAlvo = [];
+var rawResultText = '';
+
+async function atualizarCreditosHeader() {
+  try {
+    var resp = await apiFetch('/api/usage');
+    if (!resp.ok) return;
+    var data = await resp.json();
+    var el = document.getElementById('creditos_display');
+    var c = data.total_quota || 0;
+    el.textContent = 'Créditos: $' + (c / 1000000).toFixed(2);
+    el.style.color = c < 5 ? '#EF4444' : 'var(--text-secondary)';
+  } catch(e) {}
+}
+setTimeout(atualizarCreditosHeader, 600);
+
+(function() {
+  var obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (!e.isIntersecting) return;
+      var el = e.target, d = el.dataset.delay || 0;
+      setTimeout(function() { el.classList.add('visible'); }, +d);
+      obs.unobserve(el);
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.form-section').forEach(function(el, i) { el.dataset.delay = i * 80; obs.observe(el); });
+})();
+
+function atualizarProgress() {
+  var filled = 0;
+  ['nome','telefone','segmento','cidade','produto','dor_principal'].forEach(function(id) { if ((document.getElementById(id)||{}).value) filled++; });
+  if (temas.length) filled++;
+  if (document.querySelector('input[name="modo_local"]:checked')) filled++;
+  document.getElementById('progress_fill').style.width = Math.round(filled/8*100) + '%';
+}
+document.addEventListener('input', atualizarProgress);
+document.addEventListener('change', atualizarProgress);
+
+document.addEventListener('change', function(e) {
+  var inp = e.target;
+  if (inp.type === 'radio') {
+    document.querySelectorAll('input[name="'+inp.name+'"]').forEach(function(el) {
+      var item = el.closest('.choice-item'); if (!item) return;
+      item.style.borderColor = el.checked ? 'rgba(6,182,212,0.5)' : '';
+      item.style.background  = el.checked ? 'rgba(6,182,212,0.07)' : '';
+    });
+  }
+});
+
+function toggleOferta() {
+  var v = document.querySelector('input[name="tem_oferta"]:checked');
+  document.getElementById('bloco_oferta').classList.toggle('visible', v && v.value === 'sim');
+}
+function toggleLocal() {
+  var v = document.querySelector('input[name="modo_local"]:checked');
+  document.getElementById('bloco_endereco').classList.toggle('visible', v && v.value === 'endereco');
+  document.getElementById('bloco_cidades').classList.toggle('visible', v && v.value === 'cidades');
+}
+function atualizarBudget(v) { document.getElementById('budget_label').textContent = 'R$ ' + v; }
+
+function adicionarTema() {
+  var input = document.getElementById('tema_input');
+  var v = input.value.trim();
+  if (!v) return;
+  if (temas.indexOf(v) === -1) temas.push(v);
+  input.value = '';
+  renderChips('temas_list', temas, removerTema);
+  atualizarProgress();
+}
+function removerTema(i) { temas.splice(i,1); renderChips('temas_list', temas, removerTema); }
+
+function adicionarCidadeAlvo() {
+  var input = document.getElementById('cidade_input');
+  var v = input.value.trim();
+  if (!v) return;
+  if (cidadesAlvo.indexOf(v) === -1) cidadesAlvo.push(v);
+  input.value = '';
+  renderChips('cidades_list', cidadesAlvo, removerCidadeAlvo);
+}
+function removerCidadeAlvo(i) { cidadesAlvo.splice(i,1); renderChips('cidades_list', cidadesAlvo, removerCidadeAlvo); }
+
+function renderChips(containerId, arr, removeFn) {
+  var container = document.getElementById(containerId);
+  container.innerHTML = '';
+  arr.forEach(function(v, i) {
+    var span = document.createElement('span');
+    span.className = 'chip';
+    span.innerHTML = escHtml(v) + ' <button type="button" class="chip-x" title="Remover">×</button>';
+    span.querySelector('.chip-x').onclick = function() { removeFn(i); };
+    container.appendChild(span);
+  });
+}
+
+function getVal(id)  { var e = document.getElementById(id); return e ? e.value.trim() : ''; }
+function getRadio(n) { var e = document.querySelector('input[name="'+n+'"]:checked'); return e ? e.value : ''; }
+function setStep(id, state) {
+  var el = document.getElementById(id);
+  el.classList.remove('active','done');
+  if (state) el.classList.add(state);
+}
+function setProgress(p) { document.getElementById('loading_prog').style.width = p + '%'; }
+function showLoading() { document.getElementById('loading_overlay').classList.add('active'); setProgress(0); }
+function hideLoading() { document.getElementById('loading_overlay').classList.remove('active'); }
+function setSubtitle(t) { document.getElementById('loading_subtitle').textContent = t; }
+function showStatus(msg, cls) {
+  var el = document.getElementById('status_bar');
+  el.textContent = msg; el.className = 'status-bar ' + cls;
+}
+function hideStatus() { document.getElementById('status_bar').className = 'status-bar'; }
+
+function coletarDados() {
+  return {
+    nome: getVal('nome') || '(não informado)',
+    telefone: getVal('telefone') || '(não informado)',
+    segmento: getVal('segmento') || '(não informado)',
+    cidade: getVal('cidade') || '(não informada)',
+    site: getVal('site') || '',
+    produto: getVal('produto') || '(não informado)',
+    dor_principal: getVal('dor_principal') || '(não informado)',
+    diferencial: getVal('diferencial') || '(não informado)',
+    ticket_medio: getVal('ticket_medio') || '(não informado)',
+    tem_oferta: getRadio('tem_oferta') || 'nao',
+    oferta_desc: getVal('oferta_desc') || '',
+    temas: temas,
+    modo_local: getRadio('modo_local') || '(não informado)',
+    endereco: getVal('endereco') || '',
+    raio_km: getVal('raio_km') || '',
+    cidades_alvo: cidadesAlvo,
+    budget: getVal('budget') || '30',
+    concorrentes: getVal('concorrentes') || '(não informado)',
+    concorrentes_anunciam: getRadio('concorrentes_anunciam') || '(não informado)',
+    historico_anuncio: getRadio('historico_anuncio') || '(não informado)',
+    obs_extras: getVal('obs_extras') || ''
+  };
+}
+
+var SYSTEM_PROMPT = `Você é um especialista sênior em Google Ads (Rede de Pesquisa / Campanhas Inteligentes) com foco em pequenas e médias empresas brasileiras.
+
+Sua missão é gerar o conteúdo completo de uma campanha de Google Ads com base nos dados do formulário, seguindo exatamente os limites e o formato do fluxo de criação do Google Ads.
+
+REGRAS DE SAÍDA — OBRIGATÓRIAS:
+- Retorne APENAS um objeto JSON válido e completo. Sem markdown, sem blocos de código, sem texto fora do JSON.
+- O JSON deve ter exatamente estas 7 chaves de nível raiz: diagnostico, titulos, descricoes, temas_palavras_chave, localizacao, orcamento, dicas
+- Seja específico: use nome real da empresa, cidade e dados do formulário. Zero respostas genéricas.
+- Tudo em português do Brasil.
+- titulos: EXATAMENTE 4 strings, cada uma com NO MÁXIMO 30 caracteres (limite real do Google Ads).
+- descricoes: EXATAMENTE 3 strings, cada uma com NO MÁXIMO 90 caracteres (limite real do Google Ads).
+- temas_palavras_chave: inclua TODOS os temas que o usuário já digitou (campo "temas_usuario" do prompt) e adicione de 6 a 12 sugestões extras relacionadas ao negócio. Sem limite rígido de quantidade, sempre em português.
+
+ESTRUTURA OBRIGATÓRIA (copie as chaves exatas):
+{
+  "diagnostico": {
+    "vale_anunciar": "sim|nao|com_ressalvas",
+    "veredicto": "1-2 linhas honestas sobre viabilidade com esse orçamento e região",
+    "nivel_concorrencia": "baixo|medio|alto|saturado",
+    "oportunidade": "principal gap não explorado pelos concorrentes no Google",
+    "riscos": "principais limitações para esse orçamento e contexto"
+  },
+  "titulos": ["título 1 (até 30 caracteres)", "título 2", "título 3", "título 4"],
+  "descricoes": ["descrição 1 (até 90 caracteres)", "descrição 2", "descrição 3"],
+  "temas_palavras_chave": ["tema/palavra-chave 1", "tema 2", "..."],
+  "localizacao": {
+    "modo": "endereco|cidades",
+    "detalhe": "se modo endereco: raio em km recomendado e justificativa. Se modo cidades: confirme a lista de cidades e sugira incluir mais alguma se fizer sentido",
+    "justificativa": "por que essa área de alcance é a ideal para esse negócio"
+  },
+  "orcamento": {
+    "valor_sugerido_dia": "valor em R$/dia recomendado, pode confirmar ou ajustar o valor do formulário",
+    "cliques_estimados_dia": "faixa estimada de cliques por dia com esse orçamento e nicho",
+    "justificativa": "por que esse valor é adequado (ou não) para o objetivo"
+  },
+  "dicas": [
+    {"titulo": "título da dica estratégica", "descricao": "2-3 linhas práticas e acionáveis"},
+    {"titulo": "título", "descricao": "descrição"},
+    {"titulo": "título", "descricao": "descrição"}
+  ]
+}`;
+
+function buildPrompt(d) {
+  return 'Gere o conteúdo completo de uma campanha de Google Ads com base nos dados abaixo:\n\n'
+    + 'EMPRESA: ' + d.nome + '\n'
+    + 'TELEFONE DE CONTATO: ' + d.telefone + '\n'
+    + 'SEGMENTO: ' + d.segmento + '\n'
+    + 'CIDADE: ' + d.cidade + '\n'
+    + 'SITE: ' + (d.site || 'não tem') + '\n\n'
+    + 'PRODUTO/SERVIÇO PRINCIPAL: ' + d.produto + '\n'
+    + 'DOR/DESEJO PRINCIPAL: ' + d.dor_principal + '\n'
+    + 'DIFERENCIAL: ' + d.diferencial + '\n'
+    + 'TICKET MÉDIO: ' + d.ticket_medio + '\n'
+    + 'OFERTA ATIVA: ' + (d.tem_oferta === 'sim' ? 'Sim — ' + d.oferta_desc : 'Não') + '\n\n'
+    + 'TEMAS_USUARIO (confirme todos e complemente): ' + (d.temas.length ? d.temas.join(', ') : 'nenhum informado') + '\n\n'
+    + 'MODO DE LOCALIZAÇÃO: ' + d.modo_local + '\n'
+    + (d.modo_local === 'endereco'
+        ? 'ENDEREÇO: ' + (d.endereco || 'não informado') + '\nRAIO INFORMADO PELO USUÁRIO: ' + (d.raio_km || 'nenhum, sugira você')
+        : 'CIDADES/REGIÕES JÁ ADICIONADAS: ' + (d.cidades_alvo.length ? d.cidades_alvo.join(', ') : 'nenhuma ainda, sugira a partir da cidade da empresa'))
+    + '\n\n'
+    + 'ORÇAMENTO DIÁRIO INFORMADO: R$ ' + d.budget + '/dia\n\n'
+    + 'CONCORRENTES: ' + d.concorrentes + '\n'
+    + 'CONCORRENTES ANUNCIAM NO GOOGLE: ' + d.concorrentes_anunciam + '\n'
+    + 'HISTÓRICO DE ANÚNCIOS NO GOOGLE: ' + d.historico_anuncio + '\n'
+    + 'OBSERVAÇÕES EXTRAS: ' + (d.obs_extras || 'nenhuma') + '\n\n'
+    + 'Retorne APENAS o JSON estruturado conforme instruído. Nenhum texto fora do JSON.';
+}
+
+async function chamarClaude(dados) {
+  var resp = await apiFetch('/api/claude', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: [{ type: 'text', text: buildPrompt(dados) }] }],
+      max_tokens: 6000
+    })
+  });
+
+  if (!resp.ok) {
+    var err = await resp.json().catch(function(){ return {}; });
+    throw new Error(err.error && err.error.message ? err.error.message : 'Erro na API (' + resp.status + ')');
+  }
+
+  var reader  = resp.body.getReader();
+  var decoder = new TextDecoder();
+  var buffer  = '';
+  var fullText = '';
+  var charCount = 0;
+
+  while (true) {
+    var chunk = await reader.read();
+    if (chunk.done) break;
+    buffer += decoder.decode(chunk.value, { stream: true });
+    var lines = buffer.split('\n');
+    buffer = lines.pop();
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      if (!line.startsWith('data: ')) continue;
+      var raw = line.slice(6).trim();
+      if (!raw || raw === '[DONE]') continue;
+      try {
+        var ev = JSON.parse(raw);
+        if (ev.type === 'content_block_delta' && ev.delta && ev.delta.type === 'text_delta') {
+          fullText  += ev.delta.text;
+          charCount += ev.delta.text.length;
+          if (charCount % 400 < ev.delta.text.length) {
+            setSubtitle('Gerando campanha... (~' + Math.round(charCount / 4) + ' tokens)');
+          }
+        }
+      } catch(e) {}
+    }
+  }
+
+  if (!fullText) throw new Error('Resposta vazia da IA. Tente novamente.');
+  return fullText;
+}
+
+function renderResult(json, dados) {
+  var d = json;
+  var sections = '';
+
+  var veredictoClass = d.diagnostico.vale_anunciar === 'sim' ? 'good' : (d.diagnostico.vale_anunciar === 'nao' ? 'bad' : 'warn');
+  var veredictoEmoji = d.diagnostico.vale_anunciar === 'sim' ? '✅' : (d.diagnostico.vale_anunciar === 'nao' ? '⚠️' : '🔶');
+  sections += '<div class="result-section">'
+    + '<div class="rs-header"><div class="rs-icon blue">📊</div><div><div class="rs-title">Diagnóstico de Mercado</div><div class="rs-sub">Vale a pena anunciar no Google com esse orçamento?</div></div></div>'
+    + '<div class="verdict-banner ' + veredictoClass + '"><div class="verdict-emoji">' + veredictoEmoji + '</div><div class="verdict-text">' + escHtml(d.diagnostico.veredicto) + '</div></div>'
+    + '<div class="rs-content">'
+    + '<h4>Nível de concorrência</h4><p><strong>' + escHtml((d.diagnostico.nivel_concorrencia||'').toUpperCase()) + '</strong></p>'
+    + '<h4>Principal oportunidade</h4><p>' + escHtml(d.diagnostico.oportunidade) + '</p>'
+    + '<h4>Riscos / limitações</h4><p>' + escHtml(d.diagnostico.riscos) + '</p>'
+    + '</div></div>';
+
+  sections += '<div class="result-section">'
+    + '<div class="rs-header"><div class="rs-icon cyan">📝</div><div><div class="rs-title">Títulos do Anúncio</div><div class="rs-sub">Cole exatamente como está nos 4 campos de título do Google Ads</div></div></div>';
+  (d.titulos||[]).forEach(function(t, i) {
+    var len = t.length;
+    sections += '<div class="asset-card"><div class="asset-card-text">'+(i+1)+'. '+escHtml(t)+'</div><div class="asset-card-meta '+(len<=30?'ok':'warn')+'">'+len+'/30</div></div>';
+  });
+  sections += '</div>';
+
+  sections += '<div class="result-section">'
+    + '<div class="rs-header"><div class="rs-icon cyan">🧾</div><div><div class="rs-title">Descrições do Anúncio</div><div class="rs-sub">Cole exatamente como está nos 3 campos de descrição</div></div></div>';
+  (d.descricoes||[]).forEach(function(t, i) {
+    var len = t.length;
+    sections += '<div class="asset-card"><div class="asset-card-text">'+(i+1)+'. '+escHtml(t)+'</div><div class="asset-card-meta '+(len<=90?'ok':'warn')+'">'+len+'/90</div></div>';
+  });
+  sections += '</div>';
+
+  sections += '<div class="result-section">'
+    + '<div class="rs-header"><div class="rs-icon purple">🔑</div><div><div class="rs-title">Temas e Palavras-chave</div><div class="rs-sub">Confirme os seus e adicione as sugestões da IA na etapa de correspondência de pesquisas</div></div></div>'
+    + '<div class="tag-list">' + (d.temas_palavras_chave||[]).map(function(t){return '<span class="tag-pill">'+escHtml(t)+'</span>';}).join('') + '</div>'
+    + '</div>';
+
+  sections += '<div class="result-section">'
+    + '<div class="rs-header"><div class="rs-icon green">📍</div><div><div class="rs-title">Localização</div><div class="rs-sub">Onde o anúncio vai ser exibido</div></div></div>'
+    + '<div class="rs-content">'
+    + '<h4>Modo escolhido</h4><p><strong>' + (d.localizacao.modo === 'endereco' ? 'Perto de um endereço' : 'Cidades / regiões') + '</strong></p>'
+    + '<h4>Detalhe</h4><p>' + escHtml(d.localizacao.detalhe) + '</p>'
+    + '<h4>Por quê</h4><p>' + escHtml(d.localizacao.justificativa) + '</p>'
+    + (dados.telefone ? '<h4>Telefone fixo do anúncio</h4><p><strong>' + escHtml(dados.telefone) + '</strong></p>' : '')
+    + '</div></div>';
+
+  sections += '<div class="result-section">'
+    + '<div class="rs-header"><div class="rs-icon orange">💰</div><div><div class="rs-title">Orçamento</div><div class="rs-sub">Investimento diário recomendado</div></div></div>'
+    + '<div class="metric-grid" style="margin-bottom:14px;">'
+    + '<div class="metric-card"><div class="metric-value">' + escHtml(String(d.orcamento.valor_sugerido_dia)) + '</div><div class="metric-label">Valor sugerido/dia</div></div>'
+    + '<div class="metric-card"><div class="metric-value">' + escHtml(String(d.orcamento.cliques_estimados_dia)) + '</div><div class="metric-label">Cliques estimados/dia</div></div>'
+    + '</div>'
+    + '<div class="rs-content"><p>' + escHtml(d.orcamento.justificativa) + '</p></div></div>';
+
+  sections += '<div class="result-section">'
+    + '<div class="rs-header"><div class="rs-icon green">💡</div><div><div class="rs-title">Dicas Estratégicas</div><div class="rs-sub">Para maximizar o resultado dessa campanha</div></div></div>';
+  (d.dicas||[]).forEach(function(tip, i) {
+    sections += '<div class="tip-card">'
+      + '<div class="tip-label">Dica ' + (i+1) + ' · ' + escHtml(tip.titulo) + '</div>'
+      + '<div class="rs-content"><p>' + escHtml(tip.descricao) + '</p></div>'
+      + '</div>';
+  });
+  sections += '</div>';
+
+  document.getElementById('result_sections').innerHTML = sections;
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+async function gerarCampanha() {
+  var dados = coletarDados();
+  if (!dados.nome || dados.nome === '(não informado)') { alert('Preencha o nome da empresa.'); return; }
+  if (!dados.telefone || dados.telefone === '(não informado)') { alert('Preencha o telefone de contato.'); return; }
+  if (!dados.segmento || dados.segmento === '(não informado)') { alert('Selecione o segmento.'); return; }
+  if (!dados.cidade || dados.cidade === '(não informada)') { alert('Informe a cidade.'); return; }
+  if (!dados.produto || dados.produto === '(não informado)') { alert('Informe o produto/serviço principal.'); return; }
+  if (!dados.modo_local) { alert('Escolha o modo de localização.'); return; }
+  if (dados.modo_local === 'cidades' && !dados.cidades_alvo.length) { alert('Adicione pelo menos uma cidade.'); return; }
+
+  var btn = document.getElementById('btn_gerar');
+  btn.disabled = true;
+  hideStatus();
+  showLoading();
+
+  var steps = [
+    { id:'step_1', subtitle:'Analisando empresa e segmento...', pct:20 },
+    { id:'step_2', subtitle:'Criando títulos e descrições...', pct:40 },
+    { id:'step_3', subtitle:'Montando temas e palavras-chave...', pct:60 },
+    { id:'step_4', subtitle:'Definindo localização...', pct:80 },
+    { id:'step_5', subtitle:'Avaliando orçamento e cliques...', pct:95 }
+  ];
+
+  var stepIdx = 0;
+  function nextStep() {
+    if (stepIdx > 0) setStep(steps[stepIdx-1].id, 'done');
+    if (stepIdx < steps.length) {
+      var s = steps[stepIdx];
+      setStep(s.id, 'active');
+      setSubtitle(s.subtitle);
+      setProgress(s.pct);
+      stepIdx++;
+      if (stepIdx < steps.length) setTimeout(nextStep, 1800);
+    }
+  }
+  nextStep();
+
+  try {
+    var rawJson = await chamarClaude(dados);
+    rawResultText = rawJson;
+
+    var jsonStr = rawJson.trim();
+    if (jsonStr.startsWith('```')) {
+      jsonStr = jsonStr.replace(/^```[a-zA-Z]*\n?/, '').replace(/\n?```$/, '').trim();
+    }
+    var firstBrace = jsonStr.indexOf('{');
+    var lastBrace  = jsonStr.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      jsonStr = jsonStr.slice(firstBrace, lastBrace + 1);
+    }
+    var result = JSON.parse(jsonStr);
+
+    setProgress(100);
+    steps.forEach(function(s) { setStep(s.id, 'done'); });
+    setSubtitle('Campanha gerada com sucesso!');
+    await new Promise(function(r){setTimeout(r,800);});
+
+    hideLoading();
+    btn.disabled = false;
+
+    renderResult(result, dados);
+    var wrapper = document.getElementById('result_wrapper');
+    wrapper.classList.add('visible');
+    setTimeout(function(){ wrapper.scrollIntoView({ behavior:'smooth', block:'start' }); }, 100);
+
+    atualizarCreditosHeader();
+
+  } catch(e) {
+    hideLoading();
+    btn.disabled = false;
+    var msg = e.message || 'Erro desconhecido';
+    showStatus('Erro ao gerar campanha: ' + msg, 'error');
+    console.error(e);
+  }
+}
+
+function copiarTudo() {
+  if (!rawResultText) return;
+  try {
+    var _s = rawResultText.replace(/^```[a-zA-Z]*\n?/, '').replace(/\n?```$/, '').trim();
+    var _f = _s.indexOf('{'), _l = _s.lastIndexOf('}');
+    if (_f !== -1 && _l > _f) _s = _s.slice(_f, _l + 1);
+    var parsed = JSON.parse(_s);
+    var texto = '📊 CAMPANHA GOOGLE ADS — R.E.C. HUB\n'
+      + '═══════════════════════════════\n\n'
+      + '🔍 DIAGNÓSTICO\n' + parsed.diagnostico.veredicto + '\nConcorrência: ' + parsed.diagnostico.nivel_concorrencia + '\n\n'
+      + '📝 TÍTULOS\n' + (parsed.titulos||[]).map(function(t,i){return (i+1)+'. '+t;}).join('\n') + '\n\n'
+      + '🧾 DESCRIÇÕES\n' + (parsed.descricoes||[]).map(function(t,i){return (i+1)+'. '+t;}).join('\n') + '\n\n'
+      + '🔑 TEMAS E PALAVRAS-CHAVE\n' + (parsed.temas_palavras_chave||[]).join(', ') + '\n\n'
+      + '📍 LOCALIZAÇÃO\n' + parsed.localizacao.detalhe + '\n\n'
+      + '💰 ORÇAMENTO\n' + parsed.orcamento.valor_sugerido_dia + ' · ' + parsed.orcamento.cliques_estimados_dia + '\n\n'
+      + 'R.E.C. HUB de Negócios · recolaborativo.com.br';
+    navigator.clipboard.writeText(texto).catch(function(){});
+  } catch(e) {}
+}
+
+function novaAnalise() {
+  document.getElementById('result_wrapper').classList.remove('visible');
+  document.getElementById('result_sections').innerHTML = '';
+  rawResultText = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+<script src="_hub.js"></script>
+<script>hubInit('campanha-google');</script>
+</body>
+</html>

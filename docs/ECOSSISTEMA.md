@@ -13,13 +13,14 @@ O REC HUB é uma plataforma interna desenvolvida para a equipe R.E.C. HUB de Neg
 
 ---
 
-## Ferramentas disponíveis (10 páginas)
+## Ferramentas disponíveis (11 páginas)
 
 | Página | Arquivo | Função | Tem IA | Tem PDF |
 |--------|---------|--------|--------|---------|
 | Hub (Dashboard) | `index.html` | Central com gráfico de pipeline e KPIs por membro | Não | Não |
 | Diagnóstico Digital | `diagnostico.html` | Análise de perfil + proposta comercial | Sim (Claude) | Sim |
 | Briefing de Campanha | `campanha.html` | Brief para Meta Ads | Sim (Claude) | Não |
+| Campanha Google Ads | `campanha-google.html` | Títulos, descrições, temas/keywords, localização e orçamento para Google Ads | Sim (Claude) | Não |
 | Geração de Conteúdo | `conteudo.html` | Pautas, legendas, roteiros | Sim (Claude) | Não |
 | Briefing de Reunião | `briefing.html` | Preparação pré-call com cliente | Sim (Claude) | Não |
 | Reuniões | `reunioes.html` | Agendamento no Google Agenda | Não | Não |
