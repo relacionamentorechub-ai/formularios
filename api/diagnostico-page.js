@@ -34,7 +34,7 @@ USE ESSES NÚMEROS EXATOS em qualquer métrica que você citar.
 - Se "instagram.followers" não for null, use ESSE número exato (jamais invente)
 - Se for null, use linguagem qualitativa: "base ainda em crescimento", "presença modesta", etc
 - Se "gmb.nota" e "gmb.num_avaliacoes" não forem null, use ESSES números exatos (ex: "5,0 ★ em 63 avaliações")
-- Se "gmb.tem_ficha" for false ou null, escreva "ficha não localizada nas buscas públicas" (NUNCA "não tem Google" categórico) — a busca pode ter falhado mesmo a ficha existindo, e afirmar ausência errada destrói a credibilidade da análise
+- Se "gmb.tem_ficha" for null e NÃO houver outro dado de gmb, NÃO escreva sobre Google nessa página — pivote pro dado mais sólido que você tiver (Facebook, site/SEO, frequência de posts no Instagram). Se "gmb.tem_ficha" for false (raro, só quando confirmado) ou se o card precisar mencionar Google mesmo assim, escreva "ficha não localizada nas buscas públicas" (NUNCA "não tem Google" categórico)
 - Para benchmarks de setor, use "setor.engajamento_medio_pct_brasil" e cite "fonte_engajamento"
 - NÃO mencione ticket médio do setor em nenhuma página — esse dado foi removido da pesquisa por ser inconsistente entre buscas. Se precisar falar de valor de procedimento/serviço, use só linguagem qualitativa.
 - Para concorrentes, use APENAS nomes do array "concorrentes" (são reais e pesquisados)
@@ -62,7 +62,7 @@ Tipografia: Fraunces (display), Manrope (body), Space Grotesk (números).`;
 // ═══════════════════════════════════════════════════════════════
 // CONFIGS POR PÁGINA
 // ═══════════════════════════════════════════════════════════════
-const PAGES = {
+export const PAGES = {
 
   // ════════════════════════ COVER ════════════════════════
   cover: {
@@ -235,7 +235,7 @@ M&eacute;tricas prefer&ecirc;nciais (use se ambos os lados tiverem n&uacute;mero
 1. Seguidores m&eacute;dios do nicho vs lead (use research.instagram.followers)
 2. Engajamento m&eacute;dio (use research.setor.engajamento_medio_pct_brasil + research.instagram.engajamento_estimado_pct) — s&oacute; use se tiver engajamento real da lead, sen&atilde;o troque
 3. Presen&ccedil;a concorrentes locais (use research.concorrentes)
-4. Avalia&ccedil;&otilde;es Google (use research.gmb.num_avaliacoes vs concorrente GMB, 0 confirmado &eacute; n&uacute;mero real)
+4. Avalia&ccedil;&otilde;es Google (use research.gmb.num_avaliacoes vs concorrente GMB, 0 confirmado &eacute; n&uacute;mero real — S&Oacute; use se research.gmb.tem_ficha n&atilde;o for null; se for null, pule essa m&eacute;trica e use outra da lista)
 NUNCA use ticket m&eacute;dio em bench-card. Esse dado foi removido da pesquisa por ser inconsistente entre buscas.`,
   },
 
@@ -595,7 +595,7 @@ A img src="" será preenchida pelo sistema.`,
 // ═══════════════════════════════════════════════════════════════
 // MONTA O USER MESSAGE COM DADOS DO LEAD
 // ═══════════════════════════════════════════════════════════════
-function buildUserMessage(page, lead, pageNumber, totalPages, research) {
+export function buildUserMessage(page, lead, pageNumber, totalPages, research) {
   const mes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const now = new Date();
   const mesAno = mes[now.getMonth()] + ' ' + now.getFullYear();
@@ -698,7 +698,7 @@ function validaEstrutura(page, html) {
 }
 
 // Chama a API Anthropic e devolve {html, stop_reason, usage}. Pode lançar.
-async function callAnthropic(apiKey, pageConfig, userMessage, hint) {
+export async function callAnthropic(apiKey, pageConfig, userMessage, hint) {
   const systemFinal = hint ? pageConfig.system + '\n\nIMPORTANTE — TENTATIVA ANTERIOR FALHOU: ' + hint : pageConfig.system;
   const upstream = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',

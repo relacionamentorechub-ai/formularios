@@ -7,28 +7,24 @@
 export const config = { maxDuration: 120 };
 
 import { applyCors, requireAuth, rateLimit, readBody } from './_lib.js';
+import { buscarGMB } from './_places.js';
 
 // Modelo único do diagnóstico (mesmo das páginas).
 // Opções: 'claude-sonnet-4-6' ($3/$15) | 'claude-opus-4-8' ($5/$25)
 const MODEL = 'claude-sonnet-4-6';
 
-const RESEARCH_PROMPT = `Você é um analista de dados de mercado digital. Sua missão: coletar dados REAIS e VERIFICADOS sobre um lead.
+export const RESEARCH_PROMPT = `Você é um analista de dados de mercado digital. Sua missão: coletar dados REAIS e VERIFICADOS sobre um lead.
 
 IMPORTANTE — SE o contexto do lead incluir SEGUIDORES_INSTAGRAM e POSTS_INSTAGRAM, use esses valores DIRETAMENTE no JSON (campos instagram.followers e instagram.posts_count) sem fazer nenhuma busca de seguidores do Instagram. Isso economiza buscas para dados mais úteis.
 
-Você TEM acesso à ferramenta web_search. Limite-se a NO MÁXIMO 5 buscas no total. Priorize nesta ordem:
-1. Google Meu Negócio (GMB) do lead — faça ATÉ 2 QUERIES e leia os snippets:
-   a. "{nome_empresa} {cidade} avaliações" — snippet com estrelas e contagem aparece aqui
-   b. "{nome_empresa} {segmento} {cidade} google" — fallback se nome indexado for diferente
-   Se alguma retornar nota e avaliações, use como dado real. SE NENHUMA RETORNAR DADO, marque
-   tem_ficha como null (NUNCA false) — ausência na busca não comprova ausência da ficha. Já
-   aconteceu de a ficha existir e a busca não achar; afirmar "não tem Google" quando tem destrói
-   a credibilidade da análise.
-2. SE seguidores NÃO foram fornecidos, buscar Instagram do lead — 1 QUERY:
+Você TEM acesso à ferramenta web_search. Limite-se a NO MÁXIMO 3 buscas no total. Priorize nesta ordem:
+NÃO pesquise Google Meu Negócio (GMB) — esse dado é coletado por fora (Google Places API) e
+injetado depois no JSON. NÃO gaste busca com avaliações/nota do Google.
+1. SE seguidores NÃO foram fornecidos, buscar Instagram do lead — 1 QUERY:
    a. "{handle} instagram seguidores" — snippets em português costumam ter dados recentes
    Se não retornar número confiável, use null.
-3. Benchmarks do setor (1 QUERY): "engajamento médio instagram {segmento} brasil 2025"
-4. Concorrentes na cidade (1 QUERY): "{segmento} {cidade} instagram" — encontre nomes REAIS
+2. Benchmarks do setor (1 QUERY): "engajamento médio instagram {segmento} brasil 2025"
+3. Concorrentes na cidade (1 QUERY): "{segmento} {cidade} instagram" — encontre nomes REAIS
 
 RETORNE EXCLUSIVAMENTE UM JSON VÁLIDO (sem texto antes ou depois, sem markdown, sem comentários):
 
@@ -91,7 +87,7 @@ function normalizeInstagram(val) {
   return val.startsWith('@') ? val : '@' + val;
 }
 
-function buildLeadContext(lead) {
+export function buildLeadContext(lead) {
   const linhas = [
     `Pesquise os seguintes dados para o lead:`,
     '',
@@ -143,7 +139,7 @@ export default async function handler(req, res) {
           {
             type: 'web_search_20250305',
             name: 'web_search',
-            max_uses: 5,
+            max_uses: 3,
           },
         ],
       }),
@@ -183,6 +179,10 @@ export default async function handler(req, res) {
         preview: raw.slice(0, 400),
       });
     }
+
+    // GMB determinístico via Google Places API (sobrescreve o que a IA tenha posto).
+    const gmb = await buscarGMB(lead.nome_empresa, lead.cidade);
+    research.gmb = { ...(research.gmb || {}), ...gmb };
 
     return res.status(200).json({
       research,

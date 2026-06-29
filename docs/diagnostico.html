@@ -1218,7 +1218,8 @@ async function pesquisarLead(lead) {
     return null;
   }
   var data = await resp.json();
-  return data.research || null;
+  if (!data.research) return null;
+  return { research: data.research, tokens: data.tokens || null };
 }
 
 // Mapeia dados do form para o objeto lead que o servidor espera.
@@ -1297,83 +1298,92 @@ async function runComLimite(items, mapper, concurrency, pauseBetweenBatchesMs) {
   return results;
 }
 
+// Gera o documento INTEIRO numa chamada (/api/diagnostico-documento). Retry rede + 429/529.
+async function chamarDocumento(lead, research) {
+  var maxAttempts = 4;
+  for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+    var resp;
+    try {
+      resp = await apiFetch('/api/diagnostico-documento', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead: lead, research: research }),
+      });
+    } catch (netErr) {
+      if (attempt < maxAttempts) {
+        var netWait = 8000 * attempt;
+        console.warn('[chamarDocumento] tentativa ' + attempt + ' falhou na rede (' + netErr.message + '), aguardando ' + (netWait/1000) + 's...');
+        setSubtitle('Conex&atilde;o inst&aacute;vel, tentando de novo...');
+        await new Promise(function(r){ setTimeout(r, netWait); });
+        continue;
+      }
+      throw new Error('Documento: rede inst&aacute;vel (' + netErr.message + ')');
+    }
+    if (resp.ok) return resp.json();
+    var errJson = await resp.json().catch(function(){ return {}; });
+    var errMsg = errJson.error || ('HTTP ' + resp.status);
+    var isRL = resp.status === 429 || (typeof errMsg === 'string' && errMsg.indexOf('rate_limit') >= 0);
+    var isOv = resp.status === 529 || (typeof errMsg === 'string' && errMsg.indexOf('overloaded') >= 0);
+    if ((isRL || isOv) && attempt < maxAttempts) {
+      var waitMs = isRL ? 35000 : 8000 * attempt;
+      setSubtitle('Otimizando gera&ccedil;&atilde;o, aguarde...');
+      await new Promise(function(r){ setTimeout(r, waitMs); });
+      continue;
+    }
+    throw new Error('Documento: ' + errMsg);
+  }
+  throw new Error('Documento: esgotou retries');
+}
+
 async function chamarClaude(dados) {
   var lead = buildLeadObject(dados);
-  var paginas = planejarPaginas(dados);
-  var total = paginas.length;
 
-  // FASE 1: pesquisa real do lead (web_search). Garante dados consistentes em todas as páginas.
-  setSubtitle('🔍 Pesquisando dados reais do mercado (Instagram, concorrentes, benchmarks)...');
+  // FASE 1: pesquisa real do lead (web_search + GMB via Google Places).
+  setSubtitle('🔍 Pesquisando dados reais (Instagram, concorrentes, Google)...');
   var research = null;
+  var researchTokens = null;
   try {
-    research = await pesquisarLead(lead);
-    if (research) {
+    var pesq = await pesquisarLead(lead);
+    if (pesq) {
+      research = pesq.research;
+      researchTokens = pesq.tokens;
       console.log('[research] dados coletados:', research);
-      setSubtitle('✓ Dados pesquisados. Gerando ' + total + ' p&aacute;ginas em paralelo...');
+      setSubtitle('✓ Dados pesquisados. Gerando o diagn&oacute;stico...');
     } else {
-      setSubtitle('⚠️ Pesquisa falhou. Gerando ' + total + ' p&aacute;ginas sem dados verificados...');
+      setSubtitle('⚠️ Pesquisa falhou. Gerando sem dados verificados...');
     }
   } catch (err) {
     console.warn('[research] erro:', err.message, '— seguindo sem research');
-    setSubtitle('Gerando ' + total + ' p&aacute;ginas...');
+    setSubtitle('Gerando o diagn&oacute;stico...');
   }
 
-  // FASE 2: páginas com modelo único (ver MODEL nos endpoints).
-  // ATENÇÃO tier-1: research (Sonnet) + páginas (Sonnet) dividem o MESMO balde
-  // de 30k input tok/min. Research com web_search come ~15-20k. Por isso:
-  //  1) espera ~45s após research liberar a janela de 60s
-  //  2) lotes pequenos (3) com pausa 20s → ~25k/min, abaixo de 30k
-  // chamarUmaPagina já faz retry/backoff em 429 como rede de segurança.
-  // Se subir o tier da Anthropic (Sonnet 80k+/min): CONCURRENCY=6, PAUSE_MS=5000, delay=0.
-  var concluidas = 0;
-  var CONCURRENCY = 3;
-  var PAUSE_MS = 20000;
-  if (research) {
-    setSubtitle('Organizando dados, aguarde...');
-    await new Promise(function(r){ setTimeout(r, 45000); });
-  }
-  setSubtitle('Gerando ' + total + ' p&aacute;ginas...');
-
-  var resultados;
+  // FASE 2: documento INTEIRO em uma chamada (Sonnet). Contexto completo = sem corte,
+  // sem página em branco, sem inconsistência entre páginas. Pode levar ~1-2 min.
+  setSubtitle('Gerando o diagn&oacute;stico completo (pode levar at&eacute; 2 min)...');
+  var result;
   try {
-    resultados = await runComLimite(paginas, function(page, idx) {
-      var pageNumber = idx + 1;
-      return chamarUmaPagina(page, lead, pageNumber, total, research).then(function(result) {
-        concluidas++;
-        setSubtitle('Concluiu p&aacute;gina ' + concluidas + '/' + total + ' (' + page + ')');
-        return result;
-      }).catch(function(err) {
-        console.error('[chamarClaude] falha em "' + page + '":', err.message);
-        throw err;
-      });
-    }, CONCURRENCY, PAUSE_MS);
+    result = await chamarDocumento(lead, research);
   } catch (err) {
     throw new Error('Erro ao gerar diagn&oacute;stico: ' + err.message);
   }
 
-  // Soma tokens e monta HTML na ordem das páginas planejadas
-  var totalInput = 0, totalOutput = 0;
-  var truncadas = [];
-  var htmlPaginas = resultados.map(function(r) {
-    totalInput += (r.tokens && r.tokens.input) || 0;
-    totalOutput += (r.tokens && r.tokens.output) || 0;
-    if (r.stop_reason && r.stop_reason !== 'end_turn') {
-      truncadas.push(r.page + ':' + r.stop_reason);
-      console.warn('[chamarClaude] página "' + r.page + '" parou por:', r.stop_reason);
-    }
-    return r.html;
-  });
-
-  var fullHtml = htmlPaginas.join('\n');
-
-  var custo = (totalInput * PRICING.input) + (totalOutput * PRICING.output);
+  // Custo REAL total = pesquisa (tokens + buscas web) + geração do documento.
+  var rin = (researchTokens && researchTokens.input) || 0;
+  var rout = (researchTokens && researchTokens.output) || 0;
+  var rsearch = (researchTokens && researchTokens.searches) || 0;
+  var gin = (result.tokens && result.tokens.input) || 0;
+  var gout = (result.tokens && result.tokens.output) || 0;
+  var SEARCH_COST = 0.01; // web_search: US$10 / 1000 buscas
+  var totalIn = rin + gin, totalOut = rout + gout;
+  var custo = (totalIn * PRICING.input) + (totalOut * PRICING.output) + (rsearch * SEARCH_COST);
   lastAnalysisCost = {
-    input: totalInput, output: totalOutput, total_usd: custo,
-    stop_reason: truncadas.length ? truncadas.join(',') : 'end_turn',
-    paginas: total,
+    input: totalIn, output: totalOut, searches: rsearch,
+    total_usd: custo,
+    stop_reason: result.stop_reason || 'end_turn',
+    paginas: (result.html.match(/class="pdf-page/g) || []).length,
   };
 
-  return fullHtml;
+  return result.html;
 }
 
 /* ═══════════════════════════════════════════
